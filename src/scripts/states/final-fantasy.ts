@@ -46,17 +46,17 @@ export default class FinalFantasyState extends State {
     this.mistDragon.smoothed = false
     this.mistDragon.anchor.set(0.5, 0.5)
     this.mistDragon.y = this.caveBackground.centerY
-    this.mistDragon.x = this.game.world.centerX / 2
+    this.game.add.tween(this.mistDragon).to({x: this.game.world.centerX / 2},100, Phaser.Easing.Linear.None, true);
   }
 
   setParty(keys: string[]): void {
     keys.forEach((value) => {
       const i: number = this.party.length
-      this.party.push(this.game.add.sprite(0, 0, value))
+      this.party.push(this.game.add.sprite(this.world.width, 0, value))
       this.party[i].scale.setTo(1.6)
       this.party[i].smoothed = false
       this.party[i].anchor.set(0.5, 0.5)    
-      this.party[i].x = this.game.world.centerX * 1.6
+      this.game.add.tween(this.party[i]).to({x: this.game.world.centerX * 1.6}, 100, Phaser.Easing.Linear.None, true)
       this.party[i].y = this.caveBackground.height / (keys.length + 1) * (i + 1)
     })
   }
