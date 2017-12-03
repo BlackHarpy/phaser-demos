@@ -1,0 +1,1 @@
+export const SCALE: number = 1.6

@@ -4,6 +4,7 @@
 
 import State from '../../state'
 import Character from '../elements/character'
+import Boss from '../elements/boss'
 
 const caveImage = require('assets/images/ffiv/Cave.gif')
 const mistDragonImage = require('assets/images/ffiv/MistDragon1.gif')
@@ -16,7 +17,7 @@ const battleMusic = require('assets/sound/ffiv/bossfight.mp3')
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
-  mistDragon: Phaser.Sprite
+  mistDragon: Boss
   cecil: Phaser.Sprite
   kain: Phaser.Sprite
   party: Character[]
@@ -54,12 +55,8 @@ export default class MainState extends State {
   }
 
   setMistDragon(): void {
-    this.mistDragon = this.game.add.sprite(0, 0, 'mistDragon')
-    this.mistDragon.scale.setTo(1.6)
-    this.mistDragon.smoothed = false
-    this.mistDragon.anchor.set(0.5, 0.5)
-    this.mistDragon.y = this.caveBackground.centerY
-    this.game.add.tween(this.mistDragon).to({x: this.game.world.centerX / 2},100, Phaser.Easing.Linear.None, true);
+    this.mistDragon = new Boss(this.game, 'mistDragon')
+    this.mistDragon.setToBattle(this.caveBackground.centerY, this.caveBackground.centerX)
   }
 
   setParty(keys: string[]): void {

@@ -1,5 +1,7 @@
 'use strict'
 
+import {SCALE} from '../constants'
+
 interface IAnimations {
   walk: string
 }
@@ -15,7 +17,7 @@ export default class Character {
     this.animations = {
       walk: `${spriteKey}Walk`
     }
-    this.sprite.scale.setTo(1.6)
+    this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
     this.sprite.anchor.set(0.5, 0.5)
   }
