@@ -23,6 +23,7 @@ export default class MainState extends State {
   party: Character[]
   animations: Phaser.Animation[]
   music: Phaser.Sound
+  front: Boolean
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -37,6 +38,7 @@ export default class MainState extends State {
   create(): void {
     this.party = []
     this.animations = []
+    this.front = false
     this.music = this.game.add.sound('bossBattleTheme', 1)
     //this.music.play('', 0.3)
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')     
@@ -52,6 +54,18 @@ export default class MainState extends State {
   }
 
   update(): void {
+    
+    this.game.input.onDown.addOnce(this.goToFront, this)
+  }
+
+  goToFront() {
+    if (!this.front) {
+      this.party[0].goToFront()    
+      this.front = true  
+    } else {
+      this.party[0].goToBack()
+      this.front = false
+    }
   }
 
   setMistDragon(): void {
@@ -64,7 +78,6 @@ export default class MainState extends State {
       const i: number = this.party.length
       this.party.push(new Character(this.game, value))
       this.party[i].setToBattle(this.caveBackground.height, keys.length, i)
-      //this.party[i].goToFront()
     })
   }
 
