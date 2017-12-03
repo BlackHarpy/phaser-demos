@@ -6,15 +6,15 @@ import 'pixi'
 import 'p2'
 import 'phaser'
 
-import IntroState from './states/intro'
-import FinalFantasyState from './states/final-fantasy'
+import IntroState from './intro'
+import MistDragonBattleState from './mist-dragon-battle/states/main'
 
 export default class App extends Phaser.Game {
     constructor(config: Phaser.IGameConfig) {
       super(config)
       //this.state.add('intro', IntroState)      
-      this.state.add('final-fantasy', FinalFantasyState)      
-      this.state.start('final-fantasy')
+      this.state.add('mist-dragon-battle', MistDragonBattleState)      
+      this.state.start('mist-dragon-battle')
     }
   }
 
