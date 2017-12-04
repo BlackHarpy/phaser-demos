@@ -3,14 +3,14 @@
 import {SCALE} from '../constants'
 
 interface IAnimationData {
-  key: string,
   animation?: Phaser.Animation,
-  play?()
-  stop?()
+  play?(onEndCallback?: Function)
 }
 
 interface IAnimations {
-  walk: IAnimationData
+  walk: IAnimationData,
+  attack?: IAnimationData,
+  victory?: IAnimationData
 }
 
 export default class Character {
@@ -22,7 +22,7 @@ export default class Character {
 
   constructor(game: Phaser.Game, spriteKey: string, animationsKeys?: string[]) {
     this.game = game
-    this.sprite = this.game.add.sprite(0, 0, spriteKey)
+    this.sprite = this.game.add.sprite(0, 0, spriteKey, 'stand')
     this.mainSpriteKey = spriteKey
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
@@ -33,15 +33,29 @@ export default class Character {
   addAnimations(spriteKey: string) {
     this.animations = {
       walk: {
-        key: `${spriteKey}Walk`,
-        animation: this.sprite.animations.add( `${spriteKey}Walk`, [1,0]),
+        animation: this.sprite.animations.add('walk', Phaser.Animation.generateFrameNames('walk', 0, 1), 15, true),
+        play: () => {
+          this.sprite.animations.play('walk')
+        }
+      },
+      attack: {
+        animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
+        play: () => {
+          this.sprite.animations.play('attack')
+          this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
+            if (animation.loopCount === 2) {
+              this.sprite.animations.stop('attack')
+              this.sprite.loadTexture(this.mainSpriteKey, 'stand')
+            }
+          }, this)
+        }
+      },
+      victory: {
+        animation: this.sprite.animations.add('victory', Phaser.Animation.generateFrameNames('victory', 0, 1), 5, true),
+        play: () => {
+          this.sprite.animations.play('victory')
+        }
       }
-    }
-    this.animations.walk.play = () => {
-      this.animations.walk.animation.play(15, true)
-    }
-    this.animations.walk.stop = () => {
-      this.animations.walk.animation.stop()
     }
   }
 
@@ -52,16 +66,35 @@ export default class Character {
     this.initialPosition = this.game.world.centerX * 1.6
   }
 
-  walkToPosition(position: number) {
-    this.animations.walk.play()
-    this.sprite.loadTexture(this.animations.walk.key, 1)        
-    const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)
-    tween.onComplete.add(this.resetPosition, this)    
+  attack(): void {
+    this.goToFront(this.makeAttackAnimation)
   }
 
-  goToFront(): void {
-    this.walkToPosition(this.sprite.x - 50)
-    
+  victory(): void {
+    this.animations.victory.play()
+  }
+
+  walkToPosition(position: number, additionalCallback?: Function) {
+    this.animations.walk.play()
+    const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)
+    if (additionalCallback) {
+      tween.onComplete.add(additionalCallback, this)   
+    } else {
+      tween.onComplete.add(this.resetPosition, this)         
+    }
+  }
+
+  makeAttackAnimation() {
+    this.animations.attack.play()
+  }
+
+  test(sprite, animation) {
+    console.log('sprite', sprite)
+    console.log('animation', animation)
+  }
+
+  goToFront(additionalCallback?: Function): void {
+    this.walkToPosition(this.sprite.x - 50, additionalCallback)
   }
 
   goToBack(): void {
@@ -70,7 +103,7 @@ export default class Character {
   }
 
   resetPosition(): void {
-    this.sprite.loadTexture(this.mainSpriteKey, 0, true)
+    this.sprite.loadTexture(this.mainSpriteKey, 'stand')
     this.sprite.scale.x = SCALE    
   }
 

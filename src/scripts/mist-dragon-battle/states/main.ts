@@ -8,11 +8,13 @@ import Boss from '../elements/boss'
 
 const caveImage = require('assets/images/ffiv/Cave.gif')
 const mistDragonImage = require('assets/images/ffiv/MistDragon1.gif')
-const cecilImage = require('assets/images/ffiv/Cecil1.gif')
-const kainImage = require('assets/images/ffiv/Kain.gif')
-const cecilWalkSheet = require('assets/images/ffiv/Cecil1-Walk.png')
-const kainlWalkSheet = require('assets/images/ffiv/Kain-Walk.png')
 const battleMusic = require('assets/sound/ffiv/bossfight.mp3')
+
+const cecilAtlasImage = require('assets/images/ffiv/cecil.png')
+const cecilAtlasJSON = require('assets/images/ffiv/cecil.json')
+const kainAtlasImage = require('assets/images/ffiv/kain.png')
+const kainAtlasJSON = require('assets/images/ffiv/kain.json')
+
 
 export default class MainState extends State {
 
@@ -28,10 +30,8 @@ export default class MainState extends State {
   preload(): void {
     this.game.load.image('cave', caveImage)
     this.game.load.image('mistDragon', mistDragonImage)
-    this.game.load.image('cecil', cecilImage)
-    this.game.load.image('kain', kainImage)
-    this.game.load.spritesheet('cecilWalk', cecilWalkSheet, 32, 48, 2)
-    this.game.load.spritesheet('kainWalk', kainlWalkSheet, 32, 48, 2)
+    this.game.load.atlasJSONArray('cecil', cecilAtlasImage, cecilAtlasJSON)
+    this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
     this.game.load.audio('bossBattleTheme', battleMusic)
   }
   
@@ -46,26 +46,17 @@ export default class MainState extends State {
     this.caveBackground.smoothed = false
     this.caveBackground.anchor.set(0.5, 0)
     this.caveBackground.x = this.game.world.centerX
-    console.log(this.caveBackground.height)
-    console.log(this.caveBackground.width)
     this.setMistDragon()
     this.setParty(['kain', 'cecil'])
    
   }
 
   update(): void {
-    
-    this.game.input.onDown.addOnce(this.goToFront, this)
+    this.game.input.onDown.addOnce(this.attack, this)
   }
 
-  goToFront() {
-    if (!this.front) {
-      this.party[0].goToFront()    
-      this.front = true  
-    } else {
-      this.party[0].goToBack()
-      this.front = false
-    }
+  attack() {
+    this.party[1].victory()
   }
 
   setMistDragon(): void {
@@ -84,11 +75,4 @@ export default class MainState extends State {
   // render(): void {
   // }
 
-  animationStarted(sprite, animation): void {
-    console.log('stuff', sprite, animation)
-  }
-
-  onUpdate(anim, frame) {
-    console.log('frame', frame)
-  }
 }
