@@ -1,6 +1,13 @@
 'use strict'
 
 import {SCALE} from '../constants'
+import Job from '../elements/job'
+import Boss from '../elements/boss'
+
+interface IPosition {
+  x: number,
+  y: number
+}
 
 interface IAnimationData {
   animation?: Phaser.Animation,
@@ -16,13 +23,15 @@ interface IAnimations {
 export default class Character {
   game: Phaser.Game
   sprite: Phaser.Sprite
+  job: Job
   animations: IAnimations
-  initialPosition: number
+  initialPosition: IPosition
   mainSpriteKey: string
 
   constructor(game: Phaser.Game, spriteKey: string, animationsKeys?: string[]) {
     this.game = game
     this.sprite = this.game.add.sprite(0, 0, spriteKey, 'stand')
+    this.job = new Job(this.game)
     this.mainSpriteKey = spriteKey
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
@@ -61,9 +70,12 @@ export default class Character {
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
     this.sprite.x = this.game.world.width
-    this.game.add.tween(this.sprite).to({x: this.game.world.centerX * 1.6}, 100, Phaser.Easing.Linear.None, true)
+    this.game.add.tween(this.sprite).to({x: this.game.world.centerX * SCALE}, 100, Phaser.Easing.Linear.None, true)
     this.sprite.y = referenceHeight / (partySize + 1) * (position + 1)
-    this.initialPosition = this.game.world.centerX * 1.6
+    this.initialPosition = {
+      x: this.game.world.centerX * SCALE,
+      y: this.sprite.y
+    }
   }
 
   attack(): void {
@@ -88,9 +100,12 @@ export default class Character {
     this.animations.attack.play()
   }
 
-  test(sprite, animation) {
-    console.log('sprite', sprite)
-    console.log('animation', animation)
+  specialAttack() {
+    this.job.jumpAnimation(this)
+  }
+
+  finishJump(target: Boss) {
+    this.job.finishJump(this, target)
   }
 
   goToFront(additionalCallback?: Function): void {
@@ -99,7 +114,7 @@ export default class Character {
 
   goToBack(): void {
     this.sprite.scale.x = -SCALE
-    this.walkToPosition(this.initialPosition)
+    this.walkToPosition(this.initialPosition.x)
   }
 
   resetPosition(): void {

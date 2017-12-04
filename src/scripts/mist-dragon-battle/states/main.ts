@@ -22,6 +22,7 @@ export default class MainState extends State {
   mistDragon: Boss
   party: Character[]
   music: Phaser.Sound
+  startedJump: Boolean
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -34,6 +35,7 @@ export default class MainState extends State {
   create(): void {
     this.party = []
     this.music = this.game.add.sound('bossBattleTheme', 1)
+    this.startedJump = false
     //this.music.play('', 0.3)
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')     
     this.caveBackground.scale.setTo(1.6)
@@ -49,7 +51,13 @@ export default class MainState extends State {
   }
 
   attack() {
-    this.party[1].attack()
+    if (!this.startedJump) {
+      this.party[0].specialAttack()      
+      this.startedJump = true
+    } else {
+      this.party[0].finishJump(this.mistDragon)
+      this.startedJump = false      
+    }
   }
 
   setMistDragon(): void {
