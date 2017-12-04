@@ -20,12 +20,8 @@ export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
   mistDragon: Boss
-  cecil: Phaser.Sprite
-  kain: Phaser.Sprite
   party: Character[]
-  animations: Phaser.Animation[]
   music: Phaser.Sound
-  front: Boolean
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -37,8 +33,6 @@ export default class MainState extends State {
   
   create(): void {
     this.party = []
-    this.animations = []
-    this.front = false
     this.music = this.game.add.sound('bossBattleTheme', 1)
     //this.music.play('', 0.3)
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')     
