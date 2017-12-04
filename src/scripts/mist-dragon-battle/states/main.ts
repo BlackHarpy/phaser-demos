@@ -7,13 +7,14 @@ import Character from '../elements/character'
 import Boss from '../elements/boss'
 
 const caveImage = require('assets/images/ffiv/Cave.gif')
-const mistDragonImage = require('assets/images/ffiv/MistDragon1.gif')
 const battleMusic = require('assets/sound/ffiv/bossfight.mp3')
 
 const cecilAtlasImage = require('assets/images/ffiv/cecil.png')
 const cecilAtlasJSON = require('assets/images/ffiv/cecil.json')
 const kainAtlasImage = require('assets/images/ffiv/kain.png')
 const kainAtlasJSON = require('assets/images/ffiv/kain.json')
+const mistDragonAtlasImage = require('assets/images/ffiv/mistDragon.png')
+const mistDragonAtlasJSON = require('assets/images/ffiv/mistDragon.json')
 
 
 export default class MainState extends State {
@@ -29,8 +30,8 @@ export default class MainState extends State {
 
   preload(): void {
     this.game.load.image('cave', caveImage)
-    this.game.load.image('mistDragon', mistDragonImage)
-    this.game.load.atlasJSONArray('cecil', cecilAtlasImage, cecilAtlasJSON)
+    this.game.load.atlasJSONHash('mistDragon', mistDragonAtlasImage, mistDragonAtlasJSON)
+    this.game.load.atlasJSONHash('cecil', cecilAtlasImage, cecilAtlasJSON)
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
     this.game.load.audio('bossBattleTheme', battleMusic)
   }
@@ -48,7 +49,6 @@ export default class MainState extends State {
     this.caveBackground.x = this.game.world.centerX
     this.setMistDragon()
     this.setParty(['kain', 'cecil'])
-   
   }
 
   update(): void {
@@ -56,7 +56,7 @@ export default class MainState extends State {
   }
 
   attack() {
-    this.party[1].victory()
+    this.party[1].attack()
   }
 
   setMistDragon(): void {

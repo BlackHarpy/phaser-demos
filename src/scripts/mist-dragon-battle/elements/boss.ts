@@ -14,7 +14,7 @@ export default class Boss {
 
   constructor(game: Phaser.Game, spriteKey: string) {
     this.game = game
-    this.sprite = game.add.sprite(0, 0, 'mistDragon')
+    this.sprite = game.add.sprite(0, 0, spriteKey, 'stand0')
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
     this.sprite.anchor.set(0.5, 0.5)

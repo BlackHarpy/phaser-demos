@@ -45,7 +45,7 @@ export default class Character {
           this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
             if (animation.loopCount === 2) {
               this.sprite.animations.stop('attack')
-              this.sprite.loadTexture(this.mainSpriteKey, 'stand')
+              this.goToBack()
             }
           }, this)
         }
