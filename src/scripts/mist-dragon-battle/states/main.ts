@@ -6,16 +6,15 @@ import State from '../../state'
 import Character from '../elements/character'
 import Boss from '../elements/boss'
 
-const caveImage = require('assets/images/ffiv/Cave.gif')
-const battleMusic = require('assets/sound/ffiv/bossfight.mp3')
+const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
+const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
 
-const cecilAtlasImage = require('assets/images/ffiv/cecil.png')
-const cecilAtlasJSON = require('assets/images/ffiv/cecil.json')
-const kainAtlasImage = require('assets/images/ffiv/kain.png')
-const kainAtlasJSON = require('assets/images/ffiv/kain.json')
-const mistDragonAtlasImage = require('assets/images/ffiv/mistDragon.png')
-const mistDragonAtlasJSON = require('assets/images/ffiv/mistDragon.json')
-
+const cecilAtlasImage = require('assets/images/mist-dragon-battle/cecil.png')
+const cecilAtlasJSON = require('assets/images/mist-dragon-battle/cecil.json')
+const kainAtlasImage = require('assets/images/mist-dragon-battle/kain.png')
+const kainAtlasJSON = require('assets/images/mist-dragon-battle/kain.json')
+const mistDragonAtlasImage = require('assets/images/mist-dragon-battle/mistDragon.png')
+const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon.json')
 
 export default class MainState extends State {
 
