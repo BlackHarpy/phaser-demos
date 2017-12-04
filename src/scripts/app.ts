@@ -20,7 +20,7 @@ export default class App extends Phaser.Game {
 
 window.onload = () => {
     const config: Phaser.IGameConfig = {
-      width:           960, 
+      width:           770, 
       height:          600,
       renderer:        Phaser.AUTO,       //Reseach further about Phaser.WEBGL_MULTI multi-texture rendering
       parent:          'content',
