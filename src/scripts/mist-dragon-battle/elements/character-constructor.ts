@@ -2,7 +2,7 @@
 
 export const CECIL = {
   id: 1,
-  spriteKey: 'cecil',
+  atlasKey: 'cecil',
   name: 'Cecil',
   level: 10,
   stats: {
@@ -18,7 +18,7 @@ export const CECIL = {
 
 export const KAIN = {
   id: 2,
-  spriteKey: 'kain',
+  atlasKey: 'kain',
   name: 'Kain',
   level: 10,
   stats: {

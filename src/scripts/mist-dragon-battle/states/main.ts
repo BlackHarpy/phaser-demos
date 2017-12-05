@@ -3,6 +3,8 @@
 //TODO Refactor. Just make it work first! :)
 
 import { COMMANDS } from './../constants';
+import { CECIL, KAIN } from './../elements/character-constructor';
+import { DARK_KNIGHT, DRAGOON } from './../elements/job-constructor';
 
 import State from '../../state'
 import Character from '../elements/character'
@@ -112,10 +114,11 @@ export default class MainState extends State {
   }
 
   setParty(keys: string[]): void {
-    keys.forEach((value) => {
-      const i: number = this.party.length
-      this.party.push(new Character(this.game, value))
-      this.party[i].setToBattle(this.caveBackground.height, keys.length, i)
+    this.party.push(new Character(this.game, KAIN, DRAGOON))    
+    this.party.push(new Character(this.game, CECIL, DARK_KNIGHT))
+    
+    this.party.forEach((value, index) => {
+      value.setToBattle(this.caveBackground.height, this.party.length, index)
     })
   }
 

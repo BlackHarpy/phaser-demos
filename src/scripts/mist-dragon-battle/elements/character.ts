@@ -1,3 +1,4 @@
+import { INITIAL_MENU_TEXT_POSITION_Y } from './../constants';
 'use strict'
 
 import {SCALE} from '../constants'
@@ -32,21 +33,33 @@ interface IAnimations {
 
 export default class Character {
   game: Phaser.Game
+  id: number
+  atlasKey: string  
+  name: string
+  level: number
   sprite: Phaser.Sprite
+  stats: IStats
   job: Job
   animations: IAnimations
   initialPosition: IPosition
-  mainSpriteKey: string
 
-  constructor(game: Phaser.Game, spriteKey: string, animationsKeys?: string[]) {
+  constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any) {
     this.game = game
-    this.sprite = this.game.add.sprite(0, 0, spriteKey, 'stand')
-    this.job = new Job(this.game)
-    this.mainSpriteKey = spriteKey
+    this.setCharacterData(characterConstructor, jobConstructor)
+    this.addAnimations(characterConstructor.atlasKey)
+  }
+
+  setCharacterData(characterConstructor: any, jobConstructor: any) {
+    this.id = characterConstructor.id
+    this.atlasKey = characterConstructor.atlasKey
+    this.name = characterConstructor.name
+    this.level = characterConstructor.level
+    this.stats = characterConstructor.stats
+    this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand') 
+    this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
     this.sprite.anchor.set(0.5, 0.5)
-    this.addAnimations(spriteKey)
   }
 
   addAnimations(spriteKey: string) {
@@ -128,7 +141,7 @@ export default class Character {
   }
 
   resetPosition(): void {
-    this.sprite.loadTexture(this.mainSpriteKey, 'stand')
+    this.sprite.loadTexture(this.atlasKey, 'stand')
     this.sprite.scale.x = SCALE    
   }
 
