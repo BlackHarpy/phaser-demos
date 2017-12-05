@@ -4,16 +4,15 @@ import Character from '../elements/character'
 import Boss from '../elements/boss'
 interface ISpecialAttack {
   key: string,
-  animation?: Phaser.Animation
+  name: string,
+  chargeTime?: number,
+  perform?: Function
 }
 export default class Job {
-  specialAttacks: ISpecialAttack[]
+  specialAttack: ISpecialAttack
 
-  constructor(game: Phaser.Game) {
-    this.specialAttacks = []
-    this.specialAttacks.push({
-      key: 'jump'
-    })
+  constructor(game: Phaser.Game, jobConstructor: any) {
+    this.specialAttack = jobConstructor.specialAttack
   }
 
   jumpAnimation(character: Character) {

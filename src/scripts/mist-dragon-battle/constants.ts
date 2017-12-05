@@ -41,3 +41,9 @@ export const COMMANDS_POSITIONS = {
   SKIP: 'SKIP',
   RUN: 'SPECIAL'
 }
+
+export const CHARACTER_STATUS = {
+  NORMAL: 1,
+  KO: 2,
+  JUMP: 3
+}

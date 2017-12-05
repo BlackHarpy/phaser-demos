@@ -4,6 +4,16 @@ import {SCALE} from '../constants'
 import Job from '../elements/job'
 import Boss from '../elements/boss'
 
+interface IStats {
+  HP: number,
+  MP: number,
+  STRENGTH: number,
+  SPEED: number,
+  STAMINA: number,
+  INTELLECT: number,
+  SPIRIT: number
+}
+
 interface IPosition {
   x: number,
   y: number
