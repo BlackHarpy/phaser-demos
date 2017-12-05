@@ -3,8 +3,8 @@
 //TODO Refactor. Just make it work first! :)
 
 import { COMMANDS } from './../constants';
-import { CECIL, KAIN } from './../elements/character-constructor';
-import { DARK_KNIGHT, DRAGOON } from './../elements/job-constructor';
+import { CECIL, KAIN } from './../constructor-data/characters';
+import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
 import State from '../../state'
 import Character from '../elements/character'
@@ -29,9 +29,12 @@ export default class MainState extends State {
   mistDragon: Boss
   party: Character[]
   music: Phaser.Sound
-  startedJump: Boolean
-  batteMenu: BattleMenu
+  battleMenu: BattleMenu
   lastOption: number
+  battlePaused: Boolean
+  ready: any
+  battleTimer: Phaser.Timer
+  actionsQueue: any[]
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -47,7 +50,12 @@ export default class MainState extends State {
     this.party = []
     this.lastOption = 0
     this.music = this.game.add.sound('bossBattleTheme', 1)
-    this.startedJump = false
+    this.battlePaused = false
+    this.ready = {
+      id: 0,
+      type: 'NONE'
+    }
+    this.battleTimer = this.game.time.create(false)    
     //this.music.play('', 0.3)
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')     
     this.caveBackground.scale.setTo(1.6)
@@ -75,37 +83,90 @@ export default class MainState extends State {
         name: 'Mist Dragon'
       }]
     }
-    this.batteMenu = new BattleMenu(this.game, menuData)
+    this.actionsQueue = []
+    this.battleMenu = new BattleMenu(this.game, menuData)
+    this.setTimer()
+  }
+
+  setTimer() {
+    this.battleTimer.loop(Phaser.Timer.QUARTER, () => {
+      
+      if (!this.battleMenu.commandSectionOpened) {
+        this.fillCharactersATB()
+        this.ready = this.getReadyForAction()
+      }
+      
+    })
   }
 
   update(): void {
-    this.game.input.onDown.addOnce(this.attack, this)
-    const option: number = this.batteMenu.getOption()
-    if (option !== this.lastOption) {
-      this.makeCharacterAction(option, this.party[0])
-      this.lastOption = option
+    if (this.ready.id !== 0) {
+      if (!this.battlePaused) {
+        this.battleTimer.pause()       
+        this.battlePaused = true        
+        this.battleMenu.openCommandsSection(this.ready.id)
+        this.battleMenu.commandSectionOpened = true
+      }
     }
+    
+    
+    
+      if (this.battlePaused && this.battleMenu.commandSectionOpened) {
+        //console.log(this.ready.id)
+        const option: number = this.battleMenu.getOption()
+        if (option !== this.lastOption) {
+          const index = this.party.findIndex((value) => {
+            return value.id === this.ready.id
+          })
+          this.makeCharacterAction(option, this.party[index])
+          this.lastOption = option
+        }
+      }
+
+    if (!this.battlePaused) {
+      this.battleTimer.start()      
+    }
+    
+  }
+
+  fillCharactersATB() {
+    this.party.forEach((character) => {
+      character.ATB = character.ATB + character.stats.SPEED > 100 ? 100 : character.ATB + character.stats.SPEED
+    })
+  }
+
+  getReadyForAction() {
+    let ready = {
+      id: 0,
+      type: 'NONE'
+    }
+    const availableCharacters = this.party.filter((character) => {
+      return character.ATB === 100
+    })
+
+    if (availableCharacters.length === 1) {
+      ready = {
+        id: availableCharacters[0].id,
+        type: 'CHARACTER'
+      }
+    }
+    
+    if (availableCharacters.length > 1) {
+      const maxSpeed = availableCharacters.reduce(function(prev, current) {
+          return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
+      })
+      ready = {
+        id: maxSpeed.id,
+        type: 'CHARACTER'
+      }
+    }
+
+    return ready
+
   }
 
   makeCharacterAction(command: number, character: Character): void {
-    switch (command) {
-      case COMMANDS.FIGHT.ID:
-        character.attack()
-        break
-      case COMMANDS.SPECIAL_ATTACK.ID:
-        character.specialAttack()
-        break
-      }
-  }
-
-  attack() {
-    if (!this.startedJump) {
-      this.party[0].specialAttack()      
-      this.startedJump = true
-    } else {
-      this.party[0].finishJump(this.mistDragon)
-      this.startedJump = false      
-    }
+    character.makeAction(command, this.mistDragon)
   }
 
   setMistDragon(): void {

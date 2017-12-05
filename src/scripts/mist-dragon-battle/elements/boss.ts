@@ -9,6 +9,8 @@ interface ITransformation {
 
 export default class Boss {
   game: Phaser.Game
+  name: string
+  ATB: number
   sprite: Phaser.Sprite
   transformations: ITransformation[]
 

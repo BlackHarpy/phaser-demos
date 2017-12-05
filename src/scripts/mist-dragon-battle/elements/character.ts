@@ -1,4 +1,4 @@
-import { INITIAL_MENU_TEXT_POSITION_Y } from './../constants';
+import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y } from './../constants';
 'use strict'
 
 import {SCALE} from '../constants'
@@ -37,7 +37,9 @@ export default class Character {
   atlasKey: string  
   name: string
   level: number
+  status: number
   sprite: Phaser.Sprite
+  ATB: number
   stats: IStats
   job: Job
   animations: IAnimations
@@ -54,7 +56,9 @@ export default class Character {
     this.atlasKey = characterConstructor.atlasKey
     this.name = characterConstructor.name
     this.level = characterConstructor.level
+    this.status = characterConstructor.status
     this.stats = characterConstructor.stats
+    this.ATB = characterConstructor.ATB
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand') 
     this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)
@@ -101,6 +105,21 @@ export default class Character {
     }
   }
 
+  makeAction(command: number, target: Boss) {
+    switch (command) {
+      case COMMANDS.FIGHT.ID:
+        this.attack()
+        break
+      case COMMANDS.SPECIAL_ATTACK.ID:
+        this.specialAttack(target)
+        break
+      }
+  }
+
+  setStatus(status: number) {
+    this.status = status
+  }
+
   attack(): void {
     this.goToFront(this.makeAttackAnimation)
   }
@@ -109,11 +128,11 @@ export default class Character {
     this.animations.victory.play()
   }
 
-  walkToPosition(position: number, additionalCallback?: Function) {
+  walkToPosition(position: number, additionalCallback?: Function, character?: Character, target?: Boss) {
     this.animations.walk.play()
     const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)
     if (additionalCallback) {
-      tween.onComplete.add(additionalCallback, this)   
+      tween.onComplete.add(additionalCallback, this, 1, character, target)   
     } else {
       tween.onComplete.add(this.resetPosition, this)         
     }
@@ -123,16 +142,12 @@ export default class Character {
     this.animations.attack.play()
   }
 
-  specialAttack() {
-    this.job.jumpAnimation(this)
+  specialAttack(target: Boss) {
+    this.job.performSpecialAttack(this, target)
   }
-
-  finishJump(target: Boss) {
-    this.job.finishJump(this, target)
-  }
-
-  goToFront(additionalCallback?: Function): void {
-    this.walkToPosition(this.sprite.x - 50, additionalCallback)
+  
+  goToFront(additionalCallback?: Function, character?: Character, target?: Boss): void {
+    this.walkToPosition(this.sprite.x - 50, additionalCallback, character, target)
   }
 
   goToBack(): void {

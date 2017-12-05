@@ -83,6 +83,7 @@ export default class BattleMenu {
   menuData: IMenuData
   charactersSection: ICharactersMenuSection
   commandsSection: ICommandsMenuSection
+  commandSectionOpened: Boolean
   cursor: ICursor
   textStyle: Phaser.PhaserTextStyle
   activeList: any[]
@@ -95,10 +96,10 @@ export default class BattleMenu {
     this.textStyle = textStyle
     this.menuData = menuData
     this.game = game
+    this.commandSectionOpened = false
 
     this.setEnemySection()
     this.setCharactersSection()
-    this.openCommandsSection(2)
   }
 
   setCharactersSection(): void {
