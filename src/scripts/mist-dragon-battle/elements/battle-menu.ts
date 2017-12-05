@@ -98,7 +98,7 @@ export default class BattleMenu {
 
     this.setEnemySection()
     this.setCharactersSection()
-    this.openCommandsSection(1)
+    this.openCommandsSection(2)
   }
 
   setCharactersSection(): void {

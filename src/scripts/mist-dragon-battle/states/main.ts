@@ -2,6 +2,8 @@
 
 //TODO Refactor. Just make it work first! :)
 
+import { COMMANDS } from './../constants';
+
 import State from '../../state'
 import Character from '../elements/character'
 import Boss from '../elements/boss'
@@ -78,9 +80,20 @@ export default class MainState extends State {
     this.game.input.onDown.addOnce(this.attack, this)
     const option: number = this.batteMenu.getOption()
     if (option !== this.lastOption) {
-      console.log(option)
+      this.makeCharacterAction(option, this.party[0])
       this.lastOption = option
     }
+  }
+
+  makeCharacterAction(command: number, character: Character): void {
+    switch (command) {
+      case COMMANDS.FIGHT.ID:
+        character.attack()
+        break
+      case COMMANDS.SPECIAL_ATTACK.ID:
+        character.specialAttack()
+        break
+      }
   }
 
   attack() {
