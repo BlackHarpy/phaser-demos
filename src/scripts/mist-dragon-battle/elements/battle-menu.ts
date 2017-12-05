@@ -7,12 +7,14 @@ interface ICharacterData {
   specialAttack: string,
   items?: string[]
   totalHealth?: number,
-  remainingHealth?: number
+  remainingHealth?: number,
+  cursorPosition?: MenuPoint
 }
 
 interface IEnemyData {
   id: number,
-  name: string
+  name: string,
+  cursorPosition?: MenuPoint  
 }
 
 interface IMenuData {
@@ -35,7 +37,8 @@ interface IEnemyMenuInfo {
 interface ICommandsMenuInfo {
   id: number,
   name: Phaser.Text,
-  position: string
+  position: string,
+  cursorPosition?: MenuPoint
 }
 
 interface ICharactersMenuSection {
@@ -51,6 +54,11 @@ interface IEnemiesMenuSection {
 interface ICommandsMenuSection {
   background: Phaser.Sprite,
   commandsList: ICommandsMenuInfo[]
+}
+
+interface ICursor {
+  sprite: Phaser.Sprite,
+  currentOption: number
 }
 
 interface MenuPoint {
@@ -75,7 +83,10 @@ export default class BattleMenu {
   menuData: IMenuData
   charactersSection: ICharactersMenuSection
   commandsSection: ICommandsMenuSection
+  cursor: ICursor
   textStyle: Phaser.PhaserTextStyle
+  activeList: any[]
+  buttonIsDown: Boolean  
 
   constructor(game: Phaser.Game, menuData: IMenuData) {
     const textStyle: Phaser.PhaserTextStyle = {
@@ -160,9 +171,54 @@ export default class BattleMenu {
       let y = INITIAL_MENU_TEXT_POSITION_Y      
       this.commandsSection.commandsList.forEach((value) => {
         value.name.position.set(140, y)
+        value.cursorPosition = {
+          x: 105,
+          y:  value.name.centerY - 12
+        }
         y += MENU_MARGIN        
       })
+      this.setCursor(this.commandsSection.commandsList)
+      this.activeList = this.commandsSection.commandsList
     }
+  }
+
+  setCursor(section: any): void {
+    const initialX: number = section[0].cursorPosition.x
+    const initialY: number = section[0].cursorPosition.y
+    this.cursor = {
+      sprite: this.game.add.sprite(initialX, initialY, 'cursor'),
+      currentOption: 1
+    }
+  }
+
+  getOption(): number {
+    let option = this.cursor.currentOption
+    let selected = 0
+    const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
+    const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
+    const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
+
+    if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
+      option = option === this.activeList.length ? option = 1 : option += 1
+      
+    } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
+      option = option === 1 ? option = this.activeList.length : option -= 1
+    } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
+      selected = option
+      this.buttonIsDown = true            
+    }
+    if (isUpDown || isDownDown) {
+      this.cursor.currentOption = option
+      const cursorPosition = {
+        x: this.activeList[option - 1].cursorPosition.x,
+        y: this.activeList[option - 1].cursorPosition.y
+      }
+      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+      this.buttonIsDown = true      
+    } else {
+      this.buttonIsDown = false
+    }
+    return selected
   }
 
   buildCommandsList(character): ICommandsMenuInfo[] {

@@ -27,6 +27,7 @@ export default class MainState extends State {
   music: Phaser.Sound
   startedJump: Boolean
   batteMenu: BattleMenu
+  lastOption: number
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -40,6 +41,7 @@ export default class MainState extends State {
   
   create(): void {
     this.party = []
+    this.lastOption = 0
     this.music = this.game.add.sound('bossBattleTheme', 1)
     this.startedJump = false
     //this.music.play('', 0.3)
@@ -74,6 +76,11 @@ export default class MainState extends State {
 
   update(): void {
     this.game.input.onDown.addOnce(this.attack, this)
+    const option: number = this.batteMenu.getOption()
+    if (option !== this.lastOption) {
+      console.log(option)
+      this.lastOption = option
+    }
   }
 
   attack() {
