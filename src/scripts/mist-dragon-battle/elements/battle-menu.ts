@@ -84,7 +84,7 @@ export default class BattleMenu {
     this.textStyle = textStyle
     this.menuData = menuData
     this.game = game
-    
+
     this.setEnemySection()
     this.setCharactersSection()
     this.openCommandsSection(1)
@@ -92,39 +92,39 @@ export default class BattleMenu {
 
   setCharactersSection(): void {
     const backgroundConfig = {
-      anchor: {x: 1, y: 1},
-      position: {x: this.game.world.width, y: this.game.world.height},
-      size: {height: MENU_HEIGHT, width: 450}
+      anchor: { x: 1, y: 1 },
+      position: { x: this.game.world.width, y: this.game.world.height },
+      size: { height: MENU_HEIGHT, width: 450 }
     }
 
     this.charactersSection = {
       background: this.buildMenuBackground(backgroundConfig),
       charactersList: []
     }
-    
-    let y = INITIAL_MENU_TEXT_POSITION_Y    
+
+    let y = INITIAL_MENU_TEXT_POSITION_Y
     this.menuData.characters.forEach((value) => {
       const characterMenuInfo = this.buildCharacterMenuInfo(value)
       characterMenuInfo.name.position.set(340, y)
       characterMenuInfo.healthInfo.anchor.set(1, 0)
       characterMenuInfo.healthInfo.position.set(750, y)
       this.charactersSection.charactersList.push(characterMenuInfo)
-      y += MENU_MARGIN      
+      y += MENU_MARGIN
     })
   }
 
   setEnemySection(): void {
     const backgroundConfig = {
-      anchor: {x: 0, y: 1},
-      position: {x: 0, y: this.game.world.height},
-      size: {height: MENU_HEIGHT, width: 320}
+      anchor: { x: 0, y: 1 },
+      position: { x: 0, y: this.game.world.height },
+      size: { height: MENU_HEIGHT, width: 320 }
     }
 
     this.enemySection = {
       background: this.buildMenuBackground(backgroundConfig),
       enemiesList: []
     }
-    
+
     let y = INITIAL_MENU_TEXT_POSITION_Y
     this.menuData.enemies.forEach((value) => {
       const enemyMenuInfo = this.buildEnemyMenuInfo(value)
@@ -135,7 +135,7 @@ export default class BattleMenu {
   }
 
   buildMenuBackground(config: IBackgroundConfig): Phaser.Sprite {
-    const background: Phaser.Sprite =  this.game.add.sprite(0, 0, 'rectangle')
+    const background: Phaser.Sprite = this.game.add.sprite(0, 0, 'rectangle')
     background.anchor.set(config.anchor.x, config.anchor.y)
     background.position.set(config.position.x, config.position.y)
     background.height = config.size.height
@@ -149,11 +149,36 @@ export default class BattleMenu {
     })
     if (character) {
       const backgroundConfig = {
-        anchor: {x: 0, y: 0},
-        position: {x: 0, y: 0},
-        size: {height: 100, width: 100}
+        anchor: { x: 1, y: 1 },
+        position: { x: 320, y: this.game.world.height},
+        size: { height: MENU_HEIGHT, width: 200 }
+      }
+      this.commandsSection = {
+        background: this.buildMenuBackground(backgroundConfig),
+        commandsList: this.buildCommandsList(character)
+      }
+      let y = INITIAL_MENU_TEXT_POSITION_Y      
+      this.commandsSection.commandsList.forEach((value) => {
+        value.name.position.set(140, y)
+        y += MENU_MARGIN        
+      })
+    }
+  }
+
+  buildCommandsList(character): ICommandsMenuInfo[] {
+    const commandsList = []
+    for (let key in COMMANDS) {
+      if (COMMANDS[key].POSITION === COMMANDS_POSITIONS.MAIN) {
+        const commandLabel = COMMANDS[key].ID === COMMANDS.SPECIAL_ATTACK.ID ? character.specialAttack : COMMANDS[key].LABEL
+        const command = {
+          id: COMMANDS[key].ID,
+          name: this.game.add.text(0, 0, commandLabel, this.textStyle),
+          position: COMMANDS[key].POSITION
+        }
+        commandsList.push(command)
       }
     }
+    return commandsList
   }
 
   buildCharacterMenuInfo(characterInfo: ICharacterData): ICharacterMenuInfo {

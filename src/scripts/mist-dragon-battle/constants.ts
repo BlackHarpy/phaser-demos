@@ -5,26 +5,32 @@ export const INITIAL_MENU_TEXT_POSITION_Y = 460
 export const COMMANDS = {
   FIGHT: {
     ID: 1,
+    LABEL: 'Fight',
     POSITION: 'MAIN'
   }, 
   ITEM: {
     ID: 2,
+    LABEL: 'Item',    
     POSITION: 'MAIN'
   },
   SPECIAL_ATTACK: {
     ID: 3,
+    LABEL: '-',    
     POSITION: 'MAIN'
   },
   DEFEND: {
     ID: 4,
+    LABEL: 'Defend',    
     POSITION: 'RIGHT'
   },
   SKIP_TURN: {
     ID: 5,
+    LABEL: '-',    
     POSITION: 'SKIP'
   },
   RUN: {
     ID: 6,
+    LABEL: '-',    
     POSITION: 'SPECIAL'
   }
 }
