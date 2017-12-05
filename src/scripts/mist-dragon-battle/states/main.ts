@@ -23,6 +23,13 @@ const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon
 const rectangleImage = require('assets/images/mist-dragon-battle/rectangle.png')
 const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
+interface IAction {
+  executor: string,
+  idExec: number,
+  idTarget: number,
+  idAction: number
+}
+
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
@@ -34,7 +41,7 @@ export default class MainState extends State {
   battlePaused: Boolean
   ready: any
   battleTimer: Phaser.Timer
-  actionsQueue: any[]
+  actionsQueue: IAction[]
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -45,7 +52,7 @@ export default class MainState extends State {
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
     this.game.load.audio('bossBattleTheme', battleMusic)
   }
-  
+
   create(): void {
     this.party = []
     this.lastOption = 0
@@ -55,9 +62,9 @@ export default class MainState extends State {
       id: 0,
       type: 'NONE'
     }
-    this.battleTimer = this.game.time.create(false)    
+    this.battleTimer = this.game.time.create(false)
     //this.music.play('', 0.3)
-    this.caveBackground = this.game.add.sprite(0, 0, 'cave')     
+    this.caveBackground = this.game.add.sprite(0, 0, 'cave')
     this.caveBackground.scale.setTo(1.6)
     this.caveBackground.smoothed = false
     this.caveBackground.anchor.set(0.5, 0)
@@ -90,48 +97,73 @@ export default class MainState extends State {
 
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.QUARTER, () => {
-      
+
       if (!this.battleMenu.commandSectionOpened) {
         this.fillCharactersATB()
         this.ready = this.getReadyForAction()
       }
-      
+
     })
+    this.battleTimer.start()    
   }
 
   update(): void {
     if (this.ready.id !== 0) {
       if (!this.battlePaused) {
-        this.battleTimer.pause()       
-        this.battlePaused = true        
+        this.battleTimer.pause()
+        this.battlePaused = true
         this.battleMenu.openCommandsSection(this.ready.id)
         this.battleMenu.commandSectionOpened = true
       }
     }
-    
-    
-    
-      if (this.battlePaused && this.battleMenu.commandSectionOpened) {
-        //console.log(this.ready.id)
-        const option: number = this.battleMenu.getOption()
-        if (option !== this.lastOption) {
-          const index = this.party.findIndex((value) => {
-            return value.id === this.ready.id
-          })
-          this.makeCharacterAction(option, this.party[index])
-          this.lastOption = option
+
+    if (this.battlePaused && this.battleMenu.commandSectionOpened) {
+      //console.log(this.ready.id)
+      const option: number = this.battleMenu.getOption()
+      if ((option !== 0) && (option !== this.lastOption)) {
+        const index = this.party.findIndex((value) => {
+          return value.id === this.ready.id
+        })
+        this.addActionToQueue('CHARACTER', index, 0, option)
+        this.party[index].prepareForAction()
+        this.lastOption = option
+        this.ready = {
+          id: 0,
+          type: 'NONE'
         }
       }
+    } else {
+      this.battleTimer.resume()  
+      this.doNextAction()    
+    }
+  }
 
-    if (!this.battlePaused) {
-      this.battleTimer.start()      
+  doNextAction() {
+    if (this.actionsQueue.length) {
+      const nextAction: IAction = this.actionsQueue.shift()
+      if (nextAction.executor === 'CHARACTER') {
+        //this.battleTimer.pause()
+        this.battlePaused = false
+        this.makeCharacterAction(nextAction.idAction, this.party[nextAction.idExec])
+      }
     }
     
   }
 
+  addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
+    const action: IAction = {
+      executor: executor,
+      idExec: idExec,
+      idTarget: idTarget,
+      idAction: idAction
+    }
+    this.actionsQueue.push(action)
+    this.battleMenu.closeCommandsSection()
+  }
+
   fillCharactersATB() {
     this.party.forEach((character) => {
-      character.ATB = character.ATB + character.stats.SPEED > 100 ? 100 : character.ATB + character.stats.SPEED
+      character.fillATB()
     })
   }
 
@@ -150,22 +182,21 @@ export default class MainState extends State {
         type: 'CHARACTER'
       }
     }
-    
+
     if (availableCharacters.length > 1) {
-      const maxSpeed = availableCharacters.reduce(function(prev, current) {
-          return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
+      const maxSpeed = availableCharacters.reduce(function (prev, current) {
+        return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
       })
       ready = {
         id: maxSpeed.id,
         type: 'CHARACTER'
       }
     }
-
     return ready
-
   }
 
   makeCharacterAction(command: number, character: Character): void {
+    character.ATB = 0
     character.makeAction(command, this.mistDragon)
   }
 
@@ -175,9 +206,9 @@ export default class MainState extends State {
   }
 
   setParty(keys: string[]): void {
-    this.party.push(new Character(this.game, KAIN, DRAGOON))    
+    this.party.push(new Character(this.game, KAIN, DRAGOON))
     this.party.push(new Character(this.game, CECIL, DARK_KNIGHT))
-    
+
     this.party.forEach((value, index) => {
       value.setToBattle(this.caveBackground.height, this.party.length, index)
     })

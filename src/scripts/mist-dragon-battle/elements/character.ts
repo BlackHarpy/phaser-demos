@@ -1,4 +1,4 @@
-import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y } from './../constants';
+import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS } from './../constants';
 'use strict'
 
 import {SCALE} from '../constants'
@@ -95,6 +95,11 @@ export default class Character {
     }
   }
 
+  prepareForAction(): void {
+    this.ATB = 0
+    this.sprite.loadTexture(this.atlasKey, 'defend')
+  }
+
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
     this.sprite.x = this.game.world.width
     this.game.add.tween(this.sprite).to({x: this.game.world.centerX * SCALE}, 100, Phaser.Easing.Linear.None, true)
@@ -145,7 +150,7 @@ export default class Character {
   specialAttack(target: Boss) {
     this.job.performSpecialAttack(this, target)
   }
-  
+
   goToFront(additionalCallback?: Function, character?: Character, target?: Boss): void {
     this.walkToPosition(this.sprite.x - 50, additionalCallback, character, target)
   }
@@ -160,7 +165,12 @@ export default class Character {
     this.sprite.scale.x = SCALE    
   }
 
-  update(): void {
+  fillATB(): void {
+    if (this.status === CHARACTER_STATUS.JUMP) {
+      this.ATB = this.ATB + this.job.specialAttack.chargeTime > 100 ? 100 : this.ATB + this.job.specialAttack.chargeTime
+    } else {
+      this.ATB = this.ATB + this.stats.SPEED > 100 ? 100 : this.ATB + this.stats.SPEED      
+    }
   }
   
 }

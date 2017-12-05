@@ -183,6 +183,15 @@ export default class BattleMenu {
     }
   }
 
+  closeCommandsSection() {
+    this.commandsSection.background.destroy()
+    this.commandsSection.commandsList.forEach((command) => {
+      command.name.destroy()
+    })
+    this.cursor.sprite.destroy()
+    this.commandSectionOpened = false
+  }
+
   setCursor(section: any): void {
     const initialX: number = section[0].cursorPosition.x
     const initialY: number = section[0].cursorPosition.y
