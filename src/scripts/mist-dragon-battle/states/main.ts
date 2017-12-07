@@ -112,29 +112,25 @@ export default class MainState extends State {
         this.commandsQueue = this.commandsQueue.concat(readyForCommands)
       }
     })
-    this.battleTimer.start()    
+    this.battleTimer.start()
   }
 
   update(): void {
 
     if (!this.battlePaused) {
       if (this.commandsQueue.length > 0) {
-        console.log('huuuasdfasdf')
-        this.battlePaused = true                
+        this.battlePaused = true
         const next: number = this.commandsQueue.shift()
         this.receivingCommand = next
         this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
-      }
-
-      //this.doNextAction()
+      } 
+      this.doNextAction()
     }
 
     if (this.battlePaused && this.battleMenu.isListeningInput()) {
-      console.log('battlePau', this.battlePaused)
-      console.log('listening', this.battleMenu.isListeningInput())
+      this.battleTimer.resume()
       const option: number = this.battleMenu.getOption()
-      console.log('opotion', option)
       if ((option !== 0) && (option !== this.lastOption)) {
         const index = this.party.findIndex((value) => {
           return value.id === this.receivingCommand
@@ -145,6 +141,7 @@ export default class MainState extends State {
         this.receivingCommand = 0
         this.battlePaused = false
         this.battleMenu.commandSectionOpened = false
+
       }
     }
 
@@ -174,12 +171,12 @@ export default class MainState extends State {
       console.log(this.actionsQueue)
       const nextAction: IAction = this.actionsQueue.pop()
       if (nextAction.executor === 'CHARACTER') {
-        //this.battleTimer.pause()
+        this.battleTimer.pause()
         this.makeCharacterAction(nextAction.idAction, this.party[nextAction.idExec])
-        this.battlePaused = true        
+        this.battlePaused = true
       }
     }
-    
+
   }
 
   addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
@@ -192,7 +189,6 @@ export default class MainState extends State {
     console.log(action)
     this.actionsQueue.push(action)
     this.battleMenu.closeCommandsSection()
-    this.battlePaused = false    
   }
 
   getReadyForAction(): IActionReady[] {
@@ -205,34 +201,6 @@ export default class MainState extends State {
     })
     return actions
   }
-
-  // getReadyForAction() {
-  //   let ready = {
-  //     id: 0,
-  //     type: 'NONE'
-  //   }
-  //   const availableCharacters = this.party.filter((character) => {
-  //     return character.ATB === 100
-  //   })
-
-  //   if (availableCharacters.length === 1) {
-  //     ready = {
-  //       id: availableCharacters[0].id,
-  //       type: 'CHARACTER'
-  //     }
-  //   }
-
-  //   if (availableCharacters.length > 1) {
-  //     const maxSpeed = availableCharacters.reduce(function (prev, current) {
-  //       return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
-  //     })
-  //     ready = {
-  //       id: maxSpeed.id,
-  //       type: 'CHARACTER'
-  //     }
-  //   }
-  //   return ready
-  // }
 
   makeCharacterAction(command: number, character: Character): void {
     character.ATB = 0
@@ -253,7 +221,8 @@ export default class MainState extends State {
     })
   }
 
-  // render(): void {
-  // }
+  render(): void {
+    this.game.debug.text("Time passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
+  }
 
 }
