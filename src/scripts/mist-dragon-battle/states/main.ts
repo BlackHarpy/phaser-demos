@@ -30,6 +30,12 @@ interface IAction {
   idAction: number
 }
 
+
+interface IActionReady {
+  idReady: number,
+  automaticAction?: IAction
+}
+
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
@@ -39,9 +45,10 @@ export default class MainState extends State {
   battleMenu: BattleMenu
   lastOption: number
   battlePaused: Boolean
-  ready: any
+  receivingCommand: number
   battleTimer: Phaser.Timer
   actionsQueue: IAction[]
+  commandsQueue: number[]
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -58,10 +65,6 @@ export default class MainState extends State {
     this.lastOption = 0
     this.music = this.game.add.sound('bossBattleTheme', 1)
     this.battlePaused = false
-    this.ready = {
-      id: 0,
-      type: 'NONE'
-    }
     this.battleTimer = this.game.time.create(false)
     //this.music.play('', 0.3)
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')
@@ -91,60 +94,89 @@ export default class MainState extends State {
       }]
     }
     this.actionsQueue = []
+    this.commandsQueue = []
+    this.receivingCommand = 0
     this.battleMenu = new BattleMenu(this.game, menuData)
     this.setTimer()
   }
 
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.QUARTER, () => {
+      const nextReady: IActionReady[] = this.getReadyForAction()
 
-      if (!this.battleMenu.commandSectionOpened) {
-        this.fillCharactersATB()
-        this.ready = this.getReadyForAction()
+      if (nextReady.length > 0) {
+        const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
+        const readyForCommands: number[] = this.getReadyForCommands(nextReady)
+
+        this.actionsQueue.concat(readyForActions)
+        this.commandsQueue = this.commandsQueue.concat(readyForCommands)
       }
-
     })
     this.battleTimer.start()    
   }
 
   update(): void {
-    if (this.ready.id !== 0) {
-      if (!this.battlePaused) {
+
+    if (!this.battlePaused) {
+      if (this.commandsQueue.length > 0) {
+        console.log('huuuasdfasdf')
+        this.battlePaused = true                
+        const next: number = this.commandsQueue.shift()
+        this.receivingCommand = next
+        this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
-        this.battlePaused = true
-        this.battleMenu.openCommandsSection(this.ready.id)
-        this.battleMenu.commandSectionOpened = true
       }
+
+      //this.doNextAction()
     }
 
-    if (this.battlePaused && this.battleMenu.commandSectionOpened) {
-      //console.log(this.ready.id)
+    if (this.battlePaused && this.battleMenu.isListeningInput()) {
+      console.log('battlePau', this.battlePaused)
+      console.log('listening', this.battleMenu.isListeningInput())
       const option: number = this.battleMenu.getOption()
+      console.log('opotion', option)
       if ((option !== 0) && (option !== this.lastOption)) {
         const index = this.party.findIndex((value) => {
-          return value.id === this.ready.id
+          return value.id === this.receivingCommand
         })
         this.addActionToQueue('CHARACTER', index, 0, option)
         this.party[index].prepareForAction()
         this.lastOption = option
-        this.ready = {
-          id: 0,
-          type: 'NONE'
-        }
+        this.receivingCommand = 0
+        this.battlePaused = false
+        this.battleMenu.commandSectionOpened = false
       }
-    } else {
-      this.battleTimer.resume()  
-      this.doNextAction()    
     }
+
+  }
+
+  getReadyForCommands(readyCharacters: IActionReady[]): number[] {
+    return readyCharacters.map((character) => {
+      if (Object.keys(character.automaticAction).length === 0) {
+        return character.idReady
+      }
+    })
+  }
+
+
+  getAutomaticActions(readyCharacters: IActionReady[]): IAction[] {
+    const readyWithAutomaticActions: IActionReady[] = readyCharacters.filter((character) => {
+      return Object.keys(character.automaticAction).length > 0
+    })
+
+    return readyWithAutomaticActions.map((character) => {
+      return character.automaticAction
+    })
   }
 
   doNextAction() {
     if (this.actionsQueue.length) {
-      const nextAction: IAction = this.actionsQueue.shift()
+      console.log(this.actionsQueue)
+      const nextAction: IAction = this.actionsQueue.pop()
       if (nextAction.executor === 'CHARACTER') {
         //this.battleTimer.pause()
-        this.battlePaused = false
         this.makeCharacterAction(nextAction.idAction, this.party[nextAction.idExec])
+        this.battlePaused = true        
       }
     }
     
@@ -157,43 +189,50 @@ export default class MainState extends State {
       idTarget: idTarget,
       idAction: idAction
     }
+    console.log(action)
     this.actionsQueue.push(action)
     this.battleMenu.closeCommandsSection()
+    this.battlePaused = false    
   }
 
-  fillCharactersATB() {
+  getReadyForAction(): IActionReady[] {
+    let actions: IActionReady[] = []
     this.party.forEach((character) => {
-      character.fillATB()
+      const returnAction: IActionReady = character.fillATB()
+      if (returnAction.idReady !== 0) {
+        actions.push(returnAction)
+      }
     })
+    return actions
   }
 
-  getReadyForAction() {
-    let ready = {
-      id: 0,
-      type: 'NONE'
-    }
-    const availableCharacters = this.party.filter((character) => {
-      return character.ATB === 100
-    })
+  // getReadyForAction() {
+  //   let ready = {
+  //     id: 0,
+  //     type: 'NONE'
+  //   }
+  //   const availableCharacters = this.party.filter((character) => {
+  //     return character.ATB === 100
+  //   })
 
-    if (availableCharacters.length === 1) {
-      ready = {
-        id: availableCharacters[0].id,
-        type: 'CHARACTER'
-      }
-    }
+  //   if (availableCharacters.length === 1) {
+  //     ready = {
+  //       id: availableCharacters[0].id,
+  //       type: 'CHARACTER'
+  //     }
+  //   }
 
-    if (availableCharacters.length > 1) {
-      const maxSpeed = availableCharacters.reduce(function (prev, current) {
-        return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
-      })
-      ready = {
-        id: maxSpeed.id,
-        type: 'CHARACTER'
-      }
-    }
-    return ready
-  }
+  //   if (availableCharacters.length > 1) {
+  //     const maxSpeed = availableCharacters.reduce(function (prev, current) {
+  //       return (prev.stats.SPEED > current.stats.SPEED) ? prev : current
+  //     })
+  //     ready = {
+  //       id: maxSpeed.id,
+  //       type: 'CHARACTER'
+  //     }
+  //   }
+  //   return ready
+  // }
 
   makeCharacterAction(command: number, character: Character): void {
     character.ATB = 0

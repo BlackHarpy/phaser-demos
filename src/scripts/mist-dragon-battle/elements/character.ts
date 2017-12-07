@@ -5,6 +5,18 @@ import {SCALE} from '../constants'
 import Job from '../elements/job'
 import Boss from '../elements/boss'
 
+interface IAction {
+  executor: string,
+  idExec: number,
+  idTarget: number,
+  idAction: number
+}
+
+interface IActionReady {
+  idReady: number,
+  automaticAction?: IAction
+}
+
 interface IStats {
   HP: number,
   MP: number,
@@ -44,11 +56,16 @@ export default class Character {
   job: Job
   animations: IAnimations
   initialPosition: IPosition
+  debugText: Phaser.Text
 
   constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any) {
     this.game = game
     this.setCharacterData(characterConstructor, jobConstructor)
     this.addAnimations(characterConstructor.atlasKey)
+    if (characterConstructor.id === 2) {
+      this.debugText = this.game.add.text(10, 10, this.ATB.toString(), {fill: '#FFF'})
+      
+    }
   }
 
   setCharacterData(characterConstructor: any, jobConstructor: any) {
@@ -165,12 +182,16 @@ export default class Character {
     this.sprite.scale.x = SCALE    
   }
 
-  fillATB(): void {
-    if (this.status === CHARACTER_STATUS.JUMP) {
-      this.ATB = this.ATB + this.job.specialAttack.chargeTime > 100 ? 100 : this.ATB + this.job.specialAttack.chargeTime
-    } else {
-      this.ATB = this.ATB + this.stats.SPEED > 100 ? 100 : this.ATB + this.stats.SPEED      
+  fillATB(): IActionReady {
+    const actionReady = <any>{}
+    const ATBData = this.job.fillATB(this)
+    this.ATB = ATBData.newATB
+    actionReady.idReady = this.ATB === 100 ? this.id : 0
+    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    if (this.id === 2) {
+      this.debugText.text = this.ATB.toString()
     }
+    return actionReady
   }
   
 }

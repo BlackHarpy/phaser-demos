@@ -180,7 +180,12 @@ export default class BattleMenu {
       })
       this.setCursor(this.commandsSection.commandsList)
       this.activeList = this.commandsSection.commandsList
+      this.commandSectionOpened = true
     }
+  }
+
+  isListeningInput(): Boolean {
+    return this.commandSectionOpened
   }
 
   closeCommandsSection() {
@@ -207,13 +212,15 @@ export default class BattleMenu {
     const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
     const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
     const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
-
+    console.log('active list', this.activeList)
     if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
       option = option === this.activeList.length ? option = 1 : option += 1
-      
+      this.buttonIsDown = true                  
     } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
       option = option === 1 ? option = this.activeList.length : option -= 1
+      this.buttonIsDown = true    
     } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
+      console.log('estoy aca')
       selected = option
       this.buttonIsDown = true            
     }
@@ -228,6 +235,7 @@ export default class BattleMenu {
     } else {
       this.buttonIsDown = false
     }
+    console.log('selected', selected)
     return selected
   }
 
