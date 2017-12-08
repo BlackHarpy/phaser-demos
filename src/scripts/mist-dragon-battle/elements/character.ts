@@ -56,16 +56,11 @@ export default class Character {
   job: Job
   animations: IAnimations
   initialPosition: IPosition
-  debugText: Phaser.Text
 
   constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any) {
     this.game = game
     this.setCharacterData(characterConstructor, jobConstructor)
     this.addAnimations(characterConstructor.atlasKey)
-    if (characterConstructor.id === 2) {
-      this.debugText = this.game.add.text(10, 10, this.ATB.toString(), {fill: '#FFF'})
-      
-    }
   }
 
   setCharacterData(characterConstructor: any, jobConstructor: any) {
@@ -94,13 +89,15 @@ export default class Character {
       attack: {
         animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
         play: () => {
-          this.sprite.animations.play('attack')
-          this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
-            if (animation.loopCount === 2) {
-              this.sprite.animations.stop('attack')
-              this.goToBack()
-            }
-          }, this)
+          return new Promise(resolve => {
+            this.sprite.animations.play('attack')
+            this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
+              if (animation.loopCount === 2) {
+                this.sprite.animations.stop('attack')
+                resolve(true)
+              }
+            }, this)
+          })
         }
       },
       victory: {
@@ -127,59 +124,67 @@ export default class Character {
     }
   }
 
-  makeAction(command: number, target: Boss) {
+  async makeAction(command: number, target: Boss): Promise<Boolean> {
+    let promise: Promise<Boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:
-        this.attack()
+        promise = this.attack()
         break
       case COMMANDS.SPECIAL_ATTACK.ID:
         this.specialAttack(target)
         break
       }
+    return promise
   }
 
   setStatus(status: number) {
     this.status = status
   }
 
-  attack(): void {
-    this.goToFront(this.makeAttackAnimation)
+  async attack(): Promise<Boolean> {
+    this.ATB = 0
+    await this.goToFront()
+    await this.makeAttackAnimation()
+    return this.goToBack()
   }
 
   victory(): void {
     this.animations.victory.play()
   }
 
-  walkToPosition(position: number, additionalCallback?: Function, character?: Character, target?: Boss) {
-    this.animations.walk.play()
-    const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)
-    if (additionalCallback) {
-      tween.onComplete.add(additionalCallback, this, 1, character, target)   
-    } else {
-      tween.onComplete.add(this.resetPosition, this)         
-    }
+  walkToPosition(position, resetAtEnd?: Boolean): Promise<Boolean> {
+    return new Promise<any> (resolve => {
+      this.animations.walk.play()
+      const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)  
+      tween.onComplete.add(() => {
+        if (resetAtEnd) {
+          this.resetPosition()
+        }
+        resolve(true)
+      })
+    })
+  }
+ 
+  async makeAttackAnimation(): Promise<Boolean> {
+    return this.animations.attack.play()
   }
 
-  makeAttackAnimation() {
-    this.animations.attack.play()
-  }
-
-  specialAttack(target: Boss) {
+  specialAttack(target: Boss, onEndCallback?) {
     this.job.performSpecialAttack(this, target)
   }
 
-  goToFront(additionalCallback?: Function, character?: Character, target?: Boss): void {
-    this.walkToPosition(this.sprite.x - 50, additionalCallback, character, target)
+  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Boss): Promise<Boolean> {
+    return (await this.walkToPosition(this.sprite.x - 50))
   }
 
-  goToBack(): void {
+  async goToBack(): Promise<Boolean> {
     this.sprite.scale.x = -SCALE
-    this.walkToPosition(this.initialPosition.x)
+    return (await this.walkToPosition(this.initialPosition.x, true))
   }
 
   resetPosition(): void {
     this.sprite.loadTexture(this.atlasKey, 'stand')
-    this.sprite.scale.x = SCALE    
+    this.sprite.scale.x = SCALE  
   }
 
   fillATB(): IActionReady {
@@ -188,9 +193,6 @@ export default class Character {
     this.ATB = ATBData.newATB
     actionReady.idReady = this.ATB === 100 ? this.id : 0
     actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
-    if (this.id === 2) {
-      this.debugText.text = this.ATB.toString()
-    }
     return actionReady
   }
   

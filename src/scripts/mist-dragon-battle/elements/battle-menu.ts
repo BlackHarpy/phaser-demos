@@ -160,6 +160,7 @@ export default class BattleMenu {
       return value.id === characterID
     })
     if (character) {
+      this.commandSectionOpened = true      
       const backgroundConfig = {
         anchor: { x: 1, y: 1 },
         position: { x: 320, y: this.game.world.height},
@@ -180,7 +181,6 @@ export default class BattleMenu {
       })
       this.setCursor(this.commandsSection.commandsList)
       this.activeList = this.commandsSection.commandsList
-      this.commandSectionOpened = true
     }
   }
 
@@ -220,7 +220,7 @@ export default class BattleMenu {
       selected = option
       this.buttonIsDown = true            
     }
-    if (isUpDown || isDownDown || isSpaceDown) {
+    if (isUpDown || isDownDown) {
       this.cursor.currentOption = option
       const cursorPosition = {
         x: this.activeList[option - 1].cursorPosition.x,

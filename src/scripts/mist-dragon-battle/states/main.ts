@@ -66,7 +66,7 @@ export default class MainState extends State {
     this.music = this.game.add.sound('bossBattleTheme', 1)
     this.battlePaused = false
     this.battleTimer = this.game.time.create(false)
-    //this.music.play('', 0.3)
+    // this.music.play()
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')
     this.caveBackground.scale.setTo(1.6)
     this.caveBackground.smoothed = false
@@ -101,16 +101,17 @@ export default class MainState extends State {
   }
 
   setTimer() {
-    this.battleTimer.loop(Phaser.Timer.QUARTER, () => {
-      const nextReady: IActionReady[] = this.getReadyForAction()
-
-      if (nextReady.length > 0) {
-        const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
-        const readyForCommands: number[] = this.getReadyForCommands(nextReady)
-
-        this.actionsQueue.concat(readyForActions)
-        this.commandsQueue = this.commandsQueue.concat(readyForCommands)
+    this.battleTimer.loop(Phaser.Timer.HALF, () => {
+      if (!this.battlePaused) {
+        const nextReady: IActionReady[] = this.getReadyForAction()
+        if (nextReady.length > 0) {
+          const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
+          const readyForCommands: number[] = this.getReadyForCommands(nextReady)
+          this.actionsQueue.concat(readyForActions)
+          this.commandsQueue = this.commandsQueue.concat(readyForCommands)
+        }
       }
+      
     })
     this.battleTimer.start()
   }
@@ -118,14 +119,14 @@ export default class MainState extends State {
   update(): void {
 
     if (!this.battlePaused) {
-      if (this.commandsQueue.length > 0) {
+      if (this.commandsQueue.length > 0 && this.receivingCommand === 0) {
         this.battlePaused = true
         const next: number = this.commandsQueue.shift()
         this.receivingCommand = next
         this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
-      } 
-      this.doNextAction()
+      }
+      this.doNextAction()         
     }
 
     if (this.battlePaused && this.battleMenu.isListeningInput()) {
@@ -137,12 +138,10 @@ export default class MainState extends State {
         })
         this.addActionToQueue('CHARACTER', index, 0, option)
         this.party[index].prepareForAction()
-        this.lastOption = option
         this.receivingCommand = 0
         this.battlePaused = false
-        this.battleMenu.commandSectionOpened = false
-
       }
+      this.lastOption = option
     }
 
   }
@@ -168,7 +167,6 @@ export default class MainState extends State {
 
   doNextAction() {
     if (this.actionsQueue.length) {
-      console.log(this.actionsQueue)
       const nextAction: IAction = this.actionsQueue.pop()
       if (nextAction.executor === 'CHARACTER') {
         this.battleTimer.pause()
@@ -186,7 +184,6 @@ export default class MainState extends State {
       idTarget: idTarget,
       idAction: idAction
     }
-    console.log(action)
     this.actionsQueue.push(action)
     this.battleMenu.closeCommandsSection()
   }
@@ -202,9 +199,11 @@ export default class MainState extends State {
     return actions
   }
 
-  makeCharacterAction(command: number, character: Character): void {
-    character.ATB = 0
-    character.makeAction(command, this.mistDragon)
+  async makeCharacterAction(command: number, character: Character): Promise<void> {
+    const finishedAction = await character.makeAction(command, this.mistDragon)
+    if (finishedAction) {
+      this.resumeTimer()
+    }
   }
 
   setMistDragon(): void {
@@ -221,8 +220,27 @@ export default class MainState extends State {
     })
   }
 
+  resumeTimer() {
+    this.battleTimer.resume()
+    if (!this.battleMenu.isListeningInput()) {
+      this.battlePaused = false      
+    }
+  }
+
+  delay(milliseconds: number, count: number): Promise<number> {
+    return new Promise<number>(resolve => {
+            setTimeout(() => {
+                resolve(count);
+            }, milliseconds);
+        });
+  }
+
   render(): void {
     this.game.debug.text("Time passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
+    this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
+    this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
+
+    this.game.debug.text('Battle Paused: ' + this.battlePaused, 200, 400)
   }
 
 }
