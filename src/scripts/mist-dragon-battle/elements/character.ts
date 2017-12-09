@@ -5,45 +5,9 @@ import {SCALE} from '../constants'
 import Job from '../elements/job'
 import Boss from '../elements/boss'
 
-interface IAction {
-  executor: string,
-  idExec: number,
-  idTarget: number,
-  idAction: number
-}
 
-interface IActionReady {
-  idReady: number,
-  automaticAction?: IAction
-}
 
-interface IStats {
-  HP: number,
-  MP: number,
-  STRENGTH: number,
-  SPEED: number,
-  STAMINA: number,
-  INTELLECT: number,
-  SPIRIT: number
-}
-
-interface IPosition {
-  x: number,
-  y: number
-}
-
-interface IAnimationData {
-  animation?: Phaser.Animation,
-  play?(onEndCallback?: Function)
-}
-
-interface IAnimations {
-  walk: IAnimationData,
-  attack?: IAnimationData,
-  victory?: IAnimationData
-}
-
-export default class Character {
+export default class Character implements Character.Base {
   game: Phaser.Game
   id: number
   atlasKey: string  
@@ -52,9 +16,9 @@ export default class Character {
   status: number
   sprite: Phaser.Sprite
   ATB: number
-  stats: IStats
-  job: Job
-  animations: IAnimations
+  stats: Character.Stats
+  job: Job.Base
+  animations: Character.Animations
   initialPosition: IPosition
   tintTimer: Phaser.Timer
 
@@ -189,7 +153,7 @@ export default class Character {
     this.sprite.scale.x = SCALE  
   }
 
-  fillATB(): IActionReady {
+  fillATB(): CharacterAction.ReadyCharacter {
     const actionReady = <any>{}
     const ATBData = this.job.fillATB(this)
     this.ATB = ATBData.newATB
@@ -203,7 +167,7 @@ export default class Character {
       light = 0xffffff,
       dark = 0x918e8c
     }
-    let key: Boolean = true
+    let key: boolean = true
     this.tintTimer.loop(Phaser.Timer.QUARTER / 2, () => {
       key = !key
       this.sprite.tint = key ? tints.dark : tints.light

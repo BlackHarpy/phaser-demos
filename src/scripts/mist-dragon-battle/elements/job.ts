@@ -3,14 +3,8 @@
 import Character from '../elements/character'
 import Boss from '../elements/boss'
 
-interface ISpecialAttack {
-  key: string,
-  name: string,
-  chargeTime?: number,
-  perform?: Function
-}
-export default class Job {
-  specialAttack: ISpecialAttack
+export default class Job implements Job.Base {
+  specialAttack: Job.SpecialAttack
   fillATB: Function
 
   constructor(game: Phaser.Game, jobConstructor: any) {

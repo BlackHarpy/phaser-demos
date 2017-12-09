@@ -1,7 +1,5 @@
 'use strict'
 
-//TODO Refactor. Just make it work first! :)
-
 import { COMMANDS } from './../constants';
 import { CECIL, KAIN } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
@@ -23,19 +21,6 @@ const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon
 const rectangleImage = require('assets/images/mist-dragon-battle/rectangle.png')
 const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
-interface IAction {
-  executor: string,
-  idExec: number,
-  idTarget: number,
-  idAction: number
-}
-
-
-interface IActionReady {
-  idReady: number,
-  automaticAction?: IAction
-}
-
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
@@ -47,7 +32,7 @@ export default class MainState extends State {
   battlePaused: Boolean
   receivingCommand: number
   battleTimer: Phaser.Timer
-  actionsQueue: IAction[]
+  actionsQueue: CharacterAction.ActionData[]
   commandsQueue: number[]
   actionInProgress: Boolean
 
@@ -104,9 +89,9 @@ export default class MainState extends State {
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.HALF, () => {
       if (!this.actionInProgress && !this.battleMenu.isListeningInput()) {
-        const nextReady: IActionReady[] = this.getReadyForAction()
+        const nextReady: CharacterAction.ReadyCharacter[] = this.getReadyForAction()
         if (nextReady.length > 0) {
-          const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
+          const readyForActions: CharacterAction.ActionData[] = this.getAutomaticActions(nextReady)
           const readyForCommands: number[] = this.getReadyForCommands(nextReady)
           this.actionsQueue = this.actionsQueue.concat(readyForActions)
           this.commandsQueue = this.commandsQueue.concat(readyForCommands)
@@ -149,7 +134,7 @@ export default class MainState extends State {
     return  await this.battleMenu.getOption()
   }
 
-  getReadyForCommands(readyCharacters: IActionReady[]): number[] {
+  getReadyForCommands(readyCharacters: CharacterAction.ReadyCharacter[]): number[] {
     return readyCharacters.map((character) => {
       if (Object.keys(character.automaticAction).length === 0) {
         return character.idReady
@@ -158,8 +143,8 @@ export default class MainState extends State {
   }
 
 
-  getAutomaticActions(readyCharacters: IActionReady[]): IAction[] {
-    const readyWithAutomaticActions: IActionReady[] = readyCharacters.filter((character) => {
+  getAutomaticActions(readyCharacters: CharacterAction.ReadyCharacter[]): CharacterAction.ActionData[] {
+    const readyWithAutomaticActions: CharacterAction.ReadyCharacter[] = readyCharacters.filter((character) => {
       return Object.keys(character.automaticAction).length > 0
     })
 
@@ -170,7 +155,7 @@ export default class MainState extends State {
 
   doNextAction() {
     if (this.actionsQueue.length) {
-      const nextAction: IAction = this.actionsQueue.pop()
+      const nextAction: CharacterAction.ActionData = this.actionsQueue.pop()
       if (nextAction.executor === 'CHARACTER') {
         this.battleTimer.pause()
         this.makeCharacterAction(nextAction.idAction, this.getCharacter(nextAction.idExec))
@@ -185,7 +170,7 @@ export default class MainState extends State {
   }
 
   addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
-    const action: IAction = {
+    const action: CharacterAction.ActionData = {
       executor: executor,
       idExec: idExec,
       idTarget: idTarget,
@@ -195,10 +180,10 @@ export default class MainState extends State {
     this.battleMenu.closeCommandsSection()
   }
 
-  getReadyForAction(): IActionReady[] {
-    let actions: IActionReady[] = []
+  getReadyForAction(): CharacterAction.ReadyCharacter[] {
+    let actions: CharacterAction.ReadyCharacter[] = []
     this.party.forEach((character) => {
-      const returnAction: IActionReady = character.fillATB()
+      const returnAction: CharacterAction.ReadyCharacter = character.fillATB()
       if (returnAction.idReady !== 0) {
         actions.push(returnAction)
       }

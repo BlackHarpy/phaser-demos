@@ -1,95 +1,19 @@
 'use strict'
 import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS } from './../constants';
 
-interface ICharacterData {
-  id: number,
-  name: string,
-  specialAttack: string,
-  items?: string[]
-  totalHealth?: number,
-  remainingHealth?: number,
-  cursorPosition?: MenuPoint
-}
-
-interface IEnemyData {
-  id: number,
-  name: string,
-  cursorPosition?: MenuPoint  
-}
-
-interface IMenuData {
-  characters: ICharacterData[],
-  enemies: IEnemyData[]
-}
-
-interface ICharacterMenuInfo {
-  id: number,
-  name: Phaser.Text,
-  healthInfo: Phaser.Text
-  initiativeBar?: Phaser.Sprite //no idea yet
-}
-
-interface IEnemyMenuInfo {
-  id: number,
-  name: Phaser.Text
-}
-
-interface ICommandsMenuInfo {
-  id: number,
-  name: Phaser.Text,
-  position: string,
-  cursorPosition?: MenuPoint
-}
-
-interface ICharactersMenuSection {
-  background: Phaser.Sprite,
-  charactersList: ICharacterMenuInfo[]
-}
-
-interface IEnemiesMenuSection {
-  background: Phaser.Sprite,
-  enemiesList: IEnemyMenuInfo[]
-}
-
-interface ICommandsMenuSection {
-  background: Phaser.Sprite,
-  commandsList: ICommandsMenuInfo[]
-}
-
-interface ICursor {
-  sprite: Phaser.Sprite,
-  currentOption: number
-}
-
-interface MenuPoint {
-  x: number,
-  y: number
-}
-
-interface MenuSize {
-  width: number,
-  height: number
-}
-
-interface IBackgroundConfig {
-  position: MenuPoint,
-  anchor: MenuPoint,
-  size: MenuSize
-}
-
 export default class BattleMenu {
   game: Phaser.Game
-  enemySection: IEnemiesMenuSection
-  menuData: IMenuData
-  charactersSection: ICharactersMenuSection
-  commandsSection: ICommandsMenuSection
+  enemySection: BattleMenu.EnemiesMenuSection
+  menuData: BattleMenu.MenuData
+  charactersSection: BattleMenu.CharactersMenuSection
+  commandsSection: BattleMenu.CommandsMenuSection
   commandSectionOpened: Boolean
-  cursor: ICursor
+  cursor: BattleMenu.Cursor
   textStyle: Phaser.PhaserTextStyle
   activeList: any[]
   buttonIsDown: Boolean  
 
-  constructor(game: Phaser.Game, menuData: IMenuData) {
+  constructor(game: Phaser.Game, menuData: BattleMenu.MenuData) {
     const textStyle: Phaser.PhaserTextStyle = {
       font: "22px Courier", fill: "#fff", strokeThickness: 4
     }
@@ -97,7 +21,6 @@ export default class BattleMenu {
     this.menuData = menuData
     this.game = game
     this.commandSectionOpened = false
-
     this.setEnemySection()
     this.setCharactersSection()
   }
@@ -146,7 +69,7 @@ export default class BattleMenu {
     })
   }
 
-  buildMenuBackground(config: IBackgroundConfig): Phaser.Sprite {
+  buildMenuBackground(config: BattleMenu.BackgroundConfig): Phaser.Sprite {
     const background: Phaser.Sprite = this.game.add.sprite(0, 0, 'rectangle')
     background.anchor.set(config.anchor.x, config.anchor.y)
     background.position.set(config.position.x, config.position.y)
@@ -240,10 +163,9 @@ export default class BattleMenu {
         resolve(selected)
       }
     })
-    
   }
 
-  buildCommandsList(character): ICommandsMenuInfo[] {
+  buildCommandsList(character): BattleMenu.CommandsMenuInfo[] {
     const commandsList = []
     for (let key in COMMANDS) {
       if (COMMANDS[key].POSITION === COMMANDS_POSITIONS.MAIN) {
@@ -259,7 +181,7 @@ export default class BattleMenu {
     return commandsList
   }
 
-  buildCharacterMenuInfo(characterInfo: ICharacterData): ICharacterMenuInfo {
+  buildCharacterMenuInfo(characterInfo: BattleMenu.CharacterData): BattleMenu.CharacterMenuInfo {
     const characterMenuInfo = {
       id: characterInfo.id,
       name: this.game.add.text(0, 0, characterInfo.name, this.textStyle),
@@ -268,7 +190,7 @@ export default class BattleMenu {
     return characterMenuInfo
   }
 
-  buildEnemyMenuInfo(enemyInfo: IEnemyData): IEnemyMenuInfo {
+  buildEnemyMenuInfo(enemyInfo: BattleMenu.EnemyData): BattleMenu.EnemyMenuInfo {
     const enemyMenuInfo = {
       id: enemyInfo.id,
       name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle)
