@@ -108,11 +108,10 @@ export default class MainState extends State {
         if (nextReady.length > 0) {
           const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
           const readyForCommands: number[] = this.getReadyForCommands(nextReady)
-          this.actionsQueue.concat(readyForActions)
+          this.actionsQueue = this.actionsQueue.concat(readyForActions)
           this.commandsQueue = this.commandsQueue.concat(readyForCommands)
         }
       }
-      
     })
     this.battleTimer.start()
   }
@@ -134,8 +133,8 @@ export default class MainState extends State {
           const index = this.party.findIndex((value) => {
             return value.id === this.receivingCommand
           })
-          this.receivingCommand = 0        
-          this.addActionToQueue('CHARACTER', index, 0, option)
+          this.addActionToQueue('CHARACTER', this.receivingCommand, 0, option)
+          this.receivingCommand = 0                  
           this.party[index].prepareForAction()
       })
     }
@@ -155,7 +154,6 @@ export default class MainState extends State {
 
 
   getAutomaticActions(readyCharacters: IActionReady[]): IAction[] {
-    console.log(readyCharacters)
     const readyWithAutomaticActions: IActionReady[] = readyCharacters.filter((character) => {
       return Object.keys(character.automaticAction).length > 0
     })
@@ -170,9 +168,15 @@ export default class MainState extends State {
       const nextAction: IAction = this.actionsQueue.pop()
       if (nextAction.executor === 'CHARACTER') {
         this.battleTimer.pause()
-        this.makeCharacterAction(nextAction.idAction, this.party[nextAction.idExec])
+        this.makeCharacterAction(nextAction.idAction, this.getCharacter(nextAction.idExec))
       }
     }
+  }
+
+  getCharacter(idCharacter) {
+    return this.party.find((value) => {
+      return value.id === idCharacter
+    })
   }
 
   addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
@@ -229,7 +233,6 @@ export default class MainState extends State {
     this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
     this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
 
-    this.game.debug.text('Battle Paused: ' + this.battlePaused, 200, 400)
     this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
     this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
     

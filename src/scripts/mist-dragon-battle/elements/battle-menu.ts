@@ -219,7 +219,6 @@ export default class BattleMenu {
       } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
         option = option === 1 ? option = this.activeList.length : option -= 1
       } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
-        console.log('space!')
         selected = option
         this.buttonIsDown = true            
       }
