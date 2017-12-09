@@ -7,10 +7,10 @@ interface ITransformation {
   key: string
 }
 
-export default class Boss {
+export default class Enemy {
   game: Phaser.Game
   name: string
-  stats: Character.Stats
+  stats: IStats
   ATB: number
   sprite: Phaser.Sprite
   transformations: ITransformation[]

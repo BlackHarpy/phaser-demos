@@ -2,7 +2,7 @@
 import { COMMANDS, CHARACTER_STATUS } from './../constants';
 
 import Character from '../elements/character'
-import Boss from '../elements/boss'
+import Enemy from '../elements/enemy'
 import { STATUS_CODES } from 'http';
 
 interface IAction {
@@ -25,7 +25,7 @@ export const DRAGOON = {
     chargeTime: 5,
     jumpTarget: {},
     hitAnimation: Phaser.Sprite,
-    async perform(character: Character, target: Boss): Promise<Boolean> {
+    async perform(character: Character, target: Enemy): Promise<Boolean> {
       let promise: Promise<Boolean>
       if (character.status === CHARACTER_STATUS.JUMP) {
         promise = this.finishJump(character)
@@ -36,7 +36,7 @@ export const DRAGOON = {
       return promise
     },
  
-    startJump(character: Character, target: Boss): Promise<Boolean> {
+    startJump(character: Character, target: Enemy): Promise<Boolean> {
       return new Promise(resolve => {
         const timer: Phaser.Timer = character.sprite.game.time.create(false)
         character.sprite.loadTexture(character.atlasKey, 'weak')
@@ -108,7 +108,7 @@ export const DARK_KNIGHT = {
     key: 'darkness',
     name: 'Darkness',
     emmiter: Phaser.EMITTER,
-    async perform (character: Character, target: Boss) {
+    async perform (character: Character, target: Enemy) {
       return new Promise(resolve => {
         const timer = character.game.time.create(false)
         let ready: boolean = false

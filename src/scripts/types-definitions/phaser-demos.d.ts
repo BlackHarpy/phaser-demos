@@ -96,6 +96,16 @@ declare namespace CharacterAction {
   }
 }
 
+interface IStats {
+  HP: number,
+  MP: number,
+  STRENGTH: number,
+  SPEED: number,
+  STAMINA: number,
+  INTELLECT: number,
+  SPIRIT: number
+}
+
 declare namespace Character {
 
   interface Base {
@@ -107,22 +117,14 @@ declare namespace Character {
     status: number
     sprite: Phaser.Sprite
     ATB: number
-    stats: Stats
+    stats: IStats
     job: Job.Base
     animations: Animations
     initialPosition: IPosition
     tintTimer: Phaser.Timer
   }
 
-  interface Stats {
-    HP: number,
-    MP: number,
-    STRENGTH: number,
-    SPEED: number,
-    STAMINA: number,
-    INTELLECT: number,
-    SPIRIT: number
-  }
+  
 
   interface AnimationData {
     animation?: Phaser.Animation,
@@ -134,6 +136,20 @@ declare namespace Character {
     walk: AnimationData,
     attack?: AnimationData,
     victory?: AnimationData
+  }
+}
+
+declare namespace Enemy {
+  interface Base {
+    game: Phaser.Game
+    id: number
+    atlasKey: string
+    name: string
+    level: number
+    status: number
+    sprite: Phaser.Sprite
+    ATB: number
+    stats: IStats
   }
 }
 

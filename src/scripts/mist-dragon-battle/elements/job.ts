@@ -1,7 +1,7 @@
 'use strict'
 
 import Character from '../elements/character'
-import Boss from '../elements/boss'
+import Enemy from '../elements/enemy'
 
 export default class Job implements Job.Base {
   specialAttack: Job.SpecialAttack
@@ -12,7 +12,7 @@ export default class Job implements Job.Base {
     this.fillATB = jobConstructor.fillATB
   }
 
-  performSpecialAttack(character: Character, target: Boss): Promise<Boolean> {
+  performSpecialAttack(character: Character, target: Enemy): Promise<Boolean> {
     return (this.specialAttack.perform(character, target))
   }
 

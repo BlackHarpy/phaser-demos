@@ -3,7 +3,7 @@ import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS } from './../c
 
 import {SCALE} from '../constants'
 import Job from '../elements/job'
-import Boss from '../elements/boss'
+import Enemy from '../elements/enemy'
 
 
 
@@ -16,7 +16,7 @@ export default class Character implements Character.Base {
   status: number
   sprite: Phaser.Sprite
   ATB: number
-  stats: Character.Stats
+  stats: IStats
   job: Job.Base
   animations: Character.Animations
   initialPosition: IPosition
@@ -96,7 +96,7 @@ export default class Character implements Character.Base {
     }
   }
 
-  async makeAction(command: number, target: Boss): Promise<Boolean> {
+  async makeAction(command: number, target: Enemy): Promise<Boolean> {
     let promise: Promise<Boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:
@@ -113,7 +113,7 @@ export default class Character implements Character.Base {
     this.status = status
   }
 
-  async attack(target: Boss): Promise<Boolean> {
+  async attack(target: Enemy): Promise<Boolean> {
     this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
@@ -141,11 +141,11 @@ export default class Character implements Character.Base {
     return this.animations.attack.play()
   }
 
-  async specialAttack(target: Boss, onEndCallback?): Promise<Boolean> {
+  async specialAttack(target: Enemy, onEndCallback?): Promise<Boolean> {
     return (this.job.performSpecialAttack(this, target))
   }
 
-  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Boss): Promise<Boolean> {
+  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<Boolean> {
     return (await this.walkToPosition(this.sprite.x - 50))
   }
 

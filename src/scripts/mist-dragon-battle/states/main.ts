@@ -6,7 +6,7 @@ import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
 import State from '../../state'
 import Character from '../elements/character'
-import Boss from '../elements/boss'
+import Enemy from '../elements/enemy'
 import BattleMenu from '../elements/battle-menu'
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
@@ -30,7 +30,7 @@ const jumpImage = require('assets/images/mist-dragon-battle/XCast.png')
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
-  mistDragon: Boss
+  mistDragon: Enemy
   party: Character[]
   music: Phaser.Sound
   battleMenu: BattleMenu
@@ -66,31 +66,32 @@ export default class MainState extends State {
     this.caveBackground.anchor.set(0.5, 0)
     this.caveBackground.x = this.game.world.centerX
     this.setMistDragon()
-    this.setParty(['kain', 'cecil'])
-    const menuData = {
-      characters: [{
-        id: 1,
-        name: 'Cecil',
-        specialAttack: 'Darkness',
-        totalHealth: 300,
-        remainingHealth: 250
-      }, {
-        id: 2,
-        name: 'Kain',
-        specialAttack: 'Jump',
-        totalHealth: 410,
-        remainingHealth: 400
-      }],
+    this.setParty()
+    this.actionsQueue = []
+    this.commandsQueue = []
+    this.receivingCommand = 0
+    this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
+    this.setTimer()    
+  }
+
+  buildMenuData() {
+    const characters = []
+    this.party.forEach((character) => {
+      characters.push({
+        id: character.id,
+        name: character.name,
+        specialAttack: character.job.specialAttack.name,
+        totalHealth: character.stats.HP,
+        remainingHealth: character.stats.HP
+      })
+    })
+    return {
+      characters: characters,
       enemies: [{
         id: 1,
         name: 'Mist Dragon'
       }]
     }
-    this.actionsQueue = []
-    this.commandsQueue = []
-    this.receivingCommand = 0
-    this.battleMenu = new BattleMenu(this.game, menuData)
-    this.setTimer()    
   }
 
   setTimer() {
@@ -111,29 +112,37 @@ export default class MainState extends State {
   update(): void {
 
     if (!this.battleMenu.isListeningInput()) {
-      if (this.commandsQueue.length > 0) {
-        const next: number = this.commandsQueue.shift()
-        const character = this.getCharacter(next)
-        if (character) {
-          character.focus()          
-        } 
-        this.receivingCommand = next
-        this.battleMenu.openCommandsSection(next)
-        this.battleTimer.pause()
-      }
-     this.doNextAction()         
+      this.openCommandsForAvailableCharacter()
+      this.doNextAction()         
     } else {
-      this.battleTimer.resume()
-      const option: Promise<number> = this.getMenuOption()
-      option.then(option => {
-          const index = this.party.findIndex((value) => {
-            return value.id === this.receivingCommand
-          })
-          this.addActionToQueue('CHARACTER', this.receivingCommand, 0, option)
-          this.receivingCommand = 0      
-          this.party[index].resetFocus()            
-          this.party[index].prepareForAction()
-      })
+     this.processCharacterAction()
+    }
+  }
+
+  processCharacterAction(): void {
+    this.battleTimer.resume()
+    const option: Promise<number> = this.getMenuOption()
+    option.then(option => {
+        const index = this.party.findIndex((value) => {
+          return value.id === this.receivingCommand
+        })
+        this.addActionToQueue('CHARACTER', this.receivingCommand, 0, option)
+        this.receivingCommand = 0      
+        this.party[index].resetFocus()            
+        this.party[index].prepareForAction()
+    })
+  }
+
+  openCommandsForAvailableCharacter(): void {
+    if (this.commandsQueue.length > 0) {
+      const next: number = this.commandsQueue.shift()
+      const character = this.getCharacter(next)
+      if (character) {
+        character.focus()          
+      } 
+      this.receivingCommand = next
+      this.battleMenu.openCommandsSection(next)
+      this.battleTimer.pause()
     }
   }
 
@@ -207,11 +216,11 @@ export default class MainState extends State {
   }
 
   setMistDragon(): void {
-    this.mistDragon = new Boss(this.game, 'mistDragon')
+    this.mistDragon = new Enemy(this.game, 'mistDragon')
     this.mistDragon.setToBattle(this.caveBackground.centerY, this.caveBackground.centerX)
   }
 
-  setParty(keys: string[]): void {
+  setParty(): void {
     this.party.push(new Character(this.game, KAIN, DRAGOON))
     this.party.push(new Character(this.game, CECIL, DARK_KNIGHT))
 
