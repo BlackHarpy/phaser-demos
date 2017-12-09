@@ -21,6 +21,11 @@ const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon
 const rectangleImage = require('assets/images/mist-dragon-battle/rectangle.png')
 const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
+const darkness1Image = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
+const darkness2Image = require('assets/images/mist-dragon-battle/XMMK02.png')
+
+//192 x 192
+
 export default class MainState extends State {
 
   caveBackground: Phaser.Sprite
@@ -28,13 +33,12 @@ export default class MainState extends State {
   party: Character[]
   music: Phaser.Sound
   battleMenu: BattleMenu
-  lastOption: number
-  battlePaused: Boolean
   receivingCommand: number
   battleTimer: Phaser.Timer
   actionsQueue: CharacterAction.ActionData[]
   commandsQueue: number[]
   actionInProgress: Boolean
+  testSprite: Phaser.Sprite
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -43,12 +47,13 @@ export default class MainState extends State {
     this.game.load.atlasJSONHash('mistDragon', mistDragonAtlasImage, mistDragonAtlasJSON)
     this.game.load.atlasJSONHash('cecil', cecilAtlasImage, cecilAtlasJSON)
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
+    this.game.load.spritesheet('dark1', darkness1Image, 192, 192, 35)
+    this.game.load.spritesheet('dark2', darkness2Image, 192, 192, 35)
     this.game.load.audio('bossBattleTheme', battleMusic)
   }
 
   create(): void {
     this.party = []
-    this.lastOption = 0
     this.music = this.game.add.sound('bossBattleTheme', 1)
     this.actionInProgress = false
     this.battleTimer = this.game.time.create(false)
@@ -83,8 +88,9 @@ export default class MainState extends State {
     this.commandsQueue = []
     this.receivingCommand = 0
     this.battleMenu = new BattleMenu(this.game, menuData)
-    this.setTimer()
+    this.setTimer()    
   }
+ 
 
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.HALF, () => {
