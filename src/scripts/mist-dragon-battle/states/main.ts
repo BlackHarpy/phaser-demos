@@ -121,6 +121,10 @@ export default class MainState extends State {
     if (!this.battleMenu.isListeningInput()) {
       if (this.commandsQueue.length > 0) {
         const next: number = this.commandsQueue.shift()
+        const character = this.getCharacter(next)
+        if (character) {
+          character.focus()          
+        } 
         this.receivingCommand = next
         this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
@@ -134,7 +138,8 @@ export default class MainState extends State {
             return value.id === this.receivingCommand
           })
           this.addActionToQueue('CHARACTER', this.receivingCommand, 0, option)
-          this.receivingCommand = 0                  
+          this.receivingCommand = 0      
+          this.party[index].resetFocus()            
           this.party[index].prepareForAction()
       })
     }

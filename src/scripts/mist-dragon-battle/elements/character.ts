@@ -56,9 +56,11 @@ export default class Character {
   job: Job
   animations: IAnimations
   initialPosition: IPosition
+  tintTimer: Phaser.Timer
 
   constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any) {
     this.game = game
+    this.tintTimer = this.game.time.create(false)
     this.setCharacterData(characterConstructor, jobConstructor)
     this.addAnimations(characterConstructor.atlasKey)
   }
@@ -194,6 +196,24 @@ export default class Character {
     actionReady.idReady = this.ATB === 100 ? this.id : 0
     actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
     return actionReady
+  }
+
+  focus(): void {
+    enum tints  {
+      light = 0xffffff,
+      dark = 0x918e8c
+    }
+    let key: Boolean = true
+    this.tintTimer.loop(Phaser.Timer.QUARTER / 2, () => {
+      key = !key
+      this.sprite.tint = key ? tints.dark : tints.light
+    })
+    this.tintTimer.start()
+  }
+
+  resetFocus(): void {
+    this.tintTimer.stop()
+    this.sprite.tint = 0xffffff
   }
   
 }
