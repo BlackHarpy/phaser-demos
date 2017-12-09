@@ -21,8 +21,9 @@ const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon
 const rectangleImage = require('assets/images/mist-dragon-battle/rectangle.png')
 const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
-const darkness1Image = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
-const darkness2Image = require('assets/images/mist-dragon-battle/XMMK02.png')
+const darknessImage = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
+const slashImage = require('assets/images/mist-dragon-battle/XSlash1.png')
+const jumpImage = require('assets/images/mist-dragon-battle/XCast.png')
 
 //192 x 192
 
@@ -47,8 +48,9 @@ export default class MainState extends State {
     this.game.load.atlasJSONHash('mistDragon', mistDragonAtlasImage, mistDragonAtlasJSON)
     this.game.load.atlasJSONHash('cecil', cecilAtlasImage, cecilAtlasJSON)
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
-    this.game.load.spritesheet('dark1', darkness1Image, 192, 192, 35)
-    this.game.load.spritesheet('dark2', darkness2Image, 192, 192, 35)
+    this.game.load.spritesheet('dark', darknessImage, 192, 192, 35)
+    this.game.load.spritesheet('slash', slashImage, 192, 192, 35)
+    this.game.load.spritesheet('jump', jumpImage, 192, 192, 35)
     this.game.load.audio('bossBattleTheme', battleMusic)
   }
 
@@ -89,6 +91,13 @@ export default class MainState extends State {
     this.receivingCommand = 0
     this.battleMenu = new BattleMenu(this.game, menuData)
     this.setTimer()    
+    //this.animate()
+  }
+
+  animate(): void {
+    this.testSprite = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'jump')
+    this.testSprite.animations.add('start')
+    this.testSprite.animations.play('start', 70)
   }
  
 

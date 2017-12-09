@@ -54,10 +54,16 @@ export default class Character implements Character.Base {
       },
       attack: {
         animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
+        hitAnimation:  new Phaser.Sprite(this.game, 100, 100, 'slash'),
         play: () => {
           return new Promise(resolve => {
+            this.game.add.existing(this.animations.attack.hitAnimation)
+            this.animations.attack.hitAnimation.animations.add('start')
             this.sprite.animations.play('attack')
             this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
+              if (animation.loopCount === 1) {
+                this.animations.attack.hitAnimation.animations.play('start', 30)
+              }
               if (animation.loopCount === 2) {
                 this.sprite.animations.stop('attack')
                 resolve(true)
