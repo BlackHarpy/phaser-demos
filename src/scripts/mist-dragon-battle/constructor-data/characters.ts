@@ -36,3 +36,21 @@ export const KAIN = {
     SPIRIT: 12
   }
 }
+
+export const MIST_DRAGON = {
+  id: 1,
+  atlasKey: 'mistDragon',
+  name: 'Mist Dragon',
+  level: 12,
+  status: CHARACTER_STATUS.NORMAL,
+  ATB: 0,  
+  stats: {
+    HP: 556,
+    MP: 0,
+    STRENGTH: 12,
+    SPEED: 3,
+    STAMINA: 12,
+    INTELLECT: 6,
+    SPIRIT: 6
+  }
+}

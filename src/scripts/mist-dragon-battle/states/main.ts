@@ -91,15 +91,7 @@ export default class MainState extends State {
     this.receivingCommand = 0
     this.battleMenu = new BattleMenu(this.game, menuData)
     this.setTimer()    
-    //this.animate()
   }
-
-  animate(): void {
-    this.testSprite = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'jump')
-    this.testSprite.animations.add('start')
-    this.testSprite.animations.play('start', 70)
-  }
- 
 
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.HALF, () => {
