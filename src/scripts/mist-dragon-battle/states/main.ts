@@ -49,6 +49,7 @@ export default class MainState extends State {
   battleTimer: Phaser.Timer
   actionsQueue: IAction[]
   commandsQueue: number[]
+  actionInProgress: Boolean
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -64,7 +65,7 @@ export default class MainState extends State {
     this.party = []
     this.lastOption = 0
     this.music = this.game.add.sound('bossBattleTheme', 1)
-    this.battlePaused = false
+    this.actionInProgress = false
     this.battleTimer = this.game.time.create(false)
     // this.music.play()
     this.caveBackground = this.game.add.sprite(0, 0, 'cave')
@@ -102,7 +103,7 @@ export default class MainState extends State {
 
   setTimer() {
     this.battleTimer.loop(Phaser.Timer.HALF, () => {
-      if (!this.battlePaused) {
+      if (!this.actionInProgress && !this.battleMenu.isListeningInput()) {
         const nextReady: IActionReady[] = this.getReadyForAction()
         if (nextReady.length > 0) {
           const readyForActions: IAction[] = this.getAutomaticActions(nextReady)
@@ -118,32 +119,30 @@ export default class MainState extends State {
 
   update(): void {
 
-    if (!this.battlePaused) {
-      if (this.commandsQueue.length > 0 && this.receivingCommand === 0) {
-        this.battlePaused = true
+    if (!this.battleMenu.isListeningInput()) {
+      if (this.commandsQueue.length > 0) {
         const next: number = this.commandsQueue.shift()
         this.receivingCommand = next
         this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
       }
-      this.doNextAction()         
-    }
-
-    if (this.battlePaused && this.battleMenu.isListeningInput()) {
+     this.doNextAction()         
+    } else {
       this.battleTimer.resume()
-      const option: number = this.battleMenu.getOption()
-      if ((option !== 0) && (option !== this.lastOption)) {
-        const index = this.party.findIndex((value) => {
-          return value.id === this.receivingCommand
-        })
-        this.addActionToQueue('CHARACTER', index, 0, option)
-        this.party[index].prepareForAction()
-        this.receivingCommand = 0
-        this.battlePaused = false
-      }
-      this.lastOption = option
+      const option: Promise<number> = this.getMenuOption()
+      option.then(option => {
+          const index = this.party.findIndex((value) => {
+            return value.id === this.receivingCommand
+          })
+          this.receivingCommand = 0        
+          this.addActionToQueue('CHARACTER', index, 0, option)
+          this.party[index].prepareForAction()
+      })
     }
+  }
 
+  async getMenuOption(): Promise<number> {
+    return  await this.battleMenu.getOption()
   }
 
   getReadyForCommands(readyCharacters: IActionReady[]): number[] {
@@ -156,6 +155,7 @@ export default class MainState extends State {
 
 
   getAutomaticActions(readyCharacters: IActionReady[]): IAction[] {
+    console.log(readyCharacters)
     const readyWithAutomaticActions: IActionReady[] = readyCharacters.filter((character) => {
       return Object.keys(character.automaticAction).length > 0
     })
@@ -171,10 +171,8 @@ export default class MainState extends State {
       if (nextAction.executor === 'CHARACTER') {
         this.battleTimer.pause()
         this.makeCharacterAction(nextAction.idAction, this.party[nextAction.idExec])
-        this.battlePaused = true
       }
     }
-
   }
 
   addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
@@ -200,6 +198,7 @@ export default class MainState extends State {
   }
 
   async makeCharacterAction(command: number, character: Character): Promise<void> {
+    this.actionInProgress = true    
     const finishedAction = await character.makeAction(command, this.mistDragon)
     if (finishedAction) {
       this.resumeTimer()
@@ -222,17 +221,7 @@ export default class MainState extends State {
 
   resumeTimer() {
     this.battleTimer.resume()
-    if (!this.battleMenu.isListeningInput()) {
-      this.battlePaused = false      
-    }
-  }
-
-  delay(milliseconds: number, count: number): Promise<number> {
-    return new Promise<number>(resolve => {
-            setTimeout(() => {
-                resolve(count);
-            }, milliseconds);
-        });
+    this.actionInProgress = false
   }
 
   render(): void {
@@ -241,6 +230,9 @@ export default class MainState extends State {
     this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
 
     this.game.debug.text('Battle Paused: ' + this.battlePaused, 200, 400)
+    this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
+    this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
+    
   }
 
 }

@@ -7,7 +7,7 @@ interface ISpecialAttack {
   key: string,
   name: string,
   chargeTime?: number,
-  performSpecialAttack?: Function
+  perform?: Function
 }
 export default class Job {
   specialAttack: ISpecialAttack
@@ -18,8 +18,8 @@ export default class Job {
     this.fillATB = jobConstructor.fillATB
   }
 
-  performSpecialAttack(character: Character, target: Boss) {
-    this.specialAttack.performSpecialAttack(character, target)
+  performSpecialAttack(character: Character, target: Boss): Promise<Boolean> {
+    return (this.specialAttack.perform(character, target))
   }
 
 }

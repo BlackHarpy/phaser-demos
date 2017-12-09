@@ -189,12 +189,12 @@ export default class BattleMenu {
   }
 
   closeCommandsSection() {
+    this.commandSectionOpened = false    
     this.commandsSection.background.destroy()
     this.commandsSection.commandsList.forEach((command) => {
       command.name.destroy()
     })
     this.cursor.sprite.destroy()
-    this.commandSectionOpened = false
   }
 
   setCursor(section: any): void {
@@ -206,32 +206,42 @@ export default class BattleMenu {
     }
   }
 
-  getOption(): number {
-    let option = this.cursor.currentOption
-    let selected = 0
-    const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
-    const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
-    const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
-    if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
-      option = option === this.activeList.length ? option = 1 : option += 1
-    } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
-      option = option === 1 ? option = this.activeList.length : option -= 1
-    } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
-      selected = option
-      this.buttonIsDown = true            
-    }
-    if (isUpDown || isDownDown) {
-      this.cursor.currentOption = option
-      const cursorPosition = {
-        x: this.activeList[option - 1].cursorPosition.x,
-        y: this.activeList[option - 1].cursorPosition.y
+  getOption(): Promise<number> {
+    return new Promise(resolve => {
+      let option = this.cursor.currentOption
+      let selected = 0
+      const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
+      const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
+      const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
+
+      if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
+        option = option === this.activeList.length ? option = 1 : option += 1
+      } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
+        option = option === 1 ? option = this.activeList.length : option -= 1
+      } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
+        console.log('space!')
+        selected = option
+        this.buttonIsDown = true            
       }
-      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
-      this.buttonIsDown = true      
-    } else {
-      this.buttonIsDown = false
-    }
-    return selected
+      if (isUpDown || isDownDown) {
+        this.cursor.currentOption = option
+        const cursorPosition = {
+          x: this.activeList[option - 1].cursorPosition.x,
+          y: this.activeList[option - 1].cursorPosition.y
+        }
+        this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+        this.buttonIsDown = true      
+      } 
+
+      if (!isUpDown && !isDownDown && !isSpaceDown) {
+        this.buttonIsDown = false
+      }
+
+      if (selected !== 0) {
+        resolve(selected)
+      }
+    })
+    
   }
 
   buildCommandsList(character): ICommandsMenuInfo[] {

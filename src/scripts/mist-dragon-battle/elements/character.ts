@@ -128,10 +128,10 @@ export default class Character {
     let promise: Promise<Boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:
-        promise = this.attack()
+        promise = this.attack(target)
         break
       case COMMANDS.SPECIAL_ATTACK.ID:
-        this.specialAttack(target)
+        promise = this.specialAttack(target)
         break
       }
     return promise
@@ -141,7 +141,7 @@ export default class Character {
     this.status = status
   }
 
-  async attack(): Promise<Boolean> {
+  async attack(target: Boss): Promise<Boolean> {
     this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
@@ -169,8 +169,8 @@ export default class Character {
     return this.animations.attack.play()
   }
 
-  specialAttack(target: Boss, onEndCallback?) {
-    this.job.performSpecialAttack(this, target)
+  async specialAttack(target: Boss, onEndCallback?): Promise<Boolean> {
+    return (this.job.performSpecialAttack(this, target))
   }
 
   async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Boss): Promise<Boolean> {
