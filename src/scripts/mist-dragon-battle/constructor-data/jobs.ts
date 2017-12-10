@@ -5,18 +5,6 @@ import Character from '../elements/character'
 import Enemy from '../elements/enemy'
 import { STATUS_CODES } from 'http';
 
-interface IAction {
-  executor: string,
-  idExec: number,
-  idTarget: number,
-  idAction: number
-}
-
-interface IATBData {
-  newATB: number,
-  returnAction?: IAction
-}
-
 export const DRAGOON = {
   name: 'Dragoon',
   specialAttack: {
@@ -25,8 +13,9 @@ export const DRAGOON = {
     chargeTime: 5,
     jumpTarget: {},
     hitAnimation: Phaser.Sprite,
-    async perform(character: Character, target: Enemy): Promise<Boolean> {
-      let promise: Promise<Boolean>
+    async perform(character: Character, target: Character | Enemy): Promise<boolean> {
+      console.log('target', target)
+      let promise: Promise<boolean>
       if (character.status === CHARACTER_STATUS.JUMP) {
         promise = this.finishJump(character)
       } else {
@@ -36,7 +25,7 @@ export const DRAGOON = {
       return promise
     },
  
-    startJump(character: Character, target: Enemy): Promise<Boolean> {
+    startJump(character: Character, target: Character | Enemy): Promise<boolean> {
       return new Promise(resolve => {
         const timer: Phaser.Timer = character.sprite.game.time.create(false)
         character.sprite.loadTexture(character.atlasKey, 'weak')
@@ -83,7 +72,7 @@ export const DRAGOON = {
     } 
   },
 
-  fillATB(character: Character): IATBData {
+  fillATB(character: Character): Battle.ATBData {
     const ATBData = <any>{}
     if (character.status === CHARACTER_STATUS.JUMP) {
       ATBData.newATB = character.ATB + this.specialAttack.chargeTime > 100 ? 100 : character.ATB + this.specialAttack.chargeTime
@@ -108,7 +97,7 @@ export const DARK_KNIGHT = {
     key: 'darkness',
     name: 'Darkness',
     emmiter: Phaser.EMITTER,
-    async perform (character: Character, target: Enemy) {
+    perform (character: Character, target: Character | Enemy) {
       return new Promise(resolve => {
         const timer = character.game.time.create(false)
         let ready: boolean = false
@@ -149,7 +138,7 @@ export const DARK_KNIGHT = {
     }
   },
 
-  fillATB(character: Character): IATBData {
+  fillATB(character: Character): Battle.ATBData {
     const ATBData = <any>{}
     ATBData.newATB = character.ATB + character.stats.SPEED > 100 ? 100 : character.ATB + character.stats.SPEED      
     return ATBData

@@ -1,4 +1,5 @@
 import { MENU_HEIGHT } from './../constants';
+import Character from './character'
 'use strict'
 
 import {SCALE} from '../constants'
@@ -18,7 +19,7 @@ export default class Enemy implements Enemy.Base {
   status: number
   stats: IStats
   ATB: number
-  transformations: ITransformation[]
+  customFlags: object
   commands: ICommand[]
 
   constructor(game: Phaser.Game, enemyConstructor: any) {
@@ -31,6 +32,7 @@ export default class Enemy implements Enemy.Base {
     this.stats = enemyConstructor.stats
     this.ATB = enemyConstructor.ATB
     this.commands = enemyConstructor.commands
+    this.customFlags = enemyConstructor.customFlags
   }
 
   setSprite(atlasKey: string): Phaser.Sprite {
@@ -46,24 +48,88 @@ export default class Enemy implements Enemy.Base {
     this.game.add.tween(this.sprite).to({x: referenceCenterX / 2},100, Phaser.Easing.Linear.None, true);
   }
 
-  blink(): void {
-    const tintTimer = this.game.time.create(false)
-    enum tints  {
-      light = 0xffffff,
-      dark = 0x918e8c
-    }
-    let key: boolean = true
-    let loop: number = 0
-    tintTimer.loop(Phaser.Timer.QUARTER / 3, () => {
-      key = !key
-      this.sprite.tint = key ? tints.dark : tints.light
-      loop++
-      if (loop === 7) {
-        tintTimer.stop()
-        tintTimer.destroy()
+  fillATB(availableTargets: number[]): Battle.ReadyCharacter {
+    const actionReady = <any>{}
+    const ATBData = this.getAutomaticAction(availableTargets)
+    this.ATB = ATBData.newATB
+    actionReady.idReady = this.ATB === 100 ? this.id : 0
+    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    return actionReady 
+  }
+
+  getAutomaticAction(availableTargets: number[]) {
+    const ATBData = <any>{}
+    ATBData.newATB = this.ATB + this.stats.SPEED > 100 ? 100 : this.ATB + this.stats.SPEED
+    if (ATBData.newATB === 100) {
+      const nextCommand = this.getNextCommand(availableTargets)
+      ATBData.returnAction = {
+        executor: 'ENEMY',
+        idExec: this.id,
+        idTarget: nextCommand.idTarget,
+        idAction: nextCommand.idAction
       }
+    }
+    return ATBData
+  }
+  
+  getNextCommand(availableTargets: number[]) {
+    const nextAction: any = {}
+    if (availableTargets.length) {
+      const targetIndex = Math.floor(Math.random() * availableTargets.length)
+      nextAction.idTarget = availableTargets[targetIndex]
+      nextAction.idAction = 1
+    } else {
+      nextAction.idAction = 0
+      nextAction.idTarget = 0
+    }
+    return nextAction
+  }
+
+  makeAction(command: number, target: Character | Enemy) {
+    let promise: Promise<boolean>
+    switch (command) {
+      case 1:
+        promise = this.makeAttack(target)
+        break
+    }
+    return promise
+  }
+
+
+  async makeAttack(target: Character | Enemy): Promise<boolean> {
+    this.ATB = 0    
+    await this.blink()
+    return target.getHit(10)
+  }
+
+  getHit(damage: number): Promise<boolean> {
+    return new Promise(resolve => {
+      resolve(true)
     })
-    tintTimer.start()
+  }
+
+  blink(): Promise<boolean> {
+    return new Promise(resolve => {
+      const tintTimer = this.game.time.create(false)
+      enum tints  {
+        light = 0xffffff,
+        dark = 0x918e8c
+      }
+      let key: boolean = true
+      let loop: number = 0
+      tintTimer.loop(Phaser.Timer.QUARTER / 3, () => {
+        key = !key
+        this.sprite.tint = key ? tints.dark : tints.light
+        loop++
+        if (loop === 7) {
+          tintTimer.stop()
+          tintTimer.destroy()
+          resolve (true)
+        }
+      })
+      tintTimer.start()
+    })
+    
   }
   
 

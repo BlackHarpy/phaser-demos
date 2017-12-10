@@ -33,6 +33,11 @@ declare namespace Battle {
     idAction: number
   }
 
+  interface ATBData {
+    newATB: number,
+    returnAction?: ActionData
+  }
+
   interface ReadyCharacter {
     idReady: number,
     automaticAction?: ActionData
@@ -78,14 +83,15 @@ declare namespace Character {
   }
 
   interface AnimationData {
+    play(),    
     animation?: Phaser.Animation,
     hitAnimation?: Phaser.Sprite
-    play?(onEndCallback?: Function)
   }
 
   interface Animations {
     walk: AnimationData,
     attack?: AnimationData,
+    hit?: AnimationData,
     victory?: AnimationData
   }
 }
@@ -102,6 +108,7 @@ declare namespace Enemy {
     ATB: number
     stats: IStats
     commands: ICommand[]
+    customFlags?: object    
   }
 }
 

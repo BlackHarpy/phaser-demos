@@ -78,9 +78,15 @@ export default class MainState extends State {
     }
   }
 
-  getCharacter(idCharacter) {
+  getCharacter(idCharacter: number) {
     return this.party.find((value) => {
       return value.id === idCharacter
+    })
+  }
+
+  getEnemy(idEnemy: number) {
+    return this.enemies.find((value) => {
+      return value.id === idEnemy
     })
   }
 
@@ -192,7 +198,7 @@ export default class MainState extends State {
         const index = this.party.findIndex((value) => {
           return value.id === this.receivingCommand
         })
-        this.addActionToQueue('CHARACTER', this.receivingCommand, 0, option)
+        this.addActionToQueue('CHARACTER', this.receivingCommand, 1, option)
         this.receivingCommand = 0      
         this.party[index].resetFocus()            
         this.party[index].prepareForAction()
@@ -212,7 +218,13 @@ export default class MainState extends State {
 
   getReadyForAction(): Battle.ReadyCharacter[] {
     let actions: Battle.ReadyCharacter[] = []
-    this.party.forEach((character) => {
+    this.enemies.forEach(enemy => {
+      const returnAction: Battle.ReadyCharacter = enemy.fillATB([1, 2])
+      if (returnAction.idReady !== 0) {
+        actions.push(returnAction)
+      }
+    })
+    this.party.forEach(character => {
       const returnAction: Battle.ReadyCharacter = character.fillATB()
       if (returnAction.idReady !== 0) {
         actions.push(returnAction)
@@ -224,20 +236,26 @@ export default class MainState extends State {
   doNextAction() {
     if (this.actionsQueue.length) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
-      if (nextAction.executor === 'CHARACTER') {
-        this.battleTimer.pause()
-        this.makeCharacterAction(nextAction.idAction, this.getCharacter(nextAction.idExec), this.enemies[0])
-      }
+      console.log('nextAction', nextAction)
+      this.battleTimer.pause()      
+      const executor = nextAction.executor === 'CHARACTER' ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
+      const target = nextAction.executor === 'CHARACTER' ? this.getEnemy(nextAction.idTarget) :  this.getCharacter(nextAction.idTarget)
+      this.makeCharacterAction(nextAction.idAction, executor, target)
     }
   }
 
-  async makeCharacterAction(command: number, character: Character, target: Enemy): Promise<void> {
+  async makeCharacterAction(command: number, character: Character | Enemy, target: Character | Enemy): Promise<void> {
     this.actionInProgress = true    
     const finishedAction = await character.makeAction(command, target)
     if (finishedAction) {
       this.resumeTimer()
     }
   }
+
+  // async makeEnemyAction(command: number, enemy: Enemy, target: Character) {
+  //   this.actionInProgress = true
+  //   const 
+  // }
 
   resumeTimer() {
     this.battleTimer.resume()
@@ -250,6 +268,7 @@ export default class MainState extends State {
     this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
     this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
 
+    this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 200, 400)
     this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
     this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
   }

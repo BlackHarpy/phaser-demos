@@ -60,7 +60,7 @@ export const MIST_DRAGON = {
     HP: 556,
     MP: 0,
     STRENGTH: 12,
-    SPEED: 3,
+    SPEED: 15,
     STAMINA: 12,
     INTELLECT: 6,
     SPIRIT: 6,
@@ -70,6 +70,9 @@ export const MIST_DRAGON = {
     DEFENSE: 0,
     MAGIC_DEFENSE: 0,
     MAGIC_EVASION: 0
+  },
+  customFlags: {
+    hitWhileMist: false
   },
   commands: [{
     id: 1,

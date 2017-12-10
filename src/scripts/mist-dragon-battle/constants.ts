@@ -45,5 +45,6 @@ export const COMMANDS_POSITIONS = {
 export const CHARACTER_STATUS = {
   NORMAL: 1,
   KO: 2,
-  JUMP: 3
+  JUMP: 3,
+  MIST: 4
 }

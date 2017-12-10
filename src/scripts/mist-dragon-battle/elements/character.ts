@@ -55,7 +55,37 @@ export default class Character implements Character.Base {
       attack: {
         animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
         hitAnimation:  new Phaser.Sprite(this.game, 100, 100, 'slash'),
-        play: this.generateAttackAnimation
+        play: () => {
+          return new Promise(resolve => {
+            this.game.add.existing(this.animations.attack.hitAnimation)
+            this.animations.attack.hitAnimation.animations.add('start')
+            this.sprite.animations.play('attack')
+            this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
+              if (animation.loopCount === 1) {
+                this.animations.attack.hitAnimation.animations.play('start', 30)
+              }
+              if (animation.loopCount === 2) {
+                this.sprite.animations.stop('attack')
+                resolve(true)
+              }
+            }, this)
+          })
+        }
+      },
+      hit: {
+        play: () => {
+          return new Promise(resolve => {
+            const timer = this.game.time.create(false)
+            this.sprite.loadTexture(this.sprite.key, 'hit')
+            timer.loop(Phaser.Timer.HALF + Phaser.Timer.QUARTER, () => {
+              this.resetPosition()
+              timer.stop()
+              timer.destroy()
+              resolve(true)
+            })
+            timer.start()
+          })
+        }
       },
       victory: {
         animation: this.sprite.animations.add('victory', Phaser.Animation.generateFrameNames('victory', 0, 1), 5, true),
@@ -96,14 +126,14 @@ export default class Character implements Character.Base {
     return actionReady
   }
 
-  async attack(target: Enemy): Promise<Boolean> {
+  async attack(target: Character | Enemy): Promise<boolean> {
     this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
     return this.goToBack()
   }
 
-  async specialAttack(target: Enemy, onEndCallback?): Promise<Boolean> {
+  async specialAttack(target: Character | Enemy, onEndCallback?): Promise<boolean> {
     return (this.job.performSpecialAttack(this, target))
   }
 
@@ -116,7 +146,7 @@ export default class Character implements Character.Base {
     this.sprite.loadTexture(this.atlasKey, 'defend')
   }
 
-  walkToPosition(position, resetAtEnd?: Boolean): Promise<Boolean> {
+  walkToPosition(position, resetAtEnd?: Boolean): Promise<boolean> {
     return new Promise<any> (resolve => {
       this.animations.walk.play()
       const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)  
@@ -129,11 +159,11 @@ export default class Character implements Character.Base {
     })
   }
 
-  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<Boolean> {
+  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<boolean> {
     return (await this.walkToPosition(this.sprite.x - 50))
   }
 
-  async goToBack(): Promise<Boolean> {
+  async goToBack(): Promise<boolean> {
     this.sprite.scale.x = -SCALE
     return (await this.walkToPosition(this.initialPosition.x, true))
   }
@@ -143,10 +173,13 @@ export default class Character implements Character.Base {
     this.sprite.scale.x = SCALE  
   }
 
-  async makeAttackAnimation(): Promise<Boolean> {
+  async makeAttackAnimation(): Promise<boolean> {
     return this.animations.attack.play()
   }
 
+  getHit(damage: number): Promise<boolean> {
+    return this.animations.hit.play()
+  }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
     this.sprite.x = this.game.world.width
@@ -158,8 +191,8 @@ export default class Character implements Character.Base {
     }
   }
 
-  async makeAction(command: number, target: Enemy): Promise<Boolean> {
-    let promise: Promise<Boolean>
+  async makeAction(command: number, target: Character | Enemy): Promise<boolean> {
+    let promise: Promise<boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:
         promise = this.attack(target)
