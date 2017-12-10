@@ -8,6 +8,7 @@ import State from '../../state'
 import Character from '../elements/character'
 import Enemy from '../elements/enemy'
 import BattleMenu from '../elements/battle-menu'
+import BattleMechanics from '../elements/battle-mechanics'
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -66,7 +67,7 @@ export default class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    this.startTimer()    
+    this.startBattle()    
   }
 
   update(): void {
@@ -76,6 +77,11 @@ export default class MainState extends State {
     } else {
      this.processCharacterAction()
     }
+  }
+
+  startBattle(): void {
+    this.party = BattleMechanics.setInitialATB(this.party)
+    this.startTimer() 
   }
 
   getCharacter(idCharacter: number) {
@@ -251,11 +257,6 @@ export default class MainState extends State {
       this.resumeTimer()
     }
   }
-
-  // async makeEnemyAction(command: number, enemy: Enemy, target: Character) {
-  //   this.actionInProgress = true
-  //   const 
-  // }
 
   resumeTimer() {
     this.battleTimer.resume()

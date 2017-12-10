@@ -83,7 +83,7 @@ declare namespace Character {
   }
 
   interface AnimationData {
-    play(),    
+    play(damage?: number),    
     animation?: Phaser.Animation,
     hitAnimation?: Phaser.Sprite
   }
