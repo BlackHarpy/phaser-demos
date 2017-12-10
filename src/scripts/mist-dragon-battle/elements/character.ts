@@ -129,6 +129,7 @@ export default class Character implements Character.Base {
     this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
+    target.getHit(58)
     return this.goToBack()
   }
 

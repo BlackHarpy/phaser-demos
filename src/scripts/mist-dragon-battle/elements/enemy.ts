@@ -1,5 +1,6 @@
 import { MENU_HEIGHT } from './../constants';
 import Character from './character'
+import BattleMechanics from './battle-mechanics'
 'use strict'
 
 import {SCALE} from '../constants'
@@ -89,14 +90,14 @@ export default class Enemy implements Enemy.Base {
     let promise: Promise<boolean>
     switch (command) {
       case 1:
-        promise = this.makeAttack(target)
+        promise = this.attack(target)
         break
     }
     return promise
   }
 
 
-  async makeAttack(target: Character | Enemy): Promise<boolean> {
+  async attack(target: Character | Enemy): Promise<boolean> {
     this.ATB = 0    
     await this.blink()
     return target.getHit(10)
@@ -104,6 +105,7 @@ export default class Enemy implements Enemy.Base {
 
   getHit(damage: number): Promise<boolean> {
     return new Promise(resolve => {
+      BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
       resolve(true)
     })
   }

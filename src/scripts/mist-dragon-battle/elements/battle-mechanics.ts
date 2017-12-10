@@ -26,7 +26,6 @@ export default class BattleMechanics {
       game.add.tween(damageText[index]).to({ y: sprite.centerY - 150 }, 500, Phaser.Easing.Linear.None, true, 100 * index, 0)
       game.add.tween(damageText[index]).to({ y: sprite.centerY + 50 }, 500, Phaser.Easing.Bounce.Out, true,  100 * index, 0).onComplete.add(() => {
         if (index + 1 === damageText.length) {
-          console.log('delete!')
           damageText.forEach(digit => {
             digit.destroy()
           })
