@@ -4,8 +4,7 @@ import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS } from './../c
 import {SCALE} from '../constants'
 import Job from '../elements/job'
 import Enemy from '../elements/enemy'
-
-
+import BattleMechanics from './battle-mechanics'
 
 export default class Character implements Character.Base {
   game: Phaser.Game
@@ -178,6 +177,7 @@ export default class Character implements Character.Base {
   }
 
   getHit(damage: number): Promise<boolean> {
+    BattleMechanics.showDamage(this.game, '35', this.sprite)
     return this.animations.hit.play()
   }
 
