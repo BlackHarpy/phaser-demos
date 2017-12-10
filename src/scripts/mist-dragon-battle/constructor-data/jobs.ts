@@ -1,9 +1,9 @@
 'use strict'
-import { COMMANDS, CHARACTER_STATUS } from './../constants';
+import { COMMANDS, CHARACTER_STATUS } from './../constants'
 
 import Character from '../elements/character'
 import Enemy from '../elements/enemy'
-import { STATUS_CODES } from 'http';
+import BattleMechanics from '../elements/battle-mechanics'
 
 export const DRAGOON = {
   name: 'Dragoon',
@@ -12,7 +12,6 @@ export const DRAGOON = {
     name: 'Jump',
     chargeTime: 5,
     jumpTarget: {},
-    hitAnimation: Phaser.Sprite,
     async perform(character: Character, target: Character | Enemy): Promise<boolean> {
       console.log('target', target)
       let promise: Promise<boolean>
@@ -47,9 +46,6 @@ export const DRAGOON = {
       return new Promise(resolve => {
         character.sprite.position.set(20, 50)
         character.sprite.loadTexture(character.sprite.key, 'jump')
-        this.hitAnimation = character.game.add.sprite(100, 100, 'jump')
-        this.hitAnimation.scale.setTo(1.6)
-        this.hitAnimation.animations.add('start')                
         const hitTween = character.sprite.game.add.tween(character.sprite).to({ y: this.jumpTarget.sprite.centerY, x: this.jumpTarget.sprite.centerX }, 200, "Linear")
         const returnTween = character.sprite.game.add.tween(character.sprite).to({
           x: [400, character.initialPosition.x],
@@ -59,7 +55,7 @@ export const DRAGOON = {
           return Phaser.Math.bezierInterpolation(v, k);
         })
         returnTween.onComplete.add(() => {
-          this.hitAnimation.animations.play('start', 70)
+          BattleMechanics.showDamage(character.game, '78', this.jumpTarget.sprite)
           character.ATB = 0
           character.status = CHARACTER_STATUS.NORMAL
           character.resetPosition()
@@ -109,6 +105,7 @@ export const DARK_KNIGHT = {
           } else {
             timer.stop()            
             this.emitParticles(character).then((value) => {
+              BattleMechanics.showDamage(character.game, '64', target.sprite)
               character.resetPosition()
               resolve(value)
             })

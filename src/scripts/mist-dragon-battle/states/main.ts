@@ -24,7 +24,6 @@ const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
 const darknessImage = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
 const slashImage = require('assets/images/mist-dragon-battle/XSlash1.png')
-const jumpImage = require('assets/images/mist-dragon-battle/XCast.png')
 
 const bitmapFontImage = require('assets/fonts/number-font.png')
 const bitmapFontXML = require('assets/fonts/number-font.xml')
@@ -52,7 +51,6 @@ export default class MainState extends State {
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
     this.game.load.spritesheet('dark', darknessImage, 192, 192, 35)
     this.game.load.spritesheet('slash', slashImage, 192, 192, 35)
-    this.game.load.spritesheet('jump', jumpImage, 192, 192, 35)
     this.game.load.audio('bossBattleTheme', battleMusic)
     this.game.load.bitmapFont('ffNumbers', bitmapFontImage, bitmapFontXML);
   }
