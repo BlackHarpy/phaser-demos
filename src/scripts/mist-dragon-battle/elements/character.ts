@@ -55,22 +55,7 @@ export default class Character implements Character.Base {
       attack: {
         animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
         hitAnimation:  new Phaser.Sprite(this.game, 100, 100, 'slash'),
-        play: () => {
-          return new Promise(resolve => {
-            this.game.add.existing(this.animations.attack.hitAnimation)
-            this.animations.attack.hitAnimation.animations.add('start')
-            this.sprite.animations.play('attack')
-            this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
-              if (animation.loopCount === 1) {
-                this.animations.attack.hitAnimation.animations.play('start', 30)
-              }
-              if (animation.loopCount === 2) {
-                this.sprite.animations.stop('attack')
-                resolve(true)
-              }
-            }, this)
-          })
-        }
+        play: this.generateAttackAnimation
       },
       victory: {
         animation: this.sprite.animations.add('victory', Phaser.Animation.generateFrameNames('victory', 0, 1), 5, true),
@@ -81,10 +66,87 @@ export default class Character implements Character.Base {
     }
   }
 
+  generateAttackAnimation(): Promise<any> {
+    return new Promise(resolve => {
+      this.game.add.existing(this.animations.attack.hitAnimation)
+      this.animations.attack.hitAnimation.animations.add('start')
+      this.sprite.animations.play('attack')
+      this.sprite.animations.getAnimation('attack').onLoop.add((sprite, animation) => {
+        if (animation.loopCount === 1) {
+          this.animations.attack.hitAnimation.animations.play('start', 30)
+        }
+        if (animation.loopCount === 2) {
+          this.sprite.animations.stop('attack')
+          resolve(true)
+        }
+      }, this)
+    })
+  }
+
+  setStatus(status: number) {
+    this.status = status
+  }
+
+  fillATB(): Battle.ReadyCharacter {
+    const actionReady = <any>{}
+    const ATBData = this.job.fillATB(this)
+    this.ATB = ATBData.newATB
+    actionReady.idReady = this.ATB === 100 ? this.id : 0
+    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    return actionReady
+  }
+
+  async attack(target: Enemy): Promise<Boolean> {
+    this.ATB = 0
+    await this.goToFront()
+    await this.makeAttackAnimation()
+    return this.goToBack()
+  }
+
+  async specialAttack(target: Enemy, onEndCallback?): Promise<Boolean> {
+    return (this.job.performSpecialAttack(this, target))
+  }
+
+  victory(): void {
+    this.animations.victory.play()
+  }
+
   prepareForAction(): void {
     this.ATB = 0
     this.sprite.loadTexture(this.atlasKey, 'defend')
   }
+
+  walkToPosition(position, resetAtEnd?: Boolean): Promise<Boolean> {
+    return new Promise<any> (resolve => {
+      this.animations.walk.play()
+      const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)  
+      tween.onComplete.add(() => {
+        if (resetAtEnd) {
+          this.resetPosition()
+        }
+        resolve(true)
+      })
+    })
+  }
+
+  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<Boolean> {
+    return (await this.walkToPosition(this.sprite.x - 50))
+  }
+
+  async goToBack(): Promise<Boolean> {
+    this.sprite.scale.x = -SCALE
+    return (await this.walkToPosition(this.initialPosition.x, true))
+  }
+
+  resetPosition(): void {
+    this.sprite.loadTexture(this.atlasKey, 'stand')
+    this.sprite.scale.x = SCALE  
+  }
+
+  async makeAttackAnimation(): Promise<Boolean> {
+    return this.animations.attack.play()
+  }
+
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
     this.sprite.x = this.game.world.width
@@ -107,66 +169,7 @@ export default class Character implements Character.Base {
         break
       }
     return promise
-  }
-
-  setStatus(status: number) {
-    this.status = status
-  }
-
-  async attack(target: Enemy): Promise<Boolean> {
-    this.ATB = 0
-    await this.goToFront()
-    await this.makeAttackAnimation()
-    return this.goToBack()
-  }
-
-  victory(): void {
-    this.animations.victory.play()
-  }
-
-  walkToPosition(position, resetAtEnd?: Boolean): Promise<Boolean> {
-    return new Promise<any> (resolve => {
-      this.animations.walk.play()
-      const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)  
-      tween.onComplete.add(() => {
-        if (resetAtEnd) {
-          this.resetPosition()
-        }
-        resolve(true)
-      })
-    })
-  }
- 
-  async makeAttackAnimation(): Promise<Boolean> {
-    return this.animations.attack.play()
-  }
-
-  async specialAttack(target: Enemy, onEndCallback?): Promise<Boolean> {
-    return (this.job.performSpecialAttack(this, target))
-  }
-
-  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<Boolean> {
-    return (await this.walkToPosition(this.sprite.x - 50))
-  }
-
-  async goToBack(): Promise<Boolean> {
-    this.sprite.scale.x = -SCALE
-    return (await this.walkToPosition(this.initialPosition.x, true))
-  }
-
-  resetPosition(): void {
-    this.sprite.loadTexture(this.atlasKey, 'stand')
-    this.sprite.scale.x = SCALE  
-  }
-
-  fillATB(): CharacterAction.ReadyCharacter {
-    const actionReady = <any>{}
-    const ATBData = this.job.fillATB(this)
-    this.ATB = ATBData.newATB
-    actionReady.idReady = this.ATB === 100 ? this.id : 0
-    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
-    return actionReady
-  }
+  }  
 
   focus(): void {
     enum tints  {

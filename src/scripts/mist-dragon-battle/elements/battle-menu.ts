@@ -78,6 +78,40 @@ export default class BattleMenu {
     return background
   }
 
+  
+  buildCommandsList(character): BattleMenu.CommandsMenuInfo[] {
+    const commandsList = []
+    for (let key in COMMANDS) {
+      if (COMMANDS[key].POSITION === COMMANDS_POSITIONS.MAIN) {
+        const commandLabel = COMMANDS[key].ID === COMMANDS.SPECIAL_ATTACK.ID ? character.specialAttack : COMMANDS[key].LABEL
+        const command = {
+          id: COMMANDS[key].ID,
+          name: this.game.add.text(0, 0, commandLabel, this.textStyle),
+          position: COMMANDS[key].POSITION
+        }
+        commandsList.push(command)
+      }
+    }
+    return commandsList
+  }
+
+  buildCharacterMenuInfo(characterInfo: BattleMenu.CharacterData): BattleMenu.CharacterMenuInfo {
+    const characterMenuInfo = {
+      id: characterInfo.id,
+      name: this.game.add.text(0, 0, characterInfo.name, this.textStyle),
+      healthInfo: this.game.add.text(0, 0, `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`, this.textStyle)
+    }
+    return characterMenuInfo
+  }
+
+  buildEnemyMenuInfo(enemyInfo: BattleMenu.EnemyData): BattleMenu.EnemyMenuInfo {
+    const enemyMenuInfo = {
+      id: enemyInfo.id,
+      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle)
+    }
+    return enemyMenuInfo
+  }
+
   openCommandsSection(characterID: number): void {
     const character = this.menuData.characters.find((value) => {
       return value.id === characterID
@@ -107,10 +141,6 @@ export default class BattleMenu {
     }
   }
 
-  isListeningInput(): Boolean {
-    return this.commandSectionOpened
-  }
-
   closeCommandsSection() {
     this.commandSectionOpened = false    
     this.commandsSection.background.destroy()
@@ -127,6 +157,10 @@ export default class BattleMenu {
       sprite: this.game.add.sprite(initialX, initialY, 'cursor'),
       currentOption: 1
     }
+  }
+
+  isListeningInput(): Boolean {
+    return this.commandSectionOpened
   }
 
   getOption(): Promise<number> {
@@ -165,36 +199,4 @@ export default class BattleMenu {
     })
   }
 
-  buildCommandsList(character): BattleMenu.CommandsMenuInfo[] {
-    const commandsList = []
-    for (let key in COMMANDS) {
-      if (COMMANDS[key].POSITION === COMMANDS_POSITIONS.MAIN) {
-        const commandLabel = COMMANDS[key].ID === COMMANDS.SPECIAL_ATTACK.ID ? character.specialAttack : COMMANDS[key].LABEL
-        const command = {
-          id: COMMANDS[key].ID,
-          name: this.game.add.text(0, 0, commandLabel, this.textStyle),
-          position: COMMANDS[key].POSITION
-        }
-        commandsList.push(command)
-      }
-    }
-    return commandsList
-  }
-
-  buildCharacterMenuInfo(characterInfo: BattleMenu.CharacterData): BattleMenu.CharacterMenuInfo {
-    const characterMenuInfo = {
-      id: characterInfo.id,
-      name: this.game.add.text(0, 0, characterInfo.name, this.textStyle),
-      healthInfo: this.game.add.text(0, 0, `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`, this.textStyle)
-    }
-    return characterMenuInfo
-  }
-
-  buildEnemyMenuInfo(enemyInfo: BattleMenu.EnemyData): BattleMenu.EnemyMenuInfo {
-    const enemyMenuInfo = {
-      id: enemyInfo.id,
-      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle)
-    }
-    return enemyMenuInfo
-  }
 }

@@ -1,6 +1,108 @@
-interface IPosition {
+declare interface IPosition {
   x: number,
   y: number
+}
+
+declare interface IStats {
+  HP: number,
+  MP: number,
+  STRENGTH: number,
+  SPEED: number,
+  STAMINA: number,
+  INTELLECT: number,
+  SPIRIT: number,
+  ATTACK: number,
+  ACCURACY: number,
+  EVASION: number,
+  DEFENSE: number,
+  MAGIC_DEFENSE: number,
+  MAGIC_EVASION: number
+}
+
+declare interface ICommand {
+  id: number,
+  method: Function
+  hitAnimation?: Phaser.Animation
+}
+
+declare namespace Battle {
+  interface ActionData {
+    executor: string,
+    idExec: number,
+    idTarget: number,
+    idAction: number
+  }
+
+  interface ReadyCharacter {
+    idReady: number,
+    automaticAction?: ActionData
+  }
+
+  interface Target {
+    type: string,
+    object: Enemy.Base | Character.Base
+  }
+}
+
+declare namespace Job {
+  interface Base {
+    specialAttack: SpecialAttack
+    fillATB: Function
+    performSpecialAttack?: Function
+  }
+
+  interface SpecialAttack {
+    key: string,
+    name: string,
+    chargeTime?: number,
+    perform?: Function
+  }
+}
+
+declare namespace Character {
+
+  interface Base {
+    game: Phaser.Game
+    id: number
+    atlasKey: string
+    name: string
+    level: number
+    status: number
+    sprite: Phaser.Sprite
+    ATB: number
+    stats: IStats
+    job: Job.Base
+    animations: Animations
+    initialPosition: IPosition
+    tintTimer: Phaser.Timer
+  }
+
+  interface AnimationData {
+    animation?: Phaser.Animation,
+    hitAnimation?: Phaser.Sprite
+    play?(onEndCallback?: Function)
+  }
+
+  interface Animations {
+    walk: AnimationData,
+    attack?: AnimationData,
+    victory?: AnimationData
+  }
+}
+
+declare namespace Enemy {
+  interface Base {
+    game: Phaser.Game
+    id: number
+    atlasKey: string
+    name: string
+    level: number
+    status: number
+    sprite: Phaser.Sprite
+    ATB: number
+    stats: IStats
+    commands: ICommand[]
+  }
 }
 
 declare namespace BattleMenu {
@@ -69,7 +171,6 @@ declare namespace BattleMenu {
     cursorPosition?: MenuPoint
   }
 
-
   interface EnemyData {
     id: number,
     name: string,
@@ -82,91 +183,11 @@ declare namespace BattleMenu {
   }
 }
 
-declare namespace CharacterAction {
-  interface ActionData {
-    executor: string,
-    idExec: number,
-    idTarget: number,
-    idAction: number
-  }
 
-  interface ReadyCharacter {
-    idReady: number,
-    automaticAction?: ActionData
-  }
-}
 
-interface IStats {
-  HP: number,
-  MP: number,
-  STRENGTH: number,
-  SPEED: number,
-  STAMINA: number,
-  INTELLECT: number,
-  SPIRIT: number
-}
 
-declare namespace Character {
 
-  interface Base {
-    game: Phaser.Game
-    id: number
-    atlasKey: string
-    name: string
-    level: number
-    status: number
-    sprite: Phaser.Sprite
-    ATB: number
-    stats: IStats
-    job: Job.Base
-    animations: Animations
-    initialPosition: IPosition
-    tintTimer: Phaser.Timer
-  }
 
-  
-
-  interface AnimationData {
-    animation?: Phaser.Animation,
-    hitAnimation?: Phaser.Sprite
-    play?(onEndCallback?: Function)
-  }
-
-  interface Animations {
-    walk: AnimationData,
-    attack?: AnimationData,
-    victory?: AnimationData
-  }
-}
-
-declare namespace Enemy {
-  interface Base {
-    game: Phaser.Game
-    id: number
-    atlasKey: string
-    name: string
-    level: number
-    status: number
-    sprite: Phaser.Sprite
-    ATB: number
-    stats: IStats
-  }
-}
-
-declare namespace Job {
-  interface Base {
-    specialAttack: SpecialAttack
-    fillATB: Function
-    performSpecialAttack?: Function
-  }
-
-  interface SpecialAttack {
-    key: string,
-    name: string,
-    chargeTime?: number,
-    perform?: Function
-  }
-}
 
 
 

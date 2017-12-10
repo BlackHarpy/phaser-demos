@@ -15,7 +15,13 @@ export const CECIL = {
     SPEED: 10,
     STAMINA: 11,
     INTELLECT: 6,
-    SPIRIT: 3
+    SPIRIT: 3,
+    ATTACK: 0,
+    ACCURACY: 0,
+    EVASION: 0,
+    DEFENSE: 0,
+    MAGIC_DEFENSE: 0,
+    MAGIC_EVASION: 0
   }
 }
 
@@ -33,7 +39,13 @@ export const KAIN = {
     SPEED: 11,
     STAMINA: 9,
     INTELLECT: 6,
-    SPIRIT: 12
+    SPIRIT: 12,
+    ATTACK: 0,
+    ACCURACY: 0,
+    EVASION: 0,
+    DEFENSE: 0,
+    MAGIC_DEFENSE: 0,
+    MAGIC_EVASION: 0
   }
 }
 
@@ -51,6 +63,30 @@ export const MIST_DRAGON = {
     SPEED: 3,
     STAMINA: 12,
     INTELLECT: 6,
-    SPIRIT: 6
-  }
+    SPIRIT: 6,
+    ATTACK: 0,
+    ACCURACY: 0,
+    EVASION: 0,
+    DEFENSE: 0,
+    MAGIC_DEFENSE: 0,
+    MAGIC_EVASION: 0
+  },
+  commands: [{
+    id: 1,
+    method: () => {
+      //Normal Attack
+      this.blink()
+    }
+  }, {
+    id: 2,
+    method: () => {
+      //Freezing Mist Special Ability
+      this.blink()
+    }
+  }, {
+    id: 3,
+    method: () => {
+      //Transform to Mist
+    }
+  }]
 }
