@@ -226,7 +226,7 @@ export default class MainState extends State {
   getReadyForAction(): Battle.ReadyCharacter[] {
     let actions: Battle.ReadyCharacter[] = []
     this.enemies.forEach(enemy => {
-      const returnAction: Battle.ReadyCharacter = enemy.fillATB([1, 2])
+      const returnAction: Battle.ReadyCharacter = enemy.fillATB(BattleMechanics.getAvailableForTargeting(this.party))
       if (returnAction.idReady !== 0) {
         actions.push(returnAction)
       }

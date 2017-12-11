@@ -2,6 +2,7 @@
 
 import Character from './character'
 import Enemy from './Enemy'
+import { CHARACTER_STATUS } from './../constants';
 
 export default class BattleMechanics {
 
@@ -9,6 +10,14 @@ export default class BattleMechanics {
     return party.map(character => {
       character.ATB = Math.floor(Math.random() * 101)
       return character
+    })
+  }
+
+  static getAvailableForTargeting(party: Character[]): number[] {
+    return party.map(target => {
+      if (target.status !== CHARACTER_STATUS.JUMP) {
+        return target.id
+      }
     })
   }
 
