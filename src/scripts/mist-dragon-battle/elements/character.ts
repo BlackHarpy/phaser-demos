@@ -126,6 +126,17 @@ export default class Character implements Character.Base {
   }
 
   async attack(target: Character | Enemy): Promise<boolean> {
+
+    // ------ Llamada (más o menos) con callbacks
+    // const callbackArguments = [target, 58]
+    // this.goToFront(() => {
+    //   this.makeAttackAnimation((target, damage) => {
+    //     target.getHit(damage, () => {
+    //       this.goToBack()
+    //     })
+    //   })
+    // }, callbackArguments)
+
     this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
@@ -133,7 +144,7 @@ export default class Character implements Character.Base {
     return this.goToBack()
   }
 
-  async specialAttack(target: Character | Enemy, onEndCallback?): Promise<boolean> {
+  async specialAttack(target: Character | Enemy): Promise<boolean> {
     return (this.job.performSpecialAttack(this, target))
   }
 
@@ -159,7 +170,7 @@ export default class Character implements Character.Base {
     })
   }
 
-  async goToFront(onEndCallback?: Function, additionalCallback?: Function, character?: Character, target?: Enemy): Promise<boolean> {
+  async goToFront(): Promise<boolean> {
     return (await this.walkToPosition(this.sprite.x - 50))
   }
 

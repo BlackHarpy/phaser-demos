@@ -43,6 +43,8 @@ export default class MainState extends State {
   actionsQueue: Battle.ActionData[]
   commandsQueue: number[]
   actionInProgress: Boolean
+  battleStarted: Boolean
+  musicCurrentSection: string
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -60,31 +62,47 @@ export default class MainState extends State {
   }
 
   create(): void {
+    this.battleStarted = false
+    this.music = this.game.add.sound('bossBattleTheme', 1)  
+    this.game.sound.setDecodedCallback([this.music], this.startMusic, this)
+  }
+
+  startMusic() {
     this.enemies = []
     this.actionsQueue = []
     this.commandsQueue = []
     this.receivingCommand = 0
     this.actionInProgress = false
-    this.music = this.game.add.sound('bossBattleTheme', 1)  
-    this.music.play()      
     this.caveBackground = this.setBattleBackground()
     this.enemies = this.setMistDragon()
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    this.startBattle()    
+    this.startBattle()  
+    this.music.addMarker('start', 0, 3.3)
+    this.music.addMarker('loop', 3.3, 61.4)
+    this.musicCurrentSection = 'start'
+    this.music.play(this.musicCurrentSection).onMarkerComplete.add(() => {
+      this.musicCurrentSection = 'loop'
+    }, this)
+    this.music.onStop.add(() => {
+      this.music.play(this.musicCurrentSection)
+    })
   }
 
   update(): void {
-    if (!this.battleMenu.isListeningInput()) {
-      this.openCommandsForAvailableCharacter()
-      this.doNextAction()         
-    } else {
-     this.processCharacterAction()
+    if (this.battleStarted) {
+      if (!this.battleMenu.isListeningInput()) {
+        this.openCommandsForAvailableCharacter()
+        this.doNextAction()         
+      } else {
+       this.processCharacterAction()
+      }
     }
   }
 
   startBattle(): void {
+    this.battleStarted = true
     this.party = BattleMechanics.setInitialATB(this.party)
     this.startTimer() 
   }
@@ -196,7 +214,7 @@ export default class MainState extends State {
       if (character) {
         character.focus()          
       } 
-      this.receivingCommand = next
+      this.receivingCommand = next ? next : 0
       this.battleMenu.openCommandsSection(next)
       this.battleTimer.pause()
     }
@@ -269,13 +287,16 @@ export default class MainState extends State {
 
   //For debug purposes
   render(): void {
-    this.game.debug.text("Time passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
-    this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
-    this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
-
-    this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 200, 400)
-    this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
-    this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
+    if (this.battleStarted) {
+      this.game.debug.text("Time passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
+      this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
+      this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
+  
+      this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 200, 400)
+      this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
+      this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
+    }
+    
   }
 
 }
