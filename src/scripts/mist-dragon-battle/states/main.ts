@@ -12,6 +12,8 @@ import BattleMechanics from '../elements/battle-mechanics'
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
+const cursorMoveSFX = require('assets/sound/mist-dragon-battle/cursor-move.wav')
+const cursorSelectSFX = require('assets/sound/mist-dragon-battle/cursor-select.wav')
 
 const cecilAtlasImage = require('assets/images/mist-dragon-battle/cecil.png')
 const cecilAtlasJSON = require('assets/images/mist-dragon-battle/cecil.json')
@@ -52,6 +54,8 @@ export default class MainState extends State {
     this.game.load.spritesheet('dark', darknessImage, 192, 192, 35)
     this.game.load.spritesheet('slash', slashImage, 192, 192, 35)
     this.game.load.audio('bossBattleTheme', battleMusic)
+    this.game.load.audio('cursorMoveSFX', cursorMoveSFX)
+    this.game.load.audio('cursorSelectSFX', cursorSelectSFX)
     this.game.load.bitmapFont('ffNumbers', bitmapFontImage, bitmapFontXML);
   }
 
@@ -62,7 +66,7 @@ export default class MainState extends State {
     this.receivingCommand = 0
     this.actionInProgress = false
     this.music = this.game.add.sound('bossBattleTheme', 1)  
-    // this.music.play()      
+    this.music.play()      
     this.caveBackground = this.setBattleBackground()
     this.enemies = this.setMistDragon()
     this.party = this.setParty()
@@ -241,9 +245,8 @@ export default class MainState extends State {
   }
 
   doNextAction() {
-    if (this.actionsQueue.length) {
+    if (this.actionsQueue.length && !this.actionInProgress) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
-      console.log('nextAction', nextAction)
       this.battleTimer.pause()      
       const executor = nextAction.executor === 'CHARACTER' ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
       const target = nextAction.executor === 'CHARACTER' ? this.getEnemy(nextAction.idTarget) :  this.getCharacter(nextAction.idTarget)

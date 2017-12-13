@@ -11,7 +11,19 @@ export default class BattleMenu {
   cursor: BattleMenu.Cursor
   textStyle: Phaser.PhaserTextStyle
   activeList: any[]
-  buttonIsDown: Boolean  
+  buttonIsDown: Boolean
+  sounds: {
+    cursorMove: {
+      id: string,
+      audio: Phaser.Sound,
+      play?: Function
+    },
+    cursorSelect: {
+      id: string,
+      audio: Phaser.Sound,
+      play?: Function
+    },
+  }
 
   constructor(game: Phaser.Game, menuData: BattleMenu.MenuData) {
     const textStyle: Phaser.PhaserTextStyle = {
@@ -21,6 +33,22 @@ export default class BattleMenu {
     this.menuData = menuData
     this.game = game
     this.commandSectionOpened = false
+    this.sounds = {
+      cursorMove: {
+        id: 'cursorMoveSFX',
+        audio: this.game.add.sound('cursorMoveSFX'),
+        play: () => {
+          this.sounds.cursorMove.audio.play()
+        }
+      },
+      cursorSelect: {
+        id: 'cursorSelectSFX',
+        audio: this.game.add.sound('cursorSelectSFX'),
+        play: () => {
+          this.sounds.cursorSelect.audio.play()
+        }
+      }
+    }
     this.setEnemySection()
     this.setCharactersSection()
   }
@@ -173,10 +201,13 @@ export default class BattleMenu {
 
       if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
         option = option === this.activeList.length ? option = 1 : option += 1
+        this.sounds.cursorMove.play()        
       } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
         option = option === 1 ? option = this.activeList.length : option -= 1
+        this.sounds.cursorMove.play()        
       } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
         selected = option
+        this.sounds.cursorSelect.play()                
         this.buttonIsDown = true            
       }
       if (isUpDown || isDownDown) {
@@ -186,6 +217,7 @@ export default class BattleMenu {
           y: this.activeList[option - 1].cursorPosition.y
         }
         this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+        
         this.buttonIsDown = true      
       } 
 

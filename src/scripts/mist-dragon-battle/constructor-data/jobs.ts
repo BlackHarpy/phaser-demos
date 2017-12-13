@@ -25,6 +25,7 @@ export const DRAGOON = {
     },
  
     startJump(character: Character, target: Character | Enemy): Promise<boolean> {
+      character.setStatus(CHARACTER_STATUS.JUMP)      
       return new Promise(resolve => {
         const timer: Phaser.Timer = character.sprite.game.time.create(false)
         character.sprite.loadTexture(character.atlasKey, 'weak')
@@ -32,7 +33,6 @@ export const DRAGOON = {
           character.sprite.loadTexture(character.atlasKey, 'item')
           const tween = character.sprite.game.add.tween(character.sprite).to({ y: character.sprite.y - 200, x: character.sprite.x - 50 }, 80, "Linear", true)
           timer.stop()
-          character.setStatus(CHARACTER_STATUS.JUMP)
           this.jumpTarget = target
           resolve(true)
           timer.destroy()

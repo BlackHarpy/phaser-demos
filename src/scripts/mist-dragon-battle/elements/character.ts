@@ -201,6 +201,11 @@ export default class Character implements Character.Base {
       case COMMANDS.SPECIAL_ATTACK.ID:
         promise = this.specialAttack(target)
         break
+      default:
+        promise = new Promise(resolve => {
+          resolve(true)
+        })
+        break
       }
     return promise
   }  

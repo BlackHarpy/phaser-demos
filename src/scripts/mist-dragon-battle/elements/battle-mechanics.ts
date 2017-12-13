@@ -14,11 +14,12 @@ export default class BattleMechanics {
   }
 
   static getAvailableForTargeting(party: Character[]): number[] {
-    return party.map(target => {
+
+    return party.filter(target => {
       if (target.status !== CHARACTER_STATUS.JUMP) {
         return target.id
       }
-    })
+    }).map(character => { return character.id })
   }
 
   static calculateDamage(attacker: Character | Enemy, target: Character | Enemy): number {
