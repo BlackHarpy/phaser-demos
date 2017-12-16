@@ -64,10 +64,10 @@ export default class MainState extends State {
   create(): void {
     this.battleStarted = false
     this.music = this.game.add.sound('bossBattleTheme', 1)  
-    this.game.sound.setDecodedCallback([this.music], this.startMusic, this)
+    this.game.sound.setDecodedCallback([this.music], this.setGameElements, this)
   }
 
-  startMusic() {
+  setGameElements() {
     this.enemies = []
     this.actionsQueue = []
     this.commandsQueue = []

@@ -1,7 +1,7 @@
 'use strict'
 
 import Character from './character'
-import Enemy from './Enemy'
+import Enemy from './enemy'
 import { CHARACTER_STATUS } from './../constants';
 
 export default class BattleMechanics {
