@@ -121,6 +121,23 @@ declare namespace Enemy {
     commands: ICommand[]
     customFlags?: object    
   }
+
+  interface Constructor {
+    id: number
+    atlasKey: string
+    name: string
+    level: number
+    status: number
+    ATB: number
+    stats: IStats
+    commands: ICommand[]
+    customFlags?: CustomFlag[] 
+  }
+
+  interface CustomFlag {
+    key: string
+    active: boolean
+  }
 }
 
 //Simple interface for healing items

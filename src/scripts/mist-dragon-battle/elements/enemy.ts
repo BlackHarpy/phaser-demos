@@ -20,10 +20,10 @@ export class Enemy implements Enemy.Base {
   status: number
   stats: IStats
   ATB: number
-  customFlags: object
+  customFlags: Enemy.CustomFlag[]
   commands: ICommand[]
 
-  constructor(game: Phaser.Game, enemyConstructor: any) {
+  constructor(game: Phaser.Game, enemyConstructor: Enemy.Constructor) {
     this.game = game
     this.id = enemyConstructor.id
     this.sprite = this.setSprite(enemyConstructor.atlasKey)
@@ -96,7 +96,6 @@ export class Enemy implements Enemy.Base {
     return promise
   }
 
-
   async attack(target: Character | Enemy): Promise<boolean> {
     this.ATB = 0    
     await this.blink()
@@ -131,7 +130,6 @@ export class Enemy implements Enemy.Base {
       })
       tintTimer.start()
     })
-    
   }
   
 

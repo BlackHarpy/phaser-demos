@@ -1,5 +1,5 @@
 'use strict'
-import { CHARACTER_STATUS } from './../constants';
+import { CHARACTER_STATUS } from './../constants'
 
 export const CECIL = {
   id: 1,
@@ -71,9 +71,7 @@ export const MIST_DRAGON = {
     MAGIC_DEFENSE: 0,
     MAGIC_EVASION: 0
   },
-  customFlags: {
-    hitWhileMist: false
-  },
+  customFlags: [{ key: 'hitWhileMist', active: false }],
   commands: [{
     id: 1,
     method: () => {
