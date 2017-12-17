@@ -1,9 +1,9 @@
 'use strict'
 
-import Character from '../elements/character'
-import Enemy from '../elements/enemy'
+import { Character } from '../elements/character'
+import { Enemy } from '../elements/enemy'
 
-export default class Job implements Job.Base {
+export class Job implements Job.Base {
   specialAttack: Job.SpecialAttack
   fillATB: Function
 

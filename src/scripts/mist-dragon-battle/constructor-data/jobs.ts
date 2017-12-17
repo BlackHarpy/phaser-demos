@@ -1,9 +1,9 @@
 'use strict'
 import { COMMANDS, CHARACTER_STATUS } from './../constants'
 
-import Character from '../elements/character'
-import Enemy from '../elements/enemy'
-import BattleMechanics from '../elements/battle-mechanics'
+import { Character } from '../elements/character'
+import { Enemy } from '../elements/enemy'
+import { BattleMechanics } from '../elements/battle-mechanics'
 
 export const DRAGOON = {
   name: 'Dragoon',

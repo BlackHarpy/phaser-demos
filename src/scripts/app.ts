@@ -8,8 +8,8 @@ import 'pixi'
 import 'p2'
 import 'phaser'
 
-import IntroState from './intro'
-import MistDragonBattleState from './mist-dragon-battle/states/main'
+import { IntroState } from './intro'
+import { MainState as MistDragonBattleState } from './mist-dragon-battle/states/main'
 
 export default class App extends Phaser.Game {
     constructor(config: Phaser.IGameConfig) {

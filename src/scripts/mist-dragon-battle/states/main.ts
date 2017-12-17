@@ -4,11 +4,11 @@ import { COMMANDS } from './../constants';
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
-import State from '../../state'
-import Character from '../elements/character'
-import Enemy from '../elements/enemy'
-import BattleMenu from '../elements/battle-menu'
-import BattleMechanics from '../elements/battle-mechanics'
+import  { State } from '../../state'
+import { Character } from '../elements/character'
+import { Enemy } from '../elements/enemy'
+import { BattleMenu } from '../elements/battle-menu'
+import  { BattleMechanics } from '../elements/battle-mechanics'
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -30,7 +30,7 @@ const slashImage = require('assets/images/mist-dragon-battle/XSlash1.png')
 const bitmapFontImage = require('assets/fonts/number-font.png')
 const bitmapFontXML = require('assets/fonts/number-font.xml')
 
-export default class MainState extends State {
+export class MainState extends State {
 
   caveBackground: Phaser.Sprite
   mistDragon: Enemy

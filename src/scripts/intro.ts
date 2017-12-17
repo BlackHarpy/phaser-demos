@@ -1,16 +1,16 @@
 'use strict'
 
-import State from './state'
+import { State } from './state'
 
 const logoImage = require('assets/phaser.png')
 
-export default class IntroState extends State {
+export class IntroState extends State {
 
   helloWorld: Phaser.Sprite
 
   preload(): void {
     this.game.load.image('logo', logoImage)    
-  }
+  } 
   
   create(): void {
     this.helloWorld = this.game.add.sprite(0, 0, 'logo')     

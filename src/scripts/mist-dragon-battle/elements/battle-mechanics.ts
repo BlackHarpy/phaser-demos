@@ -1,10 +1,10 @@
 'use strict'
 
-import Character from './character'
-import Enemy from './enemy'
+import { Character } from './character'
+import { Enemy } from './enemy'
 import { CHARACTER_STATUS } from './../constants';
 
-export default class BattleMechanics {
+export class BattleMechanics {
 
   static setInitialATB(party: Character[]): Character[] {
     return party.map(character => {

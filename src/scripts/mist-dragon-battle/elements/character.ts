@@ -2,11 +2,11 @@ import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS } from './../c
 'use strict'
 
 import {SCALE} from '../constants'
-import Job from '../elements/job'
-import Enemy from '../elements/enemy'
-import BattleMechanics from './battle-mechanics'
+import { Job } from '../elements/job'
+import { Enemy } from '../elements/enemy'
+import { BattleMechanics } from './battle-mechanics'
 
-export default class Character implements Character.Base {
+export class Character implements Character.Base {
   game: Phaser.Game
   id: number
   atlasKey: string  

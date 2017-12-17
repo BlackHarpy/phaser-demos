@@ -1,7 +1,7 @@
 'use strict'
 import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS } from './../constants';
 
-export default class BattleMenu {
+export class BattleMenu {
   game: Phaser.Game
   enemySection: BattleMenu.EnemiesMenuSection
   menuData: BattleMenu.MenuData

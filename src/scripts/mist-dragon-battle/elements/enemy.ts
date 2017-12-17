@@ -1,8 +1,8 @@
-import { MENU_HEIGHT } from './../constants';
-import Character from './character'
-import BattleMechanics from './battle-mechanics'
 'use strict'
 
+import { MENU_HEIGHT } from './../constants';
+import { Character } from './character'
+import{ BattleMechanics } from './battle-mechanics'
 import {SCALE} from '../constants'
 
 interface ITransformation {
@@ -10,7 +10,7 @@ interface ITransformation {
   key: string
 }
 
-export default class Enemy implements Enemy.Base {
+export class Enemy implements Enemy.Base {
   game: Phaser.Game
   id: number  
   atlasKey: string
