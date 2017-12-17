@@ -1,50 +1,50 @@
 declare interface IPosition {
-  x: number,
+  x: number
   y: number
 }
 
 declare interface IStats {
-  HP: number,
-  MP: number,
-  STRENGTH: number,
-  SPEED: number,
-  STAMINA: number,
-  INTELLECT: number,
-  SPIRIT: number,
-  ATTACK: number,
-  ACCURACY: number,
-  EVASION: number,
-  DEFENSE: number,
-  MAGIC_DEFENSE: number,
+  HP: number
+  MP: number
+  STRENGTH: number
+  SPEED: number
+  STAMINA: number
+  INTELLECT: number
+  SPIRIT: number
+  ATTACK: number
+  ACCURACY: number
+  EVASION: number
+  DEFENSE: number
+  MAGIC_DEFENSE: number
   MAGIC_EVASION: number
 }
 
 declare interface ICommand {
-  id: number,
+  id: number
   method: Function
   hitAnimation?: Phaser.Animation
 }
 
 declare namespace Battle {
   interface ActionData {
-    executor: string,
-    idExec: number,
-    idTarget: number,
+    executor: string
+    idExec: number
+    idTarget: number
     idAction: number
   }
 
   interface ATBData {
-    newATB: number,
+    newATB: number
     returnAction?: ActionData
   }
 
   interface ReadyCharacter {
-    idReady: number,
+    idReady: number
     automaticAction?: ActionData
   }
 
   interface Target {
-    type: string,
+    type: string
     object: Enemy.Base | Character.Base
   }
 }
@@ -57,9 +57,9 @@ declare namespace Job {
   }
 
   interface SpecialAttack {
-    key: string,
-    name: string,
-    chargeTime?: number,
+    key: string
+    name: string
+    chargeTime?: number
     perform?: Function
   }
 }
@@ -83,15 +83,15 @@ declare namespace Character {
   }
 
   interface AnimationData {
-    play(damage?: number),    
-    animation?: Phaser.Animation,
+    play(damage?: number)    
+    animation?: Phaser.Animation
     hitAnimation?: Phaser.Sprite
   }
 
   interface Animations {
-    walk: AnimationData,
-    attack?: AnimationData,
-    hit?: AnimationData,
+    walk: AnimationData
+    attack?: AnimationData
+    hit?: AnimationData
     victory?: AnimationData
   }
 }
@@ -112,80 +112,115 @@ declare namespace Enemy {
   }
 }
 
+declare namespace Item {
+  interface Base {
+    id: number
+    type: number
+    name: string
+    menuSprite: Phaser.Sprite
+  }
+}
+
+declare namespace Weapon {
+  interface Base extends Item.Base {
+    sprite: Phaser.Sprite
+    stats: WeaponStats
+  }
+
+  interface WeaponStats {
+    attack: number
+    accuracy: number
+  }
+}
+
+declare namespace Armor {
+  interface Base extends Item.Base {
+    sprite: Phaser.Sprite
+    stats: ArmorStats
+  }
+
+  interface ArmorStats {
+    defense: number
+    magicDefense: number
+    evasion: number
+    magicEvasion
+  }
+}
+
 declare namespace BattleMenu {
   interface Cursor {
-    sprite: Phaser.Sprite,
+    sprite: Phaser.Sprite
     currentOption: number
   }
 
   interface MenuPoint {
-    x: number,
+    x: number
     y: number
   }
 
   interface MenuSize {
-    width: number,
+    width: number
     height: number
   }
 
   interface BackgroundConfig {
-    position: MenuPoint,
-    anchor: MenuPoint,
+    position: MenuPoint
+    anchor: MenuPoint
     size: MenuSize
   }
 
   interface CharacterMenuInfo {
-    id: number,
-    name: Phaser.Text,
+    id: number
+    name: Phaser.Text
     healthInfo: Phaser.Text
     initiativeBar?: Phaser.Sprite //no idea yet
   }
 
   interface EnemyMenuInfo {
-    id: number,
+    id: number
     name: Phaser.Text
   }
 
   interface CommandsMenuInfo {
-    id: number,
-    name: Phaser.Text,
-    position: string,
+    id: number
+    name: Phaser.Text
+    position: string
     cursorPosition?: MenuPoint
   }
 
   interface CharactersMenuSection {
-    background: Phaser.Sprite,
+    background: Phaser.Sprite
     charactersList: CharacterMenuInfo[]
   }
 
   interface EnemiesMenuSection {
-    background: Phaser.Sprite,
+    background: Phaser.Sprite
     enemiesList: EnemyMenuInfo[]
   }
 
   interface CommandsMenuSection {
-    background: Phaser.Sprite,
+    background: Phaser.Sprite
     commandsList: CommandsMenuInfo[]
   }
 
   interface CharacterData {
-    id: number,
-    name: string,
-    specialAttack: string,
+    id: number
+    name: string
+    specialAttack: string
     items?: string[]
-    totalHealth?: number,
-    remainingHealth?: number,
+    totalHealth?: number
+    remainingHealth?: number
     cursorPosition?: MenuPoint
   }
 
   interface EnemyData {
-    id: number,
-    name: string,
+    id: number
+    name: string
     cursorPosition?: MenuPoint
   }
 
   interface MenuData {
-    characters: CharacterData[],
+    characters: CharacterData[]
     enemies: EnemyData[]
   }
 }

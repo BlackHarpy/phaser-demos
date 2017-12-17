@@ -34,6 +34,7 @@ export const COMMANDS = {
     POSITION: 'SPECIAL'
   }
 }
+
 export const COMMANDS_POSITIONS = {
   MAIN: 'MAIN',
   LEFT: 'LEFT',
@@ -47,4 +48,10 @@ export const CHARACTER_STATUS = {
   KO: 2,
   JUMP: 3,
   MIST: 4
+}
+
+export const ITEM_TYPES = {
+  HEALING: 1,
+  WEAPON: 2,
+  ARMOR: 3
 }
