@@ -231,4 +231,10 @@ export class BattleMenu {
     })
   }
 
+  getTarget(): Promise<number> {
+    return new Promise(resolve => {
+      resolve(0)
+    })
+  }
+
 }

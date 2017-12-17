@@ -1,5 +1,5 @@
 'use strict'
-import { COMMANDS, CHARACTER_STATUS } from './../constants'
+import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
 
 import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
@@ -74,7 +74,7 @@ export const DRAGOON = {
       ATBData.newATB = character.ATB + this.specialAttack.chargeTime > 100 ? 100 : character.ATB + this.specialAttack.chargeTime
       if (ATBData.newATB === 100) {
         ATBData.returnAction = {
-          executor: 'CHARACTER',
+          executor: ACTOR_TYPES.CHARACTER,
           idExec: character.id,
           idTarget: this.specialAttack.jumpTarget.id,
           idAction: COMMANDS.SPECIAL_ATTACK.ID

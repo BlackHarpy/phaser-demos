@@ -2,6 +2,10 @@ export const SCALE: number = 1.6
 export const MENU_HEIGHT: number = 150
 export const MENU_MARGIN: number = 30
 export const INITIAL_MENU_TEXT_POSITION_Y = 460
+export const ACTOR_TYPES = {
+  CHARACTER: 1,
+  ENEMY: 2
+}
 export const COMMANDS = {
   FIGHT: {
     ID: 1,

@@ -1,6 +1,6 @@
 'use strict'
 
-import { COMMANDS } from './../constants';
+import { ACTOR_TYPES, COMMANDS } from './../constants';
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
@@ -79,6 +79,7 @@ export class MainState extends State {
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
     this.startBattle()  
+    this.testCursor()
     // this.music.addMarker('start', 0, 3.3)
     // this.music.addMarker('loop', 3.3, 61.4)
     // this.musicCurrentSection = 'start'
@@ -88,6 +89,13 @@ export class MainState extends State {
     // this.music.onStop.add(() => {
     //   this.music.play(this.musicCurrentSection)
     // })
+  }
+
+  testCursor(): void {
+    const mistDragon = this.buildMenuData().enemies[0].cursorPosition
+    const cursor = this.game.add.sprite(mistDragon.x, mistDragon.y, 'cursor')
+    cursor.scale.x = -1
+    
   }
 
   update(): void {
@@ -161,7 +169,11 @@ export class MainState extends State {
     this.enemies.forEach((enemy) => {
       enemies.push({
         id: enemy,
-        name: enemy.name
+        name: enemy.name,
+        cursorPosition: {
+          x: enemy.sprite.width + 90,
+          y: enemy.sprite.centerY
+        }
       })
     })
     return {
@@ -227,14 +239,14 @@ export class MainState extends State {
         const index = this.party.findIndex((value) => {
           return value.id === this.receivingCommand
         })
-        this.addActionToQueue('CHARACTER', this.receivingCommand, 1, option)
+        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, 1, option)
         this.receivingCommand = 0      
         this.party[index].resetFocus()            
         this.party[index].prepareForAction()
     })
   }
 
-  addActionToQueue(executor: any, idExec: number, idTarget: number, idAction: number) {
+  addActionToQueue(executor: number, idExec: number, idTarget: number, idAction: number) {
     const action: Battle.ActionData = {
       executor: executor,
       idExec: idExec,
@@ -266,8 +278,8 @@ export class MainState extends State {
     if (this.actionsQueue.length && !this.actionInProgress) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
       this.battleTimer.pause()      
-      const executor = nextAction.executor === 'CHARACTER' ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
-      const target = nextAction.executor === 'CHARACTER' ? this.getEnemy(nextAction.idTarget) :  this.getCharacter(nextAction.idTarget)
+      const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
+      const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) :  this.getCharacter(nextAction.idTarget)
       this.makeCharacterAction(nextAction.idAction, executor, target)
     }
   }

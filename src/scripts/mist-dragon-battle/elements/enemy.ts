@@ -1,6 +1,6 @@
 'use strict'
 
-import { MENU_HEIGHT } from './../constants';
+import { ACTOR_TYPES, MENU_HEIGHT } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'
 import {SCALE} from '../constants'
@@ -64,7 +64,7 @@ export class Enemy implements Enemy.Base {
     if (ATBData.newATB === 100) {
       const nextCommand = this.getNextCommand(availableTargets)
       ATBData.returnAction = {
-        executor: 'ENEMY',
+        executor: ACTOR_TYPES.ENEMY,
         idExec: this.id,
         idTarget: nextCommand.idTarget,
         idAction: nextCommand.idAction

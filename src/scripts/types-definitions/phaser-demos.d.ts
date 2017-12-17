@@ -27,7 +27,7 @@ declare interface ICommand {
 
 declare namespace Battle {
   interface ActionData {
-    executor: string
+    executor: number
     idExec: number
     idTarget: number
     idAction: number
