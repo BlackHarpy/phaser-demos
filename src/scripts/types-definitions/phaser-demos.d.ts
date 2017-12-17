@@ -115,6 +115,7 @@ declare namespace Enemy {
 //Simple interface for healing items
 declare namespace Item {
   interface Base {
+    game: Phaser.Game
     id: number
     type: number
     name: string
@@ -127,28 +128,17 @@ declare namespace Item {
 
 declare namespace Equipment {
   interface Base {
+    game: Phaser.Game
     id: number
     type: number
     name: string
-  }
-}
-
-declare namespace Weapon {
-  interface Base extends Equipment.Base {
-    sprite: Phaser.Sprite
-    stats: WeaponStats
+    stats: WeaponStats | ArmorStats
+    sprite?: Phaser.Sprite
   }
 
   interface WeaponStats {
     attack: number
     accuracy: number
-  }
-}
-
-declare namespace Armor {
-  interface Base extends Equipment.Base {
-    sprite: Phaser.Sprite
-    stats: ArmorStats
   }
 
   interface ArmorStats {
