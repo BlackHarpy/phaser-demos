@@ -1,6 +1,6 @@
 'use strict'
 
-import { SCALE } from './../constants'
+import { SCALE, ITEM_TYPES } from './../constants'
 
 export class Equipment implements Equipment.Base {
   game: Phaser.Game
@@ -10,12 +10,12 @@ export class Equipment implements Equipment.Base {
   stats: Equipment.WeaponStats | Equipment.ArmorStats
   sprite?: Phaser.Sprite  
 
-  constructor(game: Phaser.Game, id: number, name: string, type: string, stats: Equipment.ArmorStats | Equipment.WeaponStats,  spriteKey?: string) {
+  constructor(game: Phaser.Game, equipmentConstructor: Equipment.Constructor) {
     this.game = game
-    this.id = id
-    this.name = name
-    if (spriteKey) {
-      this.sprite = new Phaser.Sprite(game, 0, 0, spriteKey)
+    this.id = equipmentConstructor.id
+    this.name = equipmentConstructor.name
+    if (equipmentConstructor.spriteKey) {
+      this.sprite = new Phaser.Sprite(game, 0, 0, equipmentConstructor.spriteKey)
       this.sprite.scale.setTo(SCALE)
       this.sprite.smoothed = false
     }

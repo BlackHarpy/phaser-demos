@@ -82,6 +82,17 @@ declare namespace Character {
     tintTimer: Phaser.Timer
   }
 
+  interface Constructor {
+    id: number
+    atlasKey: string
+    name: string
+    level: number
+    status: number
+    spriteKey: string
+    ATB: number
+    stats: IStats
+  }
+
   interface AnimationData {
     play(damage?: number)    
     animation?: Phaser.Animation
@@ -124,6 +135,16 @@ declare namespace Item {
     targetStat: string
     modifier: number
   }
+
+  interface Constructor {
+    id: number
+    type: number
+    name: string
+    menuSpriteKey: string
+    targetType: string
+    targetStat: string
+    modifier: number
+  }
 }
 
 declare namespace Equipment {
@@ -134,6 +155,14 @@ declare namespace Equipment {
     name: string
     stats: WeaponStats | ArmorStats
     sprite?: Phaser.Sprite
+  }
+
+  interface Constructor {
+    id: number
+    type: number
+    name: string
+    stats: WeaponStats | ArmorStats
+    spriteKey: string
   }
 
   interface WeaponStats {

@@ -28,7 +28,7 @@ export class Character implements Character.Base {
     this.addAnimations(characterConstructor.atlasKey)
   }
 
-  setCharacterData(characterConstructor: any, jobConstructor: any) {
+  setCharacterData(characterConstructor: Character.Constructor, jobConstructor: any) {
     this.id = characterConstructor.id
     this.atlasKey = characterConstructor.atlasKey
     this.name = characterConstructor.name
