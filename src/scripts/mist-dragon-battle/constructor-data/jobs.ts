@@ -13,7 +13,6 @@ export const DRAGOON = {
     chargeTime: 5,
     jumpTarget: {},
     async perform(character: Character, target: Character | Enemy): Promise<boolean> {
-      console.log('target', target)
       let promise: Promise<boolean>
       if (character.status === CHARACTER_STATUS.JUMP) {
         promise = this.finishJump(character)

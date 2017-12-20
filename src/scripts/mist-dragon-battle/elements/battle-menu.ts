@@ -1,5 +1,5 @@
 'use strict'
-import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS } from './../constants';
+import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES } from './../constants';
 
 export class BattleMenu {
   game: Phaser.Game
@@ -106,7 +106,7 @@ export class BattleMenu {
     return background
   }
 
-  
+
   buildCommandsList(character): BattleMenu.CommandsMenuInfo[] {
     const commandsList = []
     for (let key in COMMANDS) {
@@ -135,7 +135,8 @@ export class BattleMenu {
   buildEnemyMenuInfo(enemyInfo: BattleMenu.EnemyData): BattleMenu.EnemyMenuInfo {
     const enemyMenuInfo = {
       id: enemyInfo.id,
-      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle)
+      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle),
+      cursorPosition: enemyInfo.cursorPosition
     }
     return enemyMenuInfo
   }
@@ -145,24 +146,24 @@ export class BattleMenu {
       return value.id === characterID
     })
     if (character) {
-      this.commandSectionOpened = true      
+      this.commandSectionOpened = true
       const backgroundConfig = {
         anchor: { x: 1, y: 1 },
-        position: { x: 320, y: this.game.world.height},
+        position: { x: 320, y: this.game.world.height },
         size: { height: MENU_HEIGHT, width: 200 }
       }
       this.commandsSection = {
         background: this.buildMenuBackground(backgroundConfig),
         commandsList: this.buildCommandsList(character)
       }
-      let y = INITIAL_MENU_TEXT_POSITION_Y      
+      let y = INITIAL_MENU_TEXT_POSITION_Y
       this.commandsSection.commandsList.forEach((value) => {
         value.name.position.set(140, y)
         value.cursorPosition = {
           x: 105,
-          y:  value.name.centerY - 12
+          y: value.name.centerY - 12
         }
-        y += MENU_MARGIN        
+        y += MENU_MARGIN
       })
       this.setCursor(this.commandsSection.commandsList)
       this.activeList = this.commandsSection.commandsList
@@ -170,12 +171,13 @@ export class BattleMenu {
   }
 
   closeCommandsSection() {
-    this.commandSectionOpened = false    
     this.commandsSection.background.destroy()
     this.commandsSection.commandsList.forEach((command) => {
       command.name.destroy()
     })
     this.cursor.sprite.destroy()
+    this.commandSectionOpened = false
+
   }
 
   setCursor(section: any): void {
@@ -191,50 +193,53 @@ export class BattleMenu {
     return this.commandSectionOpened
   }
 
-  getOption(): Promise<number> {
-    return new Promise(resolve => {
-      let option = this.cursor.currentOption
-      let selected = 0
-      const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
-      const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
-      const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
+  getOption(): number {
+    let option = this.cursor.currentOption
+    let selected = 0
+    const isDownDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.DOWN)
+    const isUpDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.UP)
+    const isSpaceDown: boolean = this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
 
-      if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
-        option = option === this.activeList.length ? option = 1 : option += 1
-        this.sounds.cursorMove.play()        
-      } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
-        option = option === 1 ? option = this.activeList.length : option -= 1
-        this.sounds.cursorMove.play()        
-      } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
-        selected = option
-        this.sounds.cursorSelect.play()                
-        this.buttonIsDown = true            
-      }
-      if (isUpDown || isDownDown) {
-        this.cursor.currentOption = option
-        const cursorPosition = {
-          x: this.activeList[option - 1].cursorPosition.x,
-          y: this.activeList[option - 1].cursorPosition.y
-        }
-        this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
-        
-        this.buttonIsDown = true      
-      } 
+    if (!this.buttonIsDown && isDownDown && !isUpDown && !isSpaceDown) {
+      option = option === this.activeList.length ? option = 1 : option += 1
+      this.sounds.cursorMove.play()
+    } else if (!this.buttonIsDown && isUpDown && !isDownDown && !isSpaceDown) {
+      option = option === 1 ? option = this.activeList.length : option -= 1
+      this.sounds.cursorMove.play()
+    } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
+      selected = option
+      this.sounds.cursorSelect.play()
+      this.buttonIsDown = true
+    }
 
-      if (!isUpDown && !isDownDown && !isSpaceDown) {
-        this.buttonIsDown = false
+    if (isUpDown || isDownDown) {
+      this.cursor.currentOption = option
+      const cursorPosition = {
+        x: this.activeList[option - 1].cursorPosition.x,
+        y: this.activeList[option - 1].cursorPosition.y
       }
+      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+      this.buttonIsDown = true
+    }
 
-      if (selected !== 0) {
-        resolve(selected)
-      }
-    })
+    if (!isUpDown && !isDownDown && !isSpaceDown) {
+      this.buttonIsDown = false
+    }
+    return selected
   }
 
-  getTarget(): Promise<number> {
-    return new Promise(resolve => {
-      resolve(0)
-    })
+  getTarget(targetType: number): number {
+      if (targetType === ACTOR_TYPES.ENEMY) {
+        this.cursor.currentOption = 1
+        const cursorPosition = {
+          x: this.menuData.enemies[0].cursorPosition.x,
+          y: this.menuData.enemies[0].cursorPosition.y
+        }
+        this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+        this.cursor.sprite.scale.x = -1
+        this.activeList = this.menuData.enemies
+       return this.getOption()
+      }
   }
 
 }

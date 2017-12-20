@@ -4,11 +4,11 @@ import { ACTOR_TYPES, COMMANDS } from './../constants';
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
-import  { State } from '../../state'
+import { State } from '../../state'
 import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
 import { BattleMenu } from '../elements/battle-menu'
-import  { BattleMechanics } from '../elements/battle-mechanics'
+import { BattleMechanics } from '../elements/battle-mechanics'
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -42,9 +42,10 @@ export class MainState extends State {
   battleTimer: Phaser.Timer
   actionsQueue: Battle.ActionData[]
   commandsQueue: number[]
-  actionInProgress: Boolean
-  battleStarted: Boolean
+  actionInProgress: boolean
+  battleStarted: boolean
   musicCurrentSection: string
+  commandSelected: number
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -63,23 +64,25 @@ export class MainState extends State {
 
   create(): void {
     this.battleStarted = false
-    this.music = this.game.add.sound('bossBattleTheme', 1)  
-    this.game.sound.setDecodedCallback([this.music], this.setGameElements, this)
-  }
-
-  setGameElements() {
+    this.music = this.game.add.sound('bossBattleTheme', 1)
+    this.commandSelected = 0
     this.enemies = []
     this.actionsQueue = []
     this.commandsQueue = []
     this.receivingCommand = 0
     this.actionInProgress = false
+    this.game.sound.setDecodedCallback([this.music], this.setGameElements, this)
+  }
+
+  setGameElements() {
+
     this.caveBackground = this.setBattleBackground()
     this.enemies = this.setMistDragon()
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    this.startBattle()  
-    this.testCursor()
+    this.startBattle()
+    // this.testCursor()
     // this.music.addMarker('start', 0, 3.3)
     // this.music.addMarker('loop', 3.3, 61.4)
     // this.musicCurrentSection = 'start'
@@ -91,28 +94,22 @@ export class MainState extends State {
     // })
   }
 
-  testCursor(): void {
-    const mistDragon = this.buildMenuData().enemies[0].cursorPosition
-    const cursor = this.game.add.sprite(mistDragon.x, mistDragon.y, 'cursor')
-    cursor.scale.x = -1
-    
-  }
-
   update(): void {
     if (this.battleStarted) {
       if (!this.battleMenu.isListeningInput()) {
         this.openCommandsForAvailableCharacter()
-        this.doNextAction()         
+        this.doNextAction()
       } else {
-       this.processCharacterAction()
+        this.processCharacterAction()
       }
     }
+
   }
 
   startBattle(): void {
     this.battleStarted = true
     this.party = BattleMechanics.setInitialATB(this.party)
-    this.startTimer() 
+    this.startTimer()
   }
 
   getCharacter(idCharacter: number) {
@@ -215,8 +212,8 @@ export class MainState extends State {
     this.battleTimer.start()
   }
 
-  async getMenuOption(): Promise<number> {
-    return await this.battleMenu.getOption()
+  getMenuOption(): number {
+    return this.battleMenu.getOption()
   }
 
   openCommandsForAvailableCharacter(): void {
@@ -224,8 +221,8 @@ export class MainState extends State {
       const next: number = this.commandsQueue.shift()
       const character = this.getCharacter(next)
       if (character) {
-        character.focus()          
-      } 
+        character.focus()
+      }
       this.receivingCommand = next ? next : 0
       this.battleMenu.openCommandsSection(next)
       this.battleTimer.pause()
@@ -234,16 +231,26 @@ export class MainState extends State {
 
   processCharacterAction(): void {
     this.battleTimer.resume()
-    const option: Promise<number> = this.getMenuOption()
-    option.then(option => {
-        const index = this.party.findIndex((value) => {
-          return value.id === this.receivingCommand
-        })
-        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, 1, option)
-        this.receivingCommand = 0      
-        this.party[index].resetFocus()            
+    if (this.commandSelected === 0) {
+      const option: number = this.getMenuOption()
+      if (option !== 0) {
+        this.commandSelected = option
+      }
+    } else {
+      //select target section
+      const index = this.party.findIndex((value) => {
+        return value.id === this.receivingCommand
+      })
+      const targetType = this.party[index].getTargetType(this.commandSelected)
+      const target = this.battleMenu.getTarget(targetType)
+      if (target !== 0) {
+        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, 1, this.commandSelected)
+        this.receivingCommand = 0
+        this.commandSelected = 0
+        this.party[index].resetFocus()
         this.party[index].prepareForAction()
-    })
+      }
+    }
   }
 
   addActionToQueue(executor: number, idExec: number, idTarget: number, idAction: number) {
@@ -277,15 +284,15 @@ export class MainState extends State {
   doNextAction() {
     if (this.actionsQueue.length && !this.actionInProgress) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
-      this.battleTimer.pause()      
+      this.battleTimer.pause()
       const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
-      const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) :  this.getCharacter(nextAction.idTarget)
+      const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
       this.makeCharacterAction(nextAction.idAction, executor, target)
     }
   }
 
   async makeCharacterAction(command: number, character: Character | Enemy, target: Character | Enemy): Promise<void> {
-    this.actionInProgress = true    
+    this.actionInProgress = true
     const finishedAction = await character.makeAction(command, target)
     if (finishedAction) {
       this.resumeTimer()
@@ -300,15 +307,15 @@ export class MainState extends State {
   //For debug purposes
   render(): void {
     if (this.battleStarted) {
-      this.game.debug.text("Time passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
+      this.game.debug.text("Seconds passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
       this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
       this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
-  
-      this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 200, 400)
-      this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 200, 420)
-      this.game.debug.text('In command: ' + this.receivingCommand, 200, 440)
+
+      this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 250, 400)
+      this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 250, 420)
+      this.game.debug.text('In command: ' + this.receivingCommand, 250, 440)
     }
-    
+
   }
 
 }

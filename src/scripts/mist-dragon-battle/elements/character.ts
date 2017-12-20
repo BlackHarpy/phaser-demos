@@ -1,4 +1,4 @@
-import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS } from './../constants';
+import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES } from './../constants';
 'use strict'
 
 import {SCALE} from '../constants'
@@ -220,6 +220,22 @@ export class Character implements Character.Base {
       }
     return promise
   }  
+
+  getTargetType(command: number) {
+    let targetType: number = 0
+    switch(command) {
+      case COMMANDS.FIGHT.ID:
+        targetType = ACTOR_TYPES.ENEMY
+        break
+      case COMMANDS.ITEM.ID:
+        targetType = ACTOR_TYPES.CHARACTER
+        break
+      case COMMANDS.SPECIAL_ATTACK.ID:
+        targetType = ACTOR_TYPES.ENEMY
+        break
+    }
+    return targetType
+  }
 
   focus(): void {
     enum tints  {
