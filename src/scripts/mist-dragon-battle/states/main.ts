@@ -82,16 +82,6 @@ export class MainState extends State {
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
     this.startBattle()
-    // this.testCursor()
-    // this.music.addMarker('start', 0, 3.3)
-    // this.music.addMarker('loop', 3.3, 61.4)
-    // this.musicCurrentSection = 'start'
-    // this.music.play(this.musicCurrentSection).onMarkerComplete.add(() => {
-    //   this.musicCurrentSection = 'loop'
-    // }, this)
-    // this.music.onStop.add(() => {
-    //   this.music.play(this.musicCurrentSection)
-    // })
   }
 
   update(): void {
@@ -158,7 +148,11 @@ export class MainState extends State {
         name: character.name,
         specialAttack: character.job.specialAttack.name,
         totalHealth: character.stats.HP,
-        remainingHealth: character.stats.HP
+        remainingHealth: character.stats.HP,
+        cursorPosition: {
+          x: character.sprite.x - 220,
+          y: character.sprite.centerY
+        }
       })
     })
 
@@ -244,7 +238,7 @@ export class MainState extends State {
       const targetType = this.party[index].getTargetType(this.commandSelected)
       const target = this.battleMenu.getTarget(targetType)
       if (target !== 0) {
-        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, 1, this.commandSelected)
+        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, target, this.commandSelected)
         this.receivingCommand = 0
         this.commandSelected = 0
         this.party[index].resetFocus()
@@ -260,6 +254,7 @@ export class MainState extends State {
       idTarget: idTarget,
       idAction: idAction
     }
+    console.log(action)
     this.actionsQueue.push(action)
     this.battleMenu.closeCommandsSection()
   }

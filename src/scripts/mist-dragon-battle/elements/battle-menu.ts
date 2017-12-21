@@ -208,6 +208,7 @@ export class BattleMenu {
       this.sounds.cursorMove.play()
     } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
       selected = option
+      this.cursor.currentOption = 1
       this.sounds.cursorSelect.play()
       this.buttonIsDown = true
     }
@@ -229,17 +230,22 @@ export class BattleMenu {
   }
 
   getTarget(targetType: number): number {
+    
       if (targetType === ACTOR_TYPES.ENEMY) {
-        this.cursor.currentOption = 1
-        const cursorPosition = {
-          x: this.menuData.enemies[0].cursorPosition.x,
-          y: this.menuData.enemies[0].cursorPosition.y
-        }
-        this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
-        this.cursor.sprite.scale.x = -1
         this.activeList = this.menuData.enemies
-       return this.getOption()
+        this.cursor.sprite.scale.x = -1
+        
+      } else {
+        this.activeList = this.menuData.characters
       }
+
+      const cursorPosition = {
+        x:  this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
+        y:  this.activeList[this.cursor.currentOption - 1].cursorPosition.y
+      }
+      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+      return this.getOption()
+      
   }
 
 }
