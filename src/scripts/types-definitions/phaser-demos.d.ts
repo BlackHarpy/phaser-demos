@@ -31,6 +31,7 @@ declare namespace Battle {
     idExec: number
     idTarget: number
     idAction: number
+    idItemUsed?: number
   }
 
   interface ATBData {

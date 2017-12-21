@@ -1,6 +1,6 @@
 'use strict'
 
-import { ACTOR_TYPES, COMMANDS } from './../constants';
+import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants';
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
 
@@ -45,7 +45,7 @@ export class MainState extends State {
   actionInProgress: boolean
   battleStarted: boolean
   musicCurrentSection: string
-  commandSelected: number
+  commandInConstruction: Battle.ActionData
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -65,12 +65,12 @@ export class MainState extends State {
   create(): void {
     this.battleStarted = false
     this.music = this.game.add.sound('bossBattleTheme', 1)
-    this.commandSelected = 0
     this.enemies = []
     this.actionsQueue = []
     this.commandsQueue = []
     this.receivingCommand = 0
     this.actionInProgress = false
+    this.initializeCommandInConstruction()
     this.game.sound.setDecodedCallback([this.music], this.setGameElements, this)
   }
 
@@ -100,6 +100,16 @@ export class MainState extends State {
     this.battleStarted = true
     this.party = BattleMechanics.setInitialATB(this.party)
     this.startTimer()
+  }
+
+  initializeCommandInConstruction() {
+    this.commandInConstruction = {
+      executor: ACTOR_TYPES.CHARACTER,
+      idExec: 0,
+      idAction: 0,
+      idTarget: 0,
+      idItemUsed: 0
+    }
   }
 
   getCharacter(idCharacter: number) {
@@ -152,7 +162,12 @@ export class MainState extends State {
         cursorPosition: {
           x: character.sprite.x - 220,
           y: character.sprite.centerY
-        }
+        },
+        items: [{
+          id: 1,
+          name: 'Cure1',
+          quantity: 2
+        }]
       })
     })
 
@@ -225,26 +240,40 @@ export class MainState extends State {
 
   processCharacterAction(): void {
     this.battleTimer.resume()
-    if (this.commandSelected === 0) {
+    if (this.commandInConstruction.idAction === 0) {
       const option: number = this.getMenuOption()
-      if (option !== 0) {
-        this.commandSelected = option
-      }
+      this.commandInConstruction.idAction = option
+      this.commandInConstruction.idExec = this.receivingCommand
     } else {
-      //select target section
-      const index = this.party.findIndex((value) => {
-        return value.id === this.receivingCommand
-      })
-      const targetType = this.party[index].getTargetType(this.commandSelected)
-      const target = this.battleMenu.getTarget(targetType)
-      if (target !== 0) {
-        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, target, this.commandSelected)
+      const idAction = this.commandInConstruction.idAction
+      if (idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID) {
+        const target = this.battleMenu.getTarget(ACTOR_TYPES.ENEMY)
+        this.commandInConstruction.idTarget = target
+      }
+      if (this.isCommandComplete()) {
+        const index = this.party.findIndex((value) => {
+          return value.id === this.receivingCommand
+        })
+        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, this.commandInConstruction.idTarget, this.commandInConstruction.idAction)
         this.receivingCommand = 0
-        this.commandSelected = 0
+        this.initializeCommandInConstruction()
         this.party[index].resetFocus()
         this.party[index].prepareForAction()
       }
     }
+  }
+
+  isCommandComplete(): boolean {
+    const command = this.commandInConstruction
+    const completeValidators = {
+      //attack
+      1: command.idTarget !== 0,
+      //item
+      2: command.idTarget !== 0 && command.idItemUsed !== 0,
+      //special attack
+      3: command.idTarget !== 0 
+    }
+    return completeValidators[command.idAction]
   }
 
   addActionToQueue(executor: number, idExec: number, idTarget: number, idAction: number) {
