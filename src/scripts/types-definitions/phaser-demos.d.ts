@@ -237,6 +237,13 @@ declare namespace BattleMenu {
     cursorPosition?: MenuPoint
   }
 
+  interface ItemMenuInfo {
+    id: number,
+    name: Phaser.Text,
+    quantity: number,
+    cursorPosition?: MenuPoint
+  }
+
   interface CharactersMenuSection {
     background: Phaser.Sprite
     charactersList: CharacterMenuInfo[]
@@ -252,11 +259,16 @@ declare namespace BattleMenu {
     commandsList: CommandsMenuInfo[]
   }
 
+  interface ItemMenuSection {
+    background: Phaser.Sprite
+    itemsList: ItemMenuInfo[]
+  }
+
   interface CharacterData {
     id: number
     name: string
     specialAttack: string
-    items?: string[]
+    items?: ItemData[]
     totalHealth?: number
     remainingHealth?: number
     cursorPosition?: MenuPoint
@@ -265,6 +277,13 @@ declare namespace BattleMenu {
   interface EnemyData {
     id: number
     name: string
+    cursorPosition?: MenuPoint
+  }
+
+  interface ItemData {
+    id: number
+    name: string
+    quantity: number
     cursorPosition?: MenuPoint
   }
 

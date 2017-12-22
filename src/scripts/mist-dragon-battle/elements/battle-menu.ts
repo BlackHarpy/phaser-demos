@@ -7,6 +7,7 @@ export class BattleMenu {
   menuData: BattleMenu.MenuData
   charactersSection: BattleMenu.CharactersMenuSection
   commandsSection: BattleMenu.CommandsMenuSection
+  itemSection: BattleMenu.ItemMenuSection
   commandSectionOpened: Boolean
   cursor: BattleMenu.Cursor
   textStyle: Phaser.PhaserTextStyle
@@ -97,6 +98,27 @@ export class BattleMenu {
     })
   }
 
+  setItemSection(index): void {
+    const backgroundConfig = {
+      anchor: { x: 0, y: 1 },
+      position: { x: 0, y: this.game.world.height },
+      size: { height: MENU_HEIGHT, width: this.game.world.width }
+    }
+
+    this.itemSection = {
+      background: this.buildMenuBackground(backgroundConfig),
+      itemsList: []
+    }
+
+    let y = INITIAL_MENU_TEXT_POSITION_Y
+    this.menuData.characters[index].items.forEach((item) => {
+      const itemMenuInfo = this.buildItemMenuInfo(item)
+      itemMenuInfo.name.position.set(20, y)
+      this.itemSection.itemsList.push(itemMenuInfo)
+      y += MENU_MARGIN
+    })
+  }
+
   buildMenuBackground(config: BattleMenu.BackgroundConfig): Phaser.Sprite {
     const background: Phaser.Sprite = this.game.add.sprite(0, 0, 'rectangle')
     background.anchor.set(config.anchor.x, config.anchor.y)
@@ -133,6 +155,15 @@ export class BattleMenu {
   }
 
   buildEnemyMenuInfo(enemyInfo: BattleMenu.EnemyData): BattleMenu.EnemyMenuInfo {
+    const enemyMenuInfo = {
+      id: enemyInfo.id,
+      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle),
+      cursorPosition: enemyInfo.cursorPosition
+    }
+    return enemyMenuInfo
+  }
+
+  buildItemMenuInfo(enemyInfo: BattleMenu.ItemData): BattleMenu.ItemMenuInfo {
     const enemyMenuInfo = {
       id: enemyInfo.id,
       name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle),
