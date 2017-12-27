@@ -78,6 +78,7 @@ declare namespace Character {
     ATB: number
     stats: IStats
     job: Job.Base
+    items: BattleMenu.ItemData[]
     animations: Animations
     initialPosition: IPosition
     tintTimer: Phaser.Timer
@@ -92,6 +93,7 @@ declare namespace Character {
     spriteKey: string
     ATB: number
     stats: IStats
+    items: BattleMenu.ItemData[]
   }
 
   interface AnimationData {
@@ -238,9 +240,11 @@ declare namespace BattleMenu {
   }
 
   interface ItemMenuInfo {
-    id: number,
-    name: Phaser.Text,
-    quantity: number,
+    id: number
+    name: Phaser.Text
+    left: number
+    leftText: Phaser.Text
+    iconSprite: Phaser.Sprite
     cursorPosition?: MenuPoint
   }
 
@@ -283,8 +287,7 @@ declare namespace BattleMenu {
   interface ItemData {
     id: number
     name: string
-    quantity: number
-    cursorPosition?: MenuPoint
+    left: number
   }
 
   interface MenuData {

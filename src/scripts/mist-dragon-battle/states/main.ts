@@ -9,6 +9,7 @@ import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
 import { BattleMenu } from '../elements/battle-menu'
 import { BattleMechanics } from '../elements/battle-mechanics'
+import { isUndefined } from 'util';
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -24,6 +25,7 @@ const mistDragonAtlasJSON = require('assets/images/mist-dragon-battle/mistDragon
 const rectangleImage = require('assets/images/mist-dragon-battle/rectangle.png')
 const cursorImage = require('assets/images/mist-dragon-battle/HandCursor.gif')
 
+const recoveryItemImage = require('assets/images/mist-dragon-battle/RecoveryItem.gif')
 const darknessImage = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
 const slashImage = require('assets/images/mist-dragon-battle/XSlash1.png')
 
@@ -51,6 +53,7 @@ export class MainState extends State {
     this.game.load.image('cave', caveImage)
     this.game.load.image('rectangle', rectangleImage)
     this.game.load.image('cursor', cursorImage)
+    this.game.load.image('recoveryItem', recoveryItemImage)
     this.game.load.atlasJSONHash('mistDragon', mistDragonAtlasImage, mistDragonAtlasJSON)
     this.game.load.atlasJSONHash('cecil', cecilAtlasImage, cecilAtlasJSON)
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
@@ -75,7 +78,6 @@ export class MainState extends State {
   }
 
   setGameElements() {
-
     this.caveBackground = this.setBattleBackground()
     this.enemies = this.setMistDragon()
     this.party = this.setParty()
@@ -163,11 +165,7 @@ export class MainState extends State {
           x: character.sprite.x - 220,
           y: character.sprite.centerY
         },
-        items: [{
-          id: 1,
-          name: 'Cure1',
-          quantity: 2
-        }]
+        items: character.items
       })
     })
 
@@ -246,15 +244,26 @@ export class MainState extends State {
       this.commandInConstruction.idExec = this.receivingCommand
     } else {
       const idAction = this.commandInConstruction.idAction
-      if (idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID) {
-        const target = this.battleMenu.getTarget(ACTOR_TYPES.ENEMY)
+      if (this.commandInConstruction.idAction === COMMANDS.ITEM.ID) {
+        if (!this.battleMenu.isListeningItem()) {
+          this.battleMenu.openItemSection(this.receivingCommand)
+        } else {
+          const item: number = this.battleMenu.getItem()
+          this.commandInConstruction.idItemUsed = item
+        }
+      }
+      const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
+      const isUsingItem = idAction === COMMANDS.ITEM.ID && this.commandInConstruction.idItemUsed !== 0
+      if (isAttacking || isUsingItem) {
+        const targetType = this.getCharacter(this.receivingCommand).getTargetType(this.commandInConstruction.idAction)
+        const target = this.battleMenu.getTarget(targetType)
         this.commandInConstruction.idTarget = target
       }
       if (this.isCommandComplete()) {
         const index = this.party.findIndex((value) => {
           return value.id === this.receivingCommand
         })
-        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, this.commandInConstruction.idTarget, this.commandInConstruction.idAction)
+        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, this.commandInConstruction.idTarget, this.commandInConstruction.idAction, this.commandInConstruction.idItemUsed)
         this.receivingCommand = 0
         this.initializeCommandInConstruction()
         this.party[index].resetFocus()
@@ -276,16 +285,17 @@ export class MainState extends State {
     return completeValidators[command.idAction]
   }
 
-  addActionToQueue(executor: number, idExec: number, idTarget: number, idAction: number) {
+  addActionToQueue(executor: number, idExec: number, idTarget: number, idAction: number, idItem?: number) {
     const action: Battle.ActionData = {
       executor: executor,
       idExec: idExec,
       idTarget: idTarget,
-      idAction: idAction
+      idAction: idAction,
+      idItemUsed: idItem
     }
-    console.log(action)
     this.actionsQueue.push(action)
-    this.battleMenu.closeCommandsSection()
+    this.battleMenu.closeItemsSection()
+    this.battleMenu.closeCommandsSection()            
   }
 
   getReadyForAction(): Battle.ReadyCharacter[] {

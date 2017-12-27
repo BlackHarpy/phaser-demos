@@ -17,6 +17,7 @@ export class Character implements Character.Base {
   ATB: number
   stats: IStats
   job: Job.Base
+  items: BattleMenu.ItemData[]
   animations: Character.Animations
   initialPosition: IPosition
   tintTimer: Phaser.Timer
@@ -36,6 +37,7 @@ export class Character implements Character.Base {
     this.status = characterConstructor.status
     this.stats = characterConstructor.stats
     this.ATB = characterConstructor.ATB
+    this.items = characterConstructor.items
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand') 
     this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)

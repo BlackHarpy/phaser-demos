@@ -1,5 +1,5 @@
 'use strict'
-import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES } from './../constants';
+import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES, SCALE } from './../constants';
 
 export class BattleMenu {
   game: Phaser.Game
@@ -8,7 +8,8 @@ export class BattleMenu {
   charactersSection: BattleMenu.CharactersMenuSection
   commandsSection: BattleMenu.CommandsMenuSection
   itemSection: BattleMenu.ItemMenuSection
-  commandSectionOpened: Boolean
+  commandSectionOpened: boolean
+  itemMenuOpened: boolean
   cursor: BattleMenu.Cursor
   textStyle: Phaser.PhaserTextStyle
   activeList: any[]
@@ -34,6 +35,7 @@ export class BattleMenu {
     this.menuData = menuData
     this.game = game
     this.commandSectionOpened = false
+    this.itemMenuOpened = false
     this.sounds = {
       cursorMove: {
         id: 'cursorMoveSFX',
@@ -52,6 +54,12 @@ export class BattleMenu {
     }
     this.setEnemySection()
     this.setCharactersSection()
+  }
+
+  getMenuCharacterIndex(id: number): number {
+    return this.menuData.characters.findIndex(character => {
+      return character.id === id
+    })
   }
 
   setCharactersSection(): void {
@@ -98,7 +106,7 @@ export class BattleMenu {
     })
   }
 
-  setItemSection(index): void {
+  openItemSection(id: number): void {
     const backgroundConfig = {
       anchor: { x: 0, y: 1 },
       position: { x: 0, y: this.game.world.height },
@@ -111,12 +119,20 @@ export class BattleMenu {
     }
 
     let y = INITIAL_MENU_TEXT_POSITION_Y
-    this.menuData.characters[index].items.forEach((item) => {
+    this.menuData.characters[this.getMenuCharacterIndex(id)].items.forEach((item) => {
       const itemMenuInfo = this.buildItemMenuInfo(item)
-      itemMenuInfo.name.position.set(20, y)
+      itemMenuInfo.iconSprite.position.set(20, y + 2)
+      itemMenuInfo.name.position.set(40, y)
+      itemMenuInfo.leftText.position.set(250, y)
+      itemMenuInfo.cursorPosition = {
+        x: 7,
+        y: y
+      }
       this.itemSection.itemsList.push(itemMenuInfo)
       y += MENU_MARGIN
     })
+    this.itemMenuOpened = true
+    this.setCursor(this.itemSection.itemsList)    
   }
 
   buildMenuBackground(config: BattleMenu.BackgroundConfig): Phaser.Sprite {
@@ -163,13 +179,15 @@ export class BattleMenu {
     return enemyMenuInfo
   }
 
-  buildItemMenuInfo(enemyInfo: BattleMenu.ItemData): BattleMenu.ItemMenuInfo {
-    const enemyMenuInfo = {
-      id: enemyInfo.id,
-      name: this.game.add.text(0, 0, enemyInfo.name, this.textStyle),
-      cursorPosition: enemyInfo.cursorPosition
+  buildItemMenuInfo(itemInfo: BattleMenu.ItemData): BattleMenu.ItemMenuInfo {
+    const itemMenuInfo = {
+      id: itemInfo.id,
+      name: this.game.add.text(0, 0, itemInfo.name, this.textStyle),
+      left: itemInfo.left,
+      leftText: this.game.add.text(0, 0, `:  ${itemInfo.left.toString()}`, this.textStyle),
+      iconSprite: this.game.add.sprite(0, 0, 'recoveryItem'),
     }
-    return enemyMenuInfo
+    return itemMenuInfo
   }
 
   openCommandsSection(characterID: number): void {
@@ -208,7 +226,17 @@ export class BattleMenu {
     })
     this.cursor.sprite.destroy()
     this.commandSectionOpened = false
+  }
 
+  closeItemsSection() {
+    this.itemSection.background.destroy()
+    this.itemSection.itemsList.forEach((item) => {
+      item.name.destroy()
+      item.iconSprite.destroy()
+      item.leftText.destroy()
+    })
+    this.cursor.sprite.destroy()
+    this.itemMenuOpened = false
   }
 
   setCursor(section: any): void {
@@ -220,8 +248,12 @@ export class BattleMenu {
     }
   }
 
-  isListeningInput(): Boolean {
+  isListeningInput(): boolean {
     return this.commandSectionOpened
+  }
+  
+  isListeningItem(): boolean {
+    return this.itemMenuOpened
   }
 
   getOption(): number {
@@ -277,6 +309,16 @@ export class BattleMenu {
       this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
       return this.getOption()
       
+  }
+
+  getItem(): number {
+    this.activeList = this.itemSection.itemsList    
+    const cursorPosition = {
+      x:  this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
+      y:  this.activeList[this.cursor.currentOption - 1].cursorPosition.y
+    }
+    this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)    
+    return this.getOption()
   }
 
 }

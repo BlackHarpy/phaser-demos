@@ -22,7 +22,16 @@ export const CECIL = {
     DEFENSE: 0,
     MAGIC_DEFENSE: 0,
     MAGIC_EVASION: 0
-  }
+  },
+  items: [{
+    id: 1,
+    name: 'Cure1',
+    left: 3
+  },{
+    id: 2,
+    name: 'Heal',
+    left: 1
+  }]
 }
 
 export const KAIN = {
@@ -46,7 +55,12 @@ export const KAIN = {
     DEFENSE: 0,
     MAGIC_DEFENSE: 0,
     MAGIC_EVASION: 0
-  }
+  },
+  items: [{
+    id: 1,
+    name: 'Cure1',
+    left: 1
+  }]
 }
 
 export const MIST_DRAGON = {
