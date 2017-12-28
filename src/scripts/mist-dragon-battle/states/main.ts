@@ -248,8 +248,13 @@ export class MainState extends State {
         if (!this.battleMenu.isListeningItem()) {
           this.battleMenu.openItemSection(this.receivingCommand)
         } else {
-          const item: number = this.battleMenu.getItem()
-          this.commandInConstruction.idItemUsed = item
+          if (this.commandInConstruction.idItemUsed === 0) {
+            const item: number = this.battleMenu.getItem()
+            if (item !== 0) {
+              this.commandInConstruction.idItemUsed = item
+            }
+          }
+         
         }
       }
       const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
@@ -294,7 +299,9 @@ export class MainState extends State {
       idItemUsed: idItem
     }
     this.actionsQueue.push(action)
-    this.battleMenu.closeItemsSection()
+    if (this.battleMenu.isListeningItem()) {
+      this.battleMenu.closeItemsSection()
+    }
     this.battleMenu.closeCommandsSection()            
   }
 

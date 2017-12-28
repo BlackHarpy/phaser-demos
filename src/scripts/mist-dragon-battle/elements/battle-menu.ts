@@ -10,6 +10,7 @@ export class BattleMenu {
   itemSection: BattleMenu.ItemMenuSection
   commandSectionOpened: boolean
   itemMenuOpened: boolean
+  targetSelectionActive: boolean
   cursor: BattleMenu.Cursor
   textStyle: Phaser.PhaserTextStyle
   activeList: any[]
@@ -36,6 +37,7 @@ export class BattleMenu {
     this.game = game
     this.commandSectionOpened = false
     this.itemMenuOpened = false
+    this.targetSelectionActive = false
     this.sounds = {
       cursorMove: {
         id: 'cursorMoveSFX',
@@ -107,6 +109,7 @@ export class BattleMenu {
   }
 
   openItemSection(id: number): void {
+    this.cursor.sprite.destroy()    
     const backgroundConfig = {
       anchor: { x: 0, y: 1 },
       position: { x: 0, y: this.game.world.height },
