@@ -328,13 +328,14 @@ export class MainState extends State {
       this.battleTimer.pause()
       const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
       const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
-      this.makeCharacterAction(nextAction.idAction, executor, target)
+      const groupTargets = nextAction.idTarget === 100 ? this.party : []
+      this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets)
     }
   }
 
-  async makeCharacterAction(command: number, character: Character | Enemy, target: Character | Enemy): Promise<void> {
+  async makeCharacterAction(command: number, character: Character | Enemy, target: Character | Enemy, groupTargets?: any[]): Promise<void> {
     this.actionInProgress = true
-    const finishedAction = await character.makeAction(command, target)
+    const finishedAction = await character.makeAction(command, target, groupTargets)
     if (finishedAction) {
       this.resumeTimer()
     }

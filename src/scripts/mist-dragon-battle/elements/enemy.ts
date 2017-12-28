@@ -4,6 +4,7 @@ import { ACTOR_TYPES, MENU_HEIGHT } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'
 import {SCALE} from '../constants'
+import { networkInterfaces } from 'os';
 
 interface ITransformation {
   id: number,
@@ -76,6 +77,8 @@ export class Enemy implements Enemy.Base {
   getNextCommand(availableTargets: number[]) {
     const nextAction: any = {}
     if (availableTargets.length) {
+      // nextAction.idTarget = 100
+      // nextAction.idAction = 2
       const targetIndex = Math.floor(Math.random() * availableTargets.length)
       nextAction.idTarget = availableTargets[targetIndex]
       nextAction.idAction = 1
@@ -86,12 +89,16 @@ export class Enemy implements Enemy.Base {
     return nextAction
   }
 
-  makeAction(command: number, target: Character | Enemy) {
+  makeAction(command: number, target: Character | Enemy, groupTargets?: any[]): Promise<boolean> {
     let promise: Promise<boolean>
     switch (command) {
       case 1:
         promise = this.attack(target)
         break
+      case 2:
+        promise = this.specialAttack(groupTargets)
+        break
+
     }
     return promise
   }
@@ -100,6 +107,16 @@ export class Enemy implements Enemy.Base {
     this.ATB = 0    
     await this.blink()
     return target.getHit(10)
+  }
+
+  async specialAttack(groupTargets: Character[]): Promise<boolean> {
+    let promise: Promise<boolean>
+    this.ATB = 0        
+    await this.blink()
+    groupTargets.forEach(character => {
+      promise  = character.getHit(50)
+    })
+    return promise
   }
 
   getHit(damage: number): Promise<boolean> {

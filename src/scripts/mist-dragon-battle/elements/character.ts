@@ -205,7 +205,7 @@ export class Character implements Character.Base {
     }
   }
 
-  async makeAction(command: number, target: Character | Enemy): Promise<boolean> {
+  async makeAction(command: number, target: Character | Enemy, groupTargets?: any[]): Promise<boolean> {
     let promise: Promise<boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:
