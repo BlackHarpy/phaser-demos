@@ -88,6 +88,21 @@ export class Character implements Character.Base {
           })
         }
       },
+      useItem: {
+        play: () => {
+          return new Promise(resolve => {
+            const timer = this.game.time.create(false)
+            this.sprite.loadTexture(this.sprite.key, 'item')
+            timer.loop(Phaser.Timer.HALF + Phaser.Timer.QUARTER, () => {
+              this.resetPosition()
+              timer.stop()
+              timer.destroy()
+              resolve(true)
+            })
+            timer.start()
+          })
+        }
+      },
       victory: {
         animation: this.sprite.animations.add('victory', Phaser.Animation.generateFrameNames('victory', 0, 1), 5, true),
         play: () => {
@@ -118,6 +133,10 @@ export class Character implements Character.Base {
     this.status = status
   }
 
+  resetATB() {
+    this.ATB = 0
+  }
+
   fillATB(): Battle.ReadyCharacter {
     const actionReady = <any>{}
     const ATBData = this.job.fillATB(this)
@@ -139,7 +158,6 @@ export class Character implements Character.Base {
     //   })
     // }, callbackArguments)
 
-    this.ATB = 0
     await this.goToFront()
     await this.makeAttackAnimation()
     target.getHit(58)
@@ -150,12 +168,16 @@ export class Character implements Character.Base {
     return (this.job.performSpecialAttack(this, target))
   }
 
+  async useItem(idItem: number, target: Character | Enemy) {
+    
+  }
+
   victory(): void {
     this.animations.victory.play()
   }
 
   prepareForAction(): void {
-    this.ATB = 0
+    this.resetATB()
     this.sprite.loadTexture(this.atlasKey, 'defend')
   }
 
@@ -205,7 +227,7 @@ export class Character implements Character.Base {
     }
   }
 
-  async makeAction(command: number, target: Character | Enemy, groupTargets?: any[]): Promise<boolean> {
+  async makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<boolean> {
     let promise: Promise<boolean>
     switch (command) {
       case COMMANDS.FIGHT.ID:

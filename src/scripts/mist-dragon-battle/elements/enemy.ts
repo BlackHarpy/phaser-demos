@@ -89,7 +89,7 @@ export class Enemy implements Enemy.Base {
     return nextAction
   }
 
-  makeAction(command: number, target: Character | Enemy, groupTargets?: any[]): Promise<boolean> {
+  makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<boolean> {
     let promise: Promise<boolean>
     switch (command) {
       case 1:

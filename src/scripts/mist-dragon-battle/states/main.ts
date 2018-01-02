@@ -329,13 +329,13 @@ export class MainState extends State {
       const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
       const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
       const groupTargets = nextAction.idTarget === 100 ? this.party : []
-      this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets)
+      this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets, nextAction.idItemUsed)
     }
   }
 
-  async makeCharacterAction(command: number, character: Character | Enemy, target: Character | Enemy, groupTargets?: any[]): Promise<void> {
+  async makeCharacterAction(command: number, actor: Character | Enemy, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<void> {
     this.actionInProgress = true
-    const finishedAction = await character.makeAction(command, target, groupTargets)
+    const finishedAction = await actor.makeAction(command, target, groupTargets, idItem)
     if (finishedAction) {
       this.resumeTimer()
     }

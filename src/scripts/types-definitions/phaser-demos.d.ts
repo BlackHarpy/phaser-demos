@@ -106,6 +106,7 @@ declare namespace Character {
     walk: AnimationData
     attack?: AnimationData
     hit?: AnimationData
+    useItem?: AnimationData
     victory?: AnimationData
   }
 }
