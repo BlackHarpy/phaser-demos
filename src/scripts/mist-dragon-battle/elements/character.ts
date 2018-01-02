@@ -169,7 +169,9 @@ export class Character implements Character.Base {
   }
 
   async useItem(idItem: number, target: Character | Enemy) {
-    
+    await this.goToFront() 
+    await this.makeUseItemAnimation()    
+    return this.goToBack()    
   }
 
   victory(): void {
@@ -208,6 +210,10 @@ export class Character implements Character.Base {
     this.sprite.scale.x = SCALE  
   }
 
+  async makeUseItemAnimation(): Promise<boolean> {
+    return this.animations.useItem.play()
+  }
+
   async makeAttackAnimation(): Promise<boolean> {
     return this.animations.attack.play()
   }
@@ -236,6 +242,8 @@ export class Character implements Character.Base {
       case COMMANDS.SPECIAL_ATTACK.ID:
         promise = this.specialAttack(target)
         break
+      case COMMANDS.ITEM.ID:
+        promise = this.useItem(idItem, target)
       default:
         promise = new Promise(resolve => {
           resolve(true)
