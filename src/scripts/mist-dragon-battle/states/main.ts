@@ -326,8 +326,14 @@ export class MainState extends State {
     if (this.actionsQueue.length && !this.actionInProgress) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
       this.battleTimer.pause()
-      const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
-      const target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
+      let target: Character | Enemy
+      const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)      
+      if (nextAction.idAction === COMMANDS.ITEM.ID) {
+        //Friendly target
+        target = this.party[nextAction.idTarget - 1]
+      } else {
+        target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
+      }
       const groupTargets = nextAction.idTarget === 100 ? this.party : []
       this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets, nextAction.idItemUsed)
     }

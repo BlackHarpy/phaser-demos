@@ -120,10 +120,11 @@ export class Enemy implements Enemy.Base {
   }
 
   getHit(damage: number): Promise<boolean> {
-    return new Promise(resolve => {
-      BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
-      resolve(true)
-    })
+    return BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
+  }
+
+  restoreHP(amount: number) {
+    BattleMechanics.showDamage(this.game, amount.toString(), this.sprite)
   }
 
   blink(): Promise<boolean> {

@@ -160,7 +160,7 @@ export class Character implements Character.Base {
 
     await this.goToFront()
     await this.makeAttackAnimation()
-    target.getHit(58)
+    await target.getHit(58)
     return this.goToBack()
   }
 
@@ -170,7 +170,8 @@ export class Character implements Character.Base {
 
   async useItem(idItem: number, target: Character | Enemy) {
     await this.goToFront() 
-    await this.makeUseItemAnimation()    
+    await this.makeUseItemAnimation()   
+    target.restoreHP(50)
     return this.goToBack()    
   }
 
@@ -218,9 +219,13 @@ export class Character implements Character.Base {
     return this.animations.attack.play()
   }
 
-  getHit(damage: number): Promise<boolean> {
-    BattleMechanics.showDamage(this.game, '35', this.sprite)
+  async getHit(damage: number): Promise<boolean> {
+    BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
     return this.animations.hit.play()
+  }
+
+  restoreHP(amount: number):  Promise<boolean> {
+    return BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)          
   }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
