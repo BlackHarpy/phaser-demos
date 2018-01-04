@@ -1,9 +1,10 @@
 import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES } from './../constants';
-import {SCALE} from '../constants'
+import { SCALE } from '../constants'
 import { Job } from '../elements/job'
 import { Enemy } from '../elements/enemy'
 import { Item } from './item';
 import { BattleMechanics } from './battle-mechanics'
+import { ADDRGETNETWORKPARAMS } from 'dns';
 
 export class Character implements Character.Base {
   game: Phaser.Game
@@ -149,7 +150,7 @@ export class Character implements Character.Base {
     return actionReady
   }
 
-  async attack(target: Character | Enemy): Promise<boolean> {
+  async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
 
     // ------ Llamada (más o menos) con callbacks
     // const callbackArguments = [target, 58]
@@ -163,19 +164,62 @@ export class Character implements Character.Base {
 
     await this.goToFront()
     await this.makeAttackAnimation()
+    const newStatus = {}
     await target.getHit(58)
-    return this.goToBack()
+    await this.goToBack()
+    return {
+      response: 'OK',
+      newStatus
+    }
   }
 
-  async specialAttack(target: Character | Enemy): Promise<boolean> {
-    return (this.job.performSpecialAttack(this, target))
+  async specialAttack(target: Character | Enemy): Promise<Battle.ActionStatus> {
+    const newStatus = {
+      target: {
+        id: target.id,
+        newHP: await this.job.performSpecialAttack(this, target)
+      }
+    }
+
+    return {
+      response: 'OK',
+      newStatus
+    }
   }
 
-  async useItem(idItem: number, target: Character | Enemy) {
+  async useItem(idItem: number, target: Character | Enemy): Promise<Battle.ActionStatus> {
     await this.goToFront() 
     await this.makeUseItemAnimation()   
-    target.restoreHP(50)
-    return this.goToBack()    
+    const newStatus = this.consumeRecoveryItem(idItem, target)
+    await this.goToBack()    
+    return {
+      response: 'OK',
+      newStatus
+    }
+  }
+
+  consumeRecoveryItem(idItem: number, target: Character | Enemy) {
+    const inventoryRecord = this.inventory.find(itemRecord => {
+      return itemRecord.item.id === idItem
+    })
+    if (inventoryRecord.remaining === 1) {
+      const indexToDelete = this.inventory.findIndex(record => {
+        return record.item.id === inventoryRecord.item.id
+      })
+      this.inventory.splice(indexToDelete, 1)
+    } else {
+      inventoryRecord.remaining--
+    }
+    return {
+      character: {
+        id: this.id,
+        newInventory: this.inventory 
+      },
+      target: {
+        id: target.id,
+        newHP: target.restoreHP(inventoryRecord.item.modifier) 
+      }
+    }
   }
 
   victory(): void {
@@ -227,8 +271,9 @@ export class Character implements Character.Base {
     return this.animations.hit.play()
   }
 
-  restoreHP(amount: number):  Promise<boolean> {
-    return BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)          
+  restoreHP(amount: number):  number {
+    BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)              
+    return this.stats.HP += amount
   }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
@@ -241,8 +286,8 @@ export class Character implements Character.Base {
     }
   }
 
-  async makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<boolean> {
-    let promise: Promise<boolean>
+  async makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
+    let promise: Promise<Battle.ActionStatus>
     switch (command) {
       case COMMANDS.FIGHT.ID:
         promise = this.attack(target)
@@ -252,11 +297,11 @@ export class Character implements Character.Base {
         break
       case COMMANDS.ITEM.ID:
         promise = this.useItem(idItem, target)
-      default:
-        promise = new Promise(resolve => {
-          resolve(true)
-        })
-        break
+      // default:
+      //   promise = new Promise(resolve => {
+      //     resolve(true)
+      //   })
+      //   break
       }
     return promise
   }  

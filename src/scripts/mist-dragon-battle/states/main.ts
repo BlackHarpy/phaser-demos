@@ -368,6 +368,7 @@ export class MainState extends State {
   async makeCharacterAction(command: number, actor: Character | Enemy, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<void> {
     this.actionInProgress = true
     const finishedAction = await actor.makeAction(command, target, groupTargets, idItem)
+    console.log(finishedAction)
     if (finishedAction) {
       this.resumeTimer()
     }

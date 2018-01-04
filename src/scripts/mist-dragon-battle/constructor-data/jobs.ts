@@ -3,6 +3,7 @@ import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
 import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
 import { BattleMechanics } from '../elements/battle-mechanics'
+import { networkInterfaces } from 'os';
 
 export const DRAGOON = {
   name: 'Dragoon',
@@ -11,18 +12,18 @@ export const DRAGOON = {
     name: 'Jump',
     chargeTime: 5,
     jumpTarget: {},
-    async perform(character: Character, target: Character | Enemy): Promise<boolean> {
-      let promise: Promise<boolean>
+    async perform(character: Character, target: Character | Enemy): Promise<number> {
+      let newTargetHP: Promise<number>
       if (character.status === CHARACTER_STATUS.JUMP) {
-        promise = this.finishJump(character)
+        newTargetHP = this.finishJump(character)
       } else {
         await character.goToFront()    
-        promise = this.startJump(character, target)    
+        newTargetHP = this.startJump(character, target)    
       }
-      return promise
+      return newTargetHP
     },
  
-    startJump(character: Character, target: Character | Enemy): Promise<boolean> {
+    startJump(character: Character, target: Character | Enemy): Promise<number> {
       character.setStatus(CHARACTER_STATUS.JUMP)      
       return new Promise(resolve => {
         const timer: Phaser.Timer = character.sprite.game.time.create(false)
@@ -32,7 +33,7 @@ export const DRAGOON = {
           const tween = character.sprite.game.add.tween(character.sprite).to({ y: character.sprite.y - 200, x: character.sprite.x - 50 }, 80, "Linear", true)
           timer.stop()
           this.jumpTarget = target
-          resolve(true)
+          resolve(target.stats.HP)
           timer.destroy()
         })
         timer.start()
@@ -53,11 +54,12 @@ export const DRAGOON = {
           return Phaser.Math.bezierInterpolation(v, k);
         })
         returnTween.onComplete.add(() => {
-          BattleMechanics.showDamage(character.game, '78', this.jumpTarget.sprite)
+          const damage = 78
+          BattleMechanics.showDamage(character.game, damage.toString(), this.jumpTarget.sprite)
           character.ATB = 0
           character.status = CHARACTER_STATUS.NORMAL
           character.resetPosition()
-          resolve(true)
+          resolve(this.jumpTarget.stats.HP)
         }, this, 1, character)
         hitTween.chain(returnTween)
         hitTween.start()
@@ -105,7 +107,7 @@ export const DARK_KNIGHT = {
             this.emitParticles(character).then((value) => {
               BattleMechanics.showDamage(character.game, '64', target.sprite)
               character.resetPosition()
-              resolve(value)
+              resolve(target.stats.HP)
             })
           }
         })

@@ -34,6 +34,11 @@ declare namespace Battle {
     idItemUsed?: number
   }
 
+  interface ActionStatus {
+    response: string
+    newStatus: any
+  }
+
   interface ATBData {
     newATB: number
     returnAction?: ActionData
