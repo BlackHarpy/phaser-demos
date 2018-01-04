@@ -2,6 +2,7 @@ import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES }
 import {SCALE} from '../constants'
 import { Job } from '../elements/job'
 import { Enemy } from '../elements/enemy'
+import { Item } from './item';
 import { BattleMechanics } from './battle-mechanics'
 
 export class Character implements Character.Base {
@@ -15,19 +16,19 @@ export class Character implements Character.Base {
   ATB: number
   stats: IStats
   job: Job.Base
-  items: BattleMenu.ItemData[]
+  inventory: Character.InventoryItem[]
   animations: Character.Animations
   initialPosition: IPosition
   tintTimer: Phaser.Timer
 
-  constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any) {
+  constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any, inventory: Character.InventoryItem[]) {
     this.game = game
     this.tintTimer = this.game.time.create(false)
-    this.setCharacterData(characterConstructor, jobConstructor)
+    this.setCharacterData(characterConstructor, jobConstructor, inventory)
     this.addAnimations(characterConstructor.atlasKey)
   }
 
-  setCharacterData(characterConstructor: Character.Constructor, jobConstructor: any) {
+  setCharacterData(characterConstructor: Character.Constructor, jobConstructor: any, inventory: Character.InventoryItem[]) {
     this.id = characterConstructor.id
     this.atlasKey = characterConstructor.atlasKey
     this.name = characterConstructor.name
@@ -35,12 +36,16 @@ export class Character implements Character.Base {
     this.status = characterConstructor.status
     this.stats = characterConstructor.stats
     this.ATB = characterConstructor.ATB
-    this.items = characterConstructor.items
+    this.inventory = inventory
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand') 
     this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
     this.sprite.anchor.set(0.5, 0.5)
+  }
+
+  setItems(inventory: Character.InventoryItem[]) {
+    this.inventory = inventory
   }
 
   addAnimations(spriteKey: string) {

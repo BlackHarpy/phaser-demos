@@ -1,10 +1,12 @@
-import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants';
-import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
-import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';
+import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
+import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters'
+import { RECOVERY_ITEMS } from './../constructor-data/items'
+import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs'
 
 import { State } from '../../state'
 import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
+import { Item } from '../elements/item'
 import { BattleMenu } from '../elements/battle-menu'
 import { BattleMechanics } from '../elements/battle-mechanics'
 import { isUndefined } from 'util';
@@ -93,7 +95,6 @@ export class MainState extends State {
         this.processCharacterAction()
       }
     }
-
   }
 
   startBattle(): void {
@@ -141,13 +142,26 @@ export class MainState extends State {
 
   setParty(): Character[] {
     const party: Character[] = []
-    party.push(new Character(this.game, KAIN, DRAGOON))
-    party.push(new Character(this.game, CECIL, DARK_KNIGHT))
+    party.push(new Character(this.game, KAIN, DRAGOON, this.constructInventory([{id: 1, remaining: 1}])))
+    party.push(new Character(this.game, CECIL, DARK_KNIGHT, this.constructInventory([{id: 1, remaining: 2}, {id: 2, remaining: 1}])))
 
     party.forEach((value, index) => {
       value.setToBattle(this.caveBackground.height, party.length, index)
     })
     return party
+  }
+
+  //I dont really want to do an interface for this.
+  constructInventory(itemsToAdd: any[]) {
+    const inventory: Character.InventoryItem[] = []
+    itemsToAdd.forEach(data => {
+      const itemConstructor = RECOVERY_ITEMS.find(item => {
+        return item.id === data.id
+      })
+      const item = new Item(this.game, itemConstructor)
+      inventory.push({item: item, remaining: data.remaining})
+    })
+    return inventory
   }
 
   buildMenuData(): any {
@@ -163,7 +177,7 @@ export class MainState extends State {
           x: character.sprite.x - 220,
           y: character.sprite.centerY
         },
-        items: character.items
+        items: this.buildItemMenuDataForCharacter(character)
       })
     })
 
@@ -183,6 +197,20 @@ export class MainState extends State {
       enemies: enemies
     }
   }
+
+  buildItemMenuDataForCharacter(character: Character) {
+    const itemDataForMenu: BattleMenu.ItemData[] = []
+    character.inventory.forEach(record => {
+      const itemData = {
+        id: record.item.id,
+        name: record.item.name,
+        left: record.remaining
+      }
+      itemDataForMenu.push(itemData)
+    })
+    return itemDataForMenu
+  }
+
 
   getReadyForCommands(readyCharacters: Battle.ReadyCharacter[]): number[] {
     return readyCharacters.map((character) => {

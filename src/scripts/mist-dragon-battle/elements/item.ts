@@ -6,9 +6,9 @@ export class Item implements Item.Base {
   type: number  
   name: string
   menuSprite: Phaser.Sprite
-  targetType: string
+  targetType: number
   targetStat: string
-  modifier: number //Depends of item type
+  modifier: number //Depends of item type,
 
   constructor(game: Phaser.Game, itemConstructor: Item.Constructor) {
     this.game = game
@@ -18,5 +18,8 @@ export class Item implements Item.Base {
     this.menuSprite = new Phaser.Sprite(game, 0, 0, itemConstructor.menuSpriteKey)
     this.menuSprite.scale.setTo(SCALE)
     this.menuSprite.smoothed = false
+    this.targetType = itemConstructor.targetType
+    this.targetStat = itemConstructor.targetStat
+    this.modifier = itemConstructor.modifier
   }
 }
