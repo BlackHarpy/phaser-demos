@@ -1,4 +1,3 @@
-'use strict'
 import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES, SCALE } from './../constants';
 
 export class BattleMenu {

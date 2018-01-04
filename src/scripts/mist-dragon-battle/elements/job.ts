@@ -1,5 +1,3 @@
-'use strict'
-
 import { Character } from '../elements/character'
 import { Enemy } from '../elements/enemy'
 

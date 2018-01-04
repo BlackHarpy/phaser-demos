@@ -1,5 +1,3 @@
-'use strict'
-
 import { State } from './state'
 
 const logoImage = require('assets/phaser.png')

@@ -1,4 +1,3 @@
-'use strict'
 import { ITEM_TYPES } from './../constants'
 
 export const DARK_SWORD = {

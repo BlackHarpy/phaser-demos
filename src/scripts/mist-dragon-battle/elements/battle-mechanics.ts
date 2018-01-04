@@ -1,5 +1,3 @@
-'use strict'
-
 import { Character } from './character'
 import { Enemy } from './enemy'
 import { CHARACTER_STATUS } from './../constants';

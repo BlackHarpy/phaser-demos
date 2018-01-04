@@ -1,5 +1,3 @@
-'use strict'
-
 import { SCALE } from './../constants'
 
 export class Item implements Item.Base {
@@ -10,7 +8,7 @@ export class Item implements Item.Base {
   menuSprite: Phaser.Sprite
   targetType: string
   targetStat: string
-  modifier: number
+  modifier: number //Depends of item type
 
   constructor(game: Phaser.Game, itemConstructor: Item.Constructor) {
     this.game = game

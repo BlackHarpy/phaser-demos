@@ -1,6 +1,4 @@
 import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES } from './../constants';
-'use strict'
-
 import {SCALE} from '../constants'
 import { Job } from '../elements/job'
 import { Enemy } from '../elements/enemy'

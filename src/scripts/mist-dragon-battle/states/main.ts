@@ -1,5 +1,3 @@
-'use strict'
-
 import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants';
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters';
 import { DARK_KNIGHT, DRAGOON } from './../constructor-data/jobs';

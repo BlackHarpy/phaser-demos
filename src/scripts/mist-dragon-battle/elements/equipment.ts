@@ -1,5 +1,3 @@
-'use strict'
-
 import { SCALE, ITEM_TYPES } from './../constants'
 
 export class Equipment implements Equipment.Base {

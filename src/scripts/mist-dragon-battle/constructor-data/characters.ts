@@ -1,4 +1,3 @@
-'use strict'
 import { CHARACTER_STATUS } from './../constants'
 
 export const CECIL = {

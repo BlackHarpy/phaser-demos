@@ -1,5 +1,3 @@
-'use strict'
-
 import { ACTOR_TYPES, MENU_HEIGHT } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'

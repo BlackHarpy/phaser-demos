@@ -1,4 +1,3 @@
-'use strict'
 import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
 
 import { Character } from '../elements/character'

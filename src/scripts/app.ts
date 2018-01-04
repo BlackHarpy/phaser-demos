@@ -2,8 +2,6 @@
 /// <reference path="../../node_modules/phaser-ce/typescript/pixi.d.ts"/>
 /// <reference path="./types-definitions/phaser-demos.d.ts"/>
 
-'use strict'
-
 import 'pixi'
 import 'p2'
 import 'phaser'
