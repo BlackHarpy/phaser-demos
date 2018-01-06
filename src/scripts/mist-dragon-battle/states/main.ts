@@ -369,7 +369,7 @@ export class MainState extends State {
     this.actionInProgress = true
     const finishedAction = await actor.makeAction(command, target, groupTargets, idItem)
     console.log(finishedAction)
-    if (finishedAction) {
+    if (finishedAction.response = 'OK') {
       this.resumeTimer()
     }
   }

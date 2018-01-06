@@ -87,8 +87,8 @@ export class Enemy implements Enemy.Base {
     return nextAction
   }
 
-  makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<boolean> {
-    let promise: Promise<boolean>
+  makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
+    let promise: Promise<Battle.ActionStatus>
     switch (command) {
       case 1:
         promise = this.attack(target)
@@ -101,20 +101,30 @@ export class Enemy implements Enemy.Base {
     return promise
   }
 
-  async attack(target: Character | Enemy): Promise<boolean> {
+  async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
     this.ATB = 0    
     await this.blink()
-    return target.getHit(10)
+    const newStatus = {}
+    await target.getHit(10)
+    return {
+      response: 'OK',
+      newStatus
+    }
   }
 
-  async specialAttack(groupTargets: Character[]): Promise<boolean> {
-    let promise: Promise<boolean>
+ //TODO Check this next
+  async specialAttack(groupTargets: Character[]): Promise<Battle.ActionStatus> {
+    let promise: Promise<Battle.ActionStatus>
     this.ATB = 0        
     await this.blink()
+    const newStatus = {}    
     groupTargets.forEach(character => {
-      promise  = character.getHit(50)
+      character.getHit(50)
     })
-    return promise
+    return {
+      response: 'OK',
+      newStatus
+    }
   }
 
   getHit(damage: number): Promise<boolean> {
