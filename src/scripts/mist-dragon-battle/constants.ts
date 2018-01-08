@@ -25,7 +25,7 @@ export const COMMANDS = {
   DEFEND: {
     ID: 4,
     LABEL: 'Defend',    
-    POSITION: 'RIGHT'
+    POSITION: 'MAIN'
   },
   SKIP_TURN: {
     ID: 5,
@@ -49,9 +49,10 @@ export const COMMANDS_POSITIONS = {
 
 export const CHARACTER_STATUS = {
   NORMAL: 1,
-  KO: 2,
-  JUMP: 3,
-  MIST: 4
+  DEFEND: 2,
+  KO: 3,
+  JUMP: 4,
+  MIST: 5
 }
 
 export const ITEM_TYPES = {

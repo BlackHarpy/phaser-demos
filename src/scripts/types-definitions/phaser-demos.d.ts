@@ -111,6 +111,7 @@ declare namespace Character {
     attack?: AnimationData
     hit?: AnimationData
     useItem?: AnimationData
+    defend?: AnimationData
     victory?: AnimationData
   }
 

@@ -107,6 +107,14 @@ export class Character implements Character.Base {
           })
         }
       },
+      defend: {
+        play: () => {
+          return new Promise(resolve => {
+            this.sprite.loadTexture(this.sprite.key, 'defend')
+            resolve(true)
+          })
+        }
+      },
       victory: {
         animation: this.sprite.animations.add('victory', Phaser.Animation.generateFrameNames('victory', 0, 1), 5, true),
         play: () => {
@@ -206,6 +214,19 @@ export class Character implements Character.Base {
     }
   }
 
+  async defend(): Promise<Battle.ActionStatus> {
+    await this.animations.defend.play()
+    return {
+      response: 'OK',
+      newStatus: {
+        character: {
+          id: this.id,
+          newStatus: CHARACTER_STATUS.DEFEND
+        }
+      }
+    }
+  }
+
   consumeRecoveryItem(idItem: number, target: Character | Enemy) {
     const inventoryRecord = this.inventory.find(itemRecord => {
       return itemRecord.item.id === idItem
@@ -263,7 +284,8 @@ export class Character implements Character.Base {
   }
 
   resetPosition(): void {
-    this.sprite.loadTexture(this.atlasKey, 'stand')
+    const textureKey = this.status === CHARACTER_STATUS.DEFEND ? 'defend' : 'stand'
+    this.sprite.loadTexture(this.atlasKey, textureKey)
     this.sprite.scale.x = SCALE
   }
 
@@ -307,6 +329,9 @@ export class Character implements Character.Base {
         break
       case COMMANDS.ITEM.ID:
         promise = this.useItem(idItem, target)
+        break
+      case COMMANDS.DEFEND.ID:
+        promise = this.defend()
       // default:
       //   promise = new Promise(resolve => {
       //     resolve(true)

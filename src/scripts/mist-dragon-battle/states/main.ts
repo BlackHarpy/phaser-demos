@@ -307,11 +307,13 @@ export class MainState extends State {
     const command = this.commandInConstruction
     const completeValidators = {
       //attack
-      1: command.idTarget !== 0,
+      [COMMANDS.FIGHT.ID]: command.idTarget !== 0,
       //item
-      2: command.idTarget !== 0 && command.idItemUsed !== 0,
+      [COMMANDS.ITEM.ID]: command.idTarget !== 0 && command.idItemUsed !== 0,
       //special attack
-      3: command.idTarget !== 0 
+      [COMMANDS.SPECIAL_ATTACK.ID]: command.idTarget !== 0,
+      //defend
+      [COMMANDS.DEFEND.ID]: true
     }
     return completeValidators[command.idAction]
   }
