@@ -370,10 +370,23 @@ export class MainState extends State {
   async makeCharacterAction(command: number, actor: Character | Enemy, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<void> {
     this.actionInProgress = true
     const finishedAction = await actor.makeAction(command, target, groupTargets, idItem)
-    console.log(finishedAction)
     if (finishedAction.response = 'OK') {
-      this.resumeTimer()
+      this.updateStatus(finishedAction)
     }
+  }
+
+  updateStatus(actionResult: Battle.ActionStatus) {
+    const newStatus = actionResult.newStatus
+    if (newStatus.hasOwnProperty('targets')) {
+      newStatus.targets.forEach(target => {
+        const actor: Character | Enemy = target.type === ACTOR_TYPES.CHARACTER ? this.getCharacter(target.id) : this.getEnemy(target.id)
+        if (actor) {
+          //change to set function
+          actor.stats.HP = target.newHP
+        }
+      }) 
+    }
+    this.resumeTimer()
   }
 
   resumeTimer() {
