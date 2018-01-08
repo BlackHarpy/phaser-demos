@@ -9,7 +9,7 @@ import { ADDRGETNETWORKPARAMS } from 'dns';
 export class Character implements Character.Base {
   game: Phaser.Game
   id: number
-  atlasKey: string  
+  atlasKey: string
   name: string
   level: number
   status: number
@@ -38,7 +38,7 @@ export class Character implements Character.Base {
     this.stats = characterConstructor.stats
     this.ATB = characterConstructor.ATB
     this.inventory = inventory
-    this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand') 
+    this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand')
     this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)
     this.sprite.smoothed = false
@@ -59,7 +59,7 @@ export class Character implements Character.Base {
       },
       attack: {
         animation: this.sprite.animations.add('attack', Phaser.Animation.generateFrameNames('attack', 0, 1), 8, true),
-        hitAnimation:  new Phaser.Sprite(this.game, 100, 100, 'slash'),
+        hitAnimation: new Phaser.Sprite(this.game, 100, 100, 'slash'),
         play: () => {
           return new Promise(resolve => {
             this.game.add.existing(this.animations.attack.hitAnimation)
@@ -161,12 +161,17 @@ export class Character implements Character.Base {
     //     })
     //   })
     // }, callbackArguments)
-
     await this.goToFront()
     await this.makeAttackAnimation()
-    const newStatus = {}
-    await target.getHit(58)
+    const damage = BattleMechanics.calculateDamage(this, target)
     await this.goToBack()
+    const newStatus = {
+      targets: [{
+        type: ACTOR_TYPES.ENEMY,
+        id: target.id,
+        newHP: await target.getHit(damage)
+      }]
+    }
     return {
       response: 'OK',
       newStatus
@@ -174,11 +179,14 @@ export class Character implements Character.Base {
   }
 
   async specialAttack(target: Character | Enemy): Promise<Battle.ActionStatus> {
+    
+    const damage = await this.job.performSpecialAttack(this, target)
     const newStatus = {
-      target: {
+      targets: [{
+        type: ACTOR_TYPES.ENEMY,        
         id: target.id,
-        newHP: await this.job.performSpecialAttack(this, target)
-      }
+        newHP: await target.getHit(damage)
+      }]
     }
 
     return {
@@ -188,10 +196,10 @@ export class Character implements Character.Base {
   }
 
   async useItem(idItem: number, target: Character | Enemy): Promise<Battle.ActionStatus> {
-    await this.goToFront() 
-    await this.makeUseItemAnimation()   
+    await this.goToFront()
+    await this.makeUseItemAnimation()
     const newStatus = this.consumeRecoveryItem(idItem, target)
-    await this.goToBack()    
+    await this.goToBack()
     return {
       response: 'OK',
       newStatus
@@ -213,12 +221,13 @@ export class Character implements Character.Base {
     return {
       character: {
         id: this.id,
-        newInventory: this.inventory 
+        newInventory: this.inventory
       },
-      target: {
+      targets: [{
+        type: ACTOR_TYPES.CHARACTER,        
         id: target.id,
-        newHP: target.restoreHP(inventoryRecord.item.modifier) 
-      }
+        newHP: target.restoreHP(inventoryRecord.item.modifier)
+      }]
     }
   }
 
@@ -232,9 +241,9 @@ export class Character implements Character.Base {
   }
 
   walkToPosition(position, resetAtEnd?: Boolean): Promise<boolean> {
-    return new Promise<any> (resolve => {
+    return new Promise<any>(resolve => {
       this.animations.walk.play()
-      const tween = this.game.add.tween(this.sprite).to({x: position}, 100, "Linear", true)  
+      const tween = this.game.add.tween(this.sprite).to({ x: position }, 100, "Linear", true)
       tween.onComplete.add(() => {
         if (resetAtEnd) {
           this.resetPosition()
@@ -255,7 +264,7 @@ export class Character implements Character.Base {
 
   resetPosition(): void {
     this.sprite.loadTexture(this.atlasKey, 'stand')
-    this.sprite.scale.x = SCALE  
+    this.sprite.scale.x = SCALE
   }
 
   async makeUseItemAnimation(): Promise<boolean> {
@@ -266,19 +275,20 @@ export class Character implements Character.Base {
     return this.animations.attack.play()
   }
 
-  async getHit(damage: number): Promise<boolean> {
+  async getHit(damage: number): Promise<number> {
     BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
-    return this.animations.hit.play()
+    await this.animations.hit.play()
+    return this.stats.HP - damage
   }
 
-  restoreHP(amount: number):  number {
-    BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)              
+  restoreHP(amount: number): number {
+    BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)
     return this.stats.HP += amount
   }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {
     this.sprite.x = this.game.world.width
-    this.game.add.tween(this.sprite).to({x: this.game.world.centerX * SCALE}, 100, Phaser.Easing.Linear.None, true)
+    this.game.add.tween(this.sprite).to({ x: this.game.world.centerX * SCALE }, 100, Phaser.Easing.Linear.None, true)
     this.sprite.y = referenceHeight / (partySize + 1) * (position + 1)
     this.initialPosition = {
       x: this.game.world.centerX * SCALE,
@@ -302,13 +312,13 @@ export class Character implements Character.Base {
       //     resolve(true)
       //   })
       //   break
-      }
+    }
     return promise
-  }  
+  }
 
   getTargetType(command: number) {
     let targetType: number = 0
-    switch(command) {
+    switch (command) {
       case COMMANDS.FIGHT.ID:
         targetType = ACTOR_TYPES.ENEMY
         break
@@ -323,7 +333,7 @@ export class Character implements Character.Base {
   }
 
   focus(): void {
-    enum tints  {
+    enum tints {
       light = 0xffffff,
       dark = 0x918e8c
     }
@@ -339,5 +349,5 @@ export class Character implements Character.Base {
     this.tintTimer.stop()
     this.sprite.tint = 0xffffff
   }
-  
+
 }

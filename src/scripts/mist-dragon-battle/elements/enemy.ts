@@ -104,8 +104,15 @@ export class Enemy implements Enemy.Base {
   async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
     this.ATB = 0    
     await this.blink()
-    const newStatus = {}
-    await target.getHit(10)
+    const damage = 60
+    const newStatus = {
+      targets: [{
+        type: ACTOR_TYPES.CHARACTER,
+        id: target.id,
+        newHP: await target.getHit(damage)
+      }]
+    }
+    
     return {
       response: 'OK',
       newStatus
@@ -127,8 +134,9 @@ export class Enemy implements Enemy.Base {
     }
   }
 
-  getHit(damage: number): Promise<boolean> {
-    return BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
+  async getHit(damage: number): Promise<number> {
+    await BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
+    return this.stats.HP - damage
   }
 
   restoreHP(amount: number) {

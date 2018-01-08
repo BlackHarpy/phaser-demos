@@ -33,7 +33,7 @@ export const DRAGOON = {
           const tween = character.sprite.game.add.tween(character.sprite).to({ y: character.sprite.y - 200, x: character.sprite.x - 50 }, 80, "Linear", true)
           timer.stop()
           this.jumpTarget = target
-          resolve(target.stats.HP)
+          resolve(0)
           timer.destroy()
         })
         timer.start()
@@ -59,7 +59,7 @@ export const DRAGOON = {
           character.ATB = 0
           character.status = CHARACTER_STATUS.NORMAL
           character.resetPosition()
-          resolve(this.jumpTarget.stats.HP)
+          resolve(damage)
         }, this, 1, character)
         hitTween.chain(returnTween)
         hitTween.start()
@@ -105,9 +105,11 @@ export const DARK_KNIGHT = {
           } else {
             timer.stop()            
             this.emitParticles(character).then((value) => {
-              BattleMechanics.showDamage(character.game, '64', target.sprite)
+              const damage = 64
+              //calculateDamage function
+              BattleMechanics.showDamage(character.game, damage.toString(), target.sprite)
               character.resetPosition()
-              resolve(target.stats.HP)
+              resolve(damage)
             })
           }
         })
