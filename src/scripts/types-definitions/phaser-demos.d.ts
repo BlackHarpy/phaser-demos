@@ -200,15 +200,15 @@ declare namespace Equipment {
   }
 
   interface WeaponStats {
-    attack: number
-    accuracy: number
+    ATTACK: number
+    ACCURACY: number
   }
 
   interface ArmorStats {
-    defense: number
-    magicDefense: number
-    evasion: number
-    magicEvasion
+    DEFENSE: number
+    MAGIC_DEFENSE: number
+    EVASION: number
+    MAGIC_EVASION: number
   }
 }
 

@@ -1,4 +1,4 @@
-import { ACTOR_TYPES, MENU_HEIGHT } from './../constants';
+import { ACTOR_TYPES, MENU_HEIGHT, COMMANDS } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'
 import {SCALE} from '../constants'
@@ -18,6 +18,7 @@ export class Enemy implements Enemy.Base {
   level: number
   status: number
   stats: IStats
+  equipment: any[]    //wont use this
   currentStats: IStats
   ATB: number
   customFlags: Enemy.CustomFlag[]
@@ -35,6 +36,7 @@ export class Enemy implements Enemy.Base {
     this.ATB = enemyConstructor.ATB
     this.commands = enemyConstructor.commands
     this.customFlags = enemyConstructor.customFlags
+    this.equipment = []
   }
 
   setSprite(atlasKey: string): Phaser.Sprite {
@@ -106,7 +108,7 @@ export class Enemy implements Enemy.Base {
   async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
     this.ATB = 0    
     await this.blink()
-    const damage = 60
+    const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
     const newStatus = {
       targets: [{
         type: ACTOR_TYPES.CHARACTER,

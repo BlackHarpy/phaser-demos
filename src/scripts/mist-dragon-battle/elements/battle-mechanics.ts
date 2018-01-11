@@ -1,6 +1,7 @@
+import { Equipment } from './equipment';
 import { Character } from './character'
 import { Enemy } from './enemy'
-import { CHARACTER_STATUS } from './../constants';
+import { COMMANDS, CHARACTER_STATUS, ITEM_TYPES } from './../constants'
 
 function numbersBounce (game: Phaser.Game, number: string, sprite: Phaser.Sprite, tint: number): Promise<boolean> {
   return new Promise (resolve => {
@@ -26,6 +27,40 @@ function numbersBounce (game: Phaser.Game, number: string, sprite: Phaser.Sprite
   })
 }
 
+function getWeaponAttackPower(attackerEquipment: Equipment[]) {
+  const weapon: any = attackerEquipment.find(equipment => {
+    return equipment.type === ITEM_TYPES.WEAPON
+  })
+  return weapon.stats.ATTACK ? weapon.stats.ATTACK : 0
+}
+
+function getWeaponAccuracy(attackerEquipment: Equipment[]) {
+  const weapon: any = attackerEquipment.find(equipment => {
+    return equipment.type === ITEM_TYPES.WEAPON
+  })
+  return weapon.stats.ACCURACY ? weapon.stats.ACCURACY : 0
+}
+
+function calculateBaseAttackPower(attacker: Character | Enemy): number {
+  let baseAttackPower: number = 0
+  if (attacker instanceof Character) {
+    baseAttackPower = getWeaponAttackPower(attacker.equipment) + attacker.currentStats.STRENGTH / 4 + attacker.level / 4
+  } 
+  if (attacker instanceof Enemy) {
+    baseAttackPower = attacker.stats.STRENGTH
+  }
+  return baseAttackPower
+}
+
+function calculateRegularDamage(attacker: Character | Enemy, target: Character | Enemy): number {
+  const baseAttackPower: number = Math.round(calculateBaseAttackPower(attacker))
+  const attackPower: number = baseAttackPower + getWeaponAttackPower(attacker.equipment)
+  const baseHitRate: number = Math.round(getWeaponAccuracy(attacker.equipment) + attacker.level / 4)
+  const baseAttackMultiplier: number = Math.round(attacker.currentStats.STRENGTH / 8 + attacker.currentStats.SPEED / 16 + 1)
+  console.log(baseAttackMultiplier)
+  return 45
+}
+
 export class BattleMechanics {
 
   static setInitialATB(party: Character[]): Character[] {
@@ -44,8 +79,12 @@ export class BattleMechanics {
     }).map(character => { return character.id })
   }
 
-  static calculateDamage(attacker: Character | Enemy, target: Character | Enemy): number {
-    return 50
+  static calculateDamage(attacker: Character | Enemy, target: Character | Enemy, action: number): number {
+    const damageCalculationObject = {
+      [COMMANDS.FIGHT.ID]: calculateRegularDamage
+    }
+   
+    return damageCalculationObject[action](attacker, target)
   }
 
   static showDamage(game: Phaser.Game, damage: string, sprite: Phaser.Sprite): Promise<boolean> {

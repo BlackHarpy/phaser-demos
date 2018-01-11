@@ -175,7 +175,7 @@ export class Character implements Character.Base {
     // }, callbackArguments)
     await this.goToFront()
     await this.makeAttackAnimation()
-    const damage = BattleMechanics.calculateDamage(this, target)
+    const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
     await this.goToBack()
     const newStatus = {
       targets: [{
