@@ -302,12 +302,13 @@ export class Character implements Character.Base {
   async getHit(damage: number): Promise<number> {
     BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
     await this.animations.hit.play()
-    return this.currentStats.HP - damage
+    return this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage  : 0
   }
 
   restoreHP(amount: number): number {
     BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)
-    return this.currentStats.HP += amount
+    console.log(this.currentStats.HP + amount <= this.stats.HP )
+    return this.currentStats.HP + amount <= this.stats.HP ? this.currentStats.HP + amount : this.stats.HP
   }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {

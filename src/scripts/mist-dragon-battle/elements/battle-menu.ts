@@ -330,10 +330,16 @@ export class BattleMenu {
       y:  this.activeList[this.cursor.currentOption - 1].cursorPosition.y
     }
     this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)    
-    return this.getOption()
+    const option = this.getOption()
+    let idSelected = 0
+    if (option !== 0) {
+      idSelected = this.activeList[option - 1].id
+    }
+    return idSelected
   }
 
   updateItemInfo(character: Character): BattleMenu.ItemData[] {
+    console.log(character)
     return character.inventory.map(record => {
       return {
         id: record.item.id,

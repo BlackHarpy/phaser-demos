@@ -138,7 +138,7 @@ export class Enemy implements Enemy.Base {
 
   async getHit(damage: number): Promise<number> {
     await BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
-    return this.currentStats.HP - damage
+    return  this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage  : 0
   }
 
   restoreHP(amount: number) {
