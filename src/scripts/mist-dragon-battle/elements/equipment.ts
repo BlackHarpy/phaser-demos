@@ -12,6 +12,8 @@ export class Equipment implements Equipment.Base {
     this.game = game
     this.id = equipmentConstructor.id
     this.name = equipmentConstructor.name
+    this.type = equipmentConstructor.type    
+    this.stats = equipmentConstructor.stats
     if (equipmentConstructor.spriteKey) {
       this.sprite = new Phaser.Sprite(game, 0, 0, equipmentConstructor.spriteKey)
       this.sprite.scale.setTo(SCALE)

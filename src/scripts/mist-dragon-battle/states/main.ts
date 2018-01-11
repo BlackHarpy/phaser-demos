@@ -1,3 +1,5 @@
+import { DARK_ARMOR } from './../constructor-data/equipments';
+import { Equipment } from './../elements/equipment';
 import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters'
 import { RECOVERY_ITEMS } from './../constructor-data/items'
@@ -9,7 +11,7 @@ import { Enemy } from '../elements/enemy'
 import { Item } from '../elements/item'
 import { BattleMenu } from '../elements/battle-menu'
 import { BattleMechanics } from '../elements/battle-mechanics'
-import { isUndefined } from 'util';
+import { SPEAR, IRON_ARMOR, DARK_SWORD } from '../constructor-data/equipments';
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -142,8 +144,12 @@ export class MainState extends State {
 
   setParty(): Character[] {
     const party: Character[] = []
-    party.push(new Character(this.game, KAIN, DRAGOON, this.constructInventory([{id: 1, remaining: 1}])))
-    party.push(new Character(this.game, CECIL, DARK_KNIGHT, this.constructInventory([{id: 1, remaining: 2}, {id: 2, remaining: 1}])))
+    const kainInventory = this.constructInventory([{id: 1, remaining: 1}])
+    const kainEquipment = this.constructEquipment([SPEAR, IRON_ARMOR])
+    const cecilInventory = this.constructInventory([{id: 1, remaining: 2}, {id: 2, remaining: 1}])
+    const cecilEquipment = this.constructEquipment([DARK_SWORD, DARK_ARMOR])
+    party.push(new Character(this.game, KAIN, DRAGOON, kainInventory, kainEquipment))
+    party.push(new Character(this.game, CECIL, DARK_KNIGHT, cecilInventory, cecilEquipment))
 
     party.forEach((value, index) => {
       value.setToBattle(this.caveBackground.height, party.length, index)
@@ -162,6 +168,16 @@ export class MainState extends State {
       inventory.push({item: item, remaining: data.remaining})
     })
     return inventory
+  }
+
+  //for this neither :(
+  constructEquipment(equipmentToAdd: any []) {
+    const equipmentList: Equipment[] = []
+    equipmentToAdd.forEach(constructor => {
+      const equipment = new Equipment(this.game, constructor)
+      equipmentList.push(equipment)
+    })
+    return equipmentList
   }
 
   buildMenuData(): any {

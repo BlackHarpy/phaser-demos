@@ -1,10 +1,10 @@
-import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES } from './../constants';
+import { COMMANDS, INITIAL_MENU_TEXT_POSITION_Y, CHARACTER_STATUS, ACTOR_TYPES } from './../constants'
 import { SCALE } from '../constants'
 import { Job } from '../elements/job'
 import { Enemy } from '../elements/enemy'
-import { Item } from './item';
+import { Item } from './item'
+import { Equipment } from './equipment'
 import { BattleMechanics } from './battle-mechanics'
-import { ADDRGETNETWORKPARAMS } from 'dns';
 
 export class Character implements Character.Base {
   game: Phaser.Game
@@ -19,18 +19,19 @@ export class Character implements Character.Base {
   currentStats: IStats
   job: Job.Base
   inventory: Character.InventoryItem[]
+  equipment: Equipment[]
   animations: Character.Animations
   initialPosition: IPosition
   tintTimer: Phaser.Timer
 
-  constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any, inventory: Character.InventoryItem[]) {
+  constructor(game: Phaser.Game, characterConstructor: any, jobConstructor: any, inventory: Character.InventoryItem[], equipment: Equipment[]) {
     this.game = game
     this.tintTimer = this.game.time.create(false)
-    this.setCharacterData(characterConstructor, jobConstructor, inventory)
+    this.setCharacterData(characterConstructor, jobConstructor, inventory, equipment)
     this.addAnimations(characterConstructor.atlasKey)
   }
 
-  setCharacterData(characterConstructor: Character.Constructor, jobConstructor: any, inventory: Character.InventoryItem[]) {
+  setCharacterData(characterConstructor: Character.Constructor, jobConstructor: any, inventory: Character.InventoryItem[], equipment: Equipment[]) {
     this.id = characterConstructor.id
     this.atlasKey = characterConstructor.atlasKey
     this.name = characterConstructor.name
@@ -40,6 +41,7 @@ export class Character implements Character.Base {
     this.currentStats = {...characterConstructor.stats}
     this.ATB = characterConstructor.ATB
     this.inventory = inventory
+    this.equipment = equipment
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand')
     this.job = new Job(this.game, jobConstructor)
     this.sprite.scale.setTo(SCALE)

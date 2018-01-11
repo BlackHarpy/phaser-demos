@@ -85,6 +85,7 @@ declare namespace Character {
     currentStats: IStats
     job: Job.Base
     inventory: InventoryItem[]
+    equipment: Equipment.Base[]
     animations: Animations
     initialPosition: IPosition
     tintTimer: Phaser.Timer
