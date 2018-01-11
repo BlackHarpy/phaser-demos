@@ -262,6 +262,11 @@ export class MainState extends State {
     }
   }
 
+  characterHasItems(): boolean {
+    const character = this.getCharacter(this.receivingCommand)
+    return character ? character.inventory.length !== 0 : false
+  }
+
   processCharacterAction(): void {
     this.battleTimer.resume()
     if (this.commandInConstruction.idAction === 0) {
@@ -269,19 +274,25 @@ export class MainState extends State {
       this.commandInConstruction.idAction = option
       this.commandInConstruction.idExec = this.receivingCommand
     } else {
-      const idAction = this.commandInConstruction.idAction
-      if (this.commandInConstruction.idAction === COMMANDS.ITEM.ID) {
-        if (!this.battleMenu.isListeningItem()) {
-          this.battleMenu.openItemSection(this.receivingCommand)
-        } else {
-          if (this.commandInConstruction.idItemUsed === 0) {
-            const item: number = this.battleMenu.getItem()
-            if (item !== 0) {
-              this.commandInConstruction.idItemUsed = item
+      let idAction = this.commandInConstruction.idAction
+      if ((this.commandInConstruction.idAction === COMMANDS.ITEM.ID)) {
+        if (this.characterHasItems()) {
+          if (!this.battleMenu.isListeningItem()) {
+            this.battleMenu.openItemSection(this.receivingCommand)
+          } else {
+            if (this.commandInConstruction.idItemUsed === 0) {
+              const item: number = this.battleMenu.getItem()
+              if (item !== 0) {
+                this.commandInConstruction.idItemUsed = item
+              }
             }
+           
           }
-         
+        } else {
+          this.commandInConstruction.idAction = 0
+          idAction = this.commandInConstruction.idAction
         }
+        
       }
       const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
       const isUsingItem = idAction === COMMANDS.ITEM.ID && this.commandInConstruction.idItemUsed !== 0
