@@ -333,12 +333,24 @@ export class BattleMenu {
     return this.getOption()
   }
 
+  updateItemInfo(character: Character): BattleMenu.ItemData[] {
+    return character.inventory.map(record => {
+      return {
+        id: record.item.id,
+        name: record.item.name,
+        left: record.remaining
+      }
+    })
+  }
   updateCharactersMenuInfo(characters: Character[]) {
+    console.log(characters);
+    console.log(this.menuData.characters)
     characters.forEach(character => {
       const characterMenuData: BattleMenu.CharacterData = this.menuData.characters.find(characterMenuData => {
         return characterMenuData.id === character.id
       })
       characterMenuData.remainingHealth = character.currentStats.HP
+      characterMenuData.items = this.updateItemInfo(character)
       this.updateHealthInfo(characterMenuData)
     })
   }
