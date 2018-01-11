@@ -1,4 +1,5 @@
 import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES, SCALE } from './../constants';
+import { Character } from './character';
 
 export class BattleMenu {
   game: Phaser.Game
@@ -163,6 +164,15 @@ export class BattleMenu {
     return commandsList
   }
 
+  updateHealthInfo(characterInfo: BattleMenu.CharacterData) {
+    const characterMenuInfo = this.charactersSection.charactersList.find(characterMenuInfo => {
+      return characterMenuInfo.id === characterInfo.id
+    })
+    if (characterMenuInfo) {
+      characterMenuInfo.healthInfo.text = `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`
+    }
+  }
+
   buildCharacterMenuInfo(characterInfo: BattleMenu.CharacterData): BattleMenu.CharacterMenuInfo {
     const characterMenuInfo = {
       id: characterInfo.id,
@@ -321,6 +331,16 @@ export class BattleMenu {
     }
     this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)    
     return this.getOption()
+  }
+
+  updateCharactersMenuInfo(characters: Character[]) {
+    characters.forEach(character => {
+      const characterMenuData: BattleMenu.CharacterData = this.menuData.characters.find(characterMenuData => {
+        return characterMenuData.id === character.id
+      })
+      characterMenuData.remainingHealth = character.currentStats.HP
+      this.updateHealthInfo(characterMenuData)
+    })
   }
 
 }

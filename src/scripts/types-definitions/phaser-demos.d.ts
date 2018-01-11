@@ -82,6 +82,7 @@ declare namespace Character {
     sprite: Phaser.Sprite
     ATB: number
     stats: IStats
+    currentStats: IStats
     job: Job.Base
     inventory: InventoryItem[]
     animations: Animations
@@ -97,7 +98,8 @@ declare namespace Character {
     status: number
     spriteKey: string
     ATB: number
-    stats: IStats,
+    stats: IStats
+    currentStats: IStats    
   }
 
   interface AnimationData {

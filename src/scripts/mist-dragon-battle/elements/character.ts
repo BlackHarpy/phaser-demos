@@ -16,6 +16,7 @@ export class Character implements Character.Base {
   sprite: Phaser.Sprite
   ATB: number
   stats: IStats
+  currentStats: IStats
   job: Job.Base
   inventory: Character.InventoryItem[]
   animations: Character.Animations
@@ -36,6 +37,7 @@ export class Character implements Character.Base {
     this.level = characterConstructor.level
     this.status = characterConstructor.status
     this.stats = characterConstructor.stats
+    this.currentStats = characterConstructor.stats
     this.ATB = characterConstructor.ATB
     this.inventory = inventory
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand')
@@ -300,12 +302,12 @@ export class Character implements Character.Base {
   async getHit(damage: number): Promise<number> {
     BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
     await this.animations.hit.play()
-    return this.stats.HP - damage
+    return this.currentStats.HP - damage
   }
 
   restoreHP(amount: number): number {
     BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)
-    return this.stats.HP += amount
+    return this.currentStats.HP += amount
   }
 
   setToBattle(referenceHeight: number, partySize: number, position: number): void {

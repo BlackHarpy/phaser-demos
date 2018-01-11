@@ -18,6 +18,7 @@ export class Enemy implements Enemy.Base {
   level: number
   status: number
   stats: IStats
+  currentStats: IStats
   ATB: number
   customFlags: Enemy.CustomFlag[]
   commands: ICommand[]
@@ -30,6 +31,7 @@ export class Enemy implements Enemy.Base {
     this.level = enemyConstructor.level
     this.status = enemyConstructor.status
     this.stats = enemyConstructor.stats
+    this.currentStats = enemyConstructor.stats
     this.ATB = enemyConstructor.ATB
     this.commands = enemyConstructor.commands
     this.customFlags = enemyConstructor.customFlags
@@ -136,7 +138,7 @@ export class Enemy implements Enemy.Base {
 
   async getHit(damage: number): Promise<number> {
     await BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
-    return this.stats.HP - damage
+    return this.currentStats.HP - damage
   }
 
   restoreHP(amount: number) {

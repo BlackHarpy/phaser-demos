@@ -172,7 +172,7 @@ export class MainState extends State {
         name: character.name,
         specialAttack: character.job.specialAttack.name,
         totalHealth: character.stats.HP,
-        remainingHealth: character.stats.HP,
+        remainingHealth: character.currentStats.HP,
         cursorPosition: {
           x: character.sprite.x - 220,
           y: character.sprite.centerY
@@ -370,6 +370,8 @@ export class MainState extends State {
   async makeCharacterAction(command: number, actor: Character | Enemy, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<void> {
     this.actionInProgress = true
     const finishedAction = await actor.makeAction(command, target, groupTargets, idItem)
+    console.log(finishedAction);
+    
     if (finishedAction.response = 'OK') {
       this.updateStatus(finishedAction)
     }
@@ -382,9 +384,10 @@ export class MainState extends State {
         const actor: Character | Enemy = target.type === ACTOR_TYPES.CHARACTER ? this.getCharacter(target.id) : this.getEnemy(target.id)
         if (actor) {
           //change to set function
-          actor.stats.HP = target.newHP
+          actor.currentStats.HP = target.newHP
         }
       }) 
+      this.battleMenu.updateCharactersMenuInfo(this.party)
     }
     this.resumeTimer()
   }
