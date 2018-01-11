@@ -37,7 +37,7 @@ export class Character implements Character.Base {
     this.level = characterConstructor.level
     this.status = characterConstructor.status
     this.stats = characterConstructor.stats
-    this.currentStats = characterConstructor.stats
+    this.currentStats = {...characterConstructor.stats}
     this.ATB = characterConstructor.ATB
     this.inventory = inventory
     this.sprite = this.game.add.sprite(0, 0, characterConstructor.atlasKey, 'stand')
@@ -307,7 +307,6 @@ export class Character implements Character.Base {
 
   restoreHP(amount: number): number {
     BattleMechanics.showRecoveredHP(this.game, amount.toString(), this.sprite)
-    console.log(this.currentStats.HP + amount <= this.stats.HP )
     return this.currentStats.HP + amount <= this.stats.HP ? this.currentStats.HP + amount : this.stats.HP
   }
 

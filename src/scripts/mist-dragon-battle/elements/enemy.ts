@@ -31,7 +31,7 @@ export class Enemy implements Enemy.Base {
     this.level = enemyConstructor.level
     this.status = enemyConstructor.status
     this.stats = enemyConstructor.stats
-    this.currentStats = enemyConstructor.stats
+    this.currentStats = {...enemyConstructor.stats}
     this.ATB = enemyConstructor.ATB
     this.commands = enemyConstructor.commands
     this.customFlags = enemyConstructor.customFlags

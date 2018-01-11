@@ -339,7 +339,6 @@ export class BattleMenu {
   }
 
   updateItemInfo(character: Character): BattleMenu.ItemData[] {
-    console.log(character)
     return character.inventory.map(record => {
       return {
         id: record.item.id,
@@ -349,8 +348,6 @@ export class BattleMenu {
     })
   }
   updateCharactersMenuInfo(characters: Character[]) {
-    console.log(characters);
-    console.log(this.menuData.characters)
     characters.forEach(character => {
       const characterMenuData: BattleMenu.CharacterData = this.menuData.characters.find(characterMenuData => {
         return characterMenuData.id === character.id
