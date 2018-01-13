@@ -1,4 +1,3 @@
-import { DARK_ARMOR } from './../constructor-data/equipments';
 import { Equipment } from './../elements/equipment';
 import { ACTOR_TYPES, COMMANDS, CHARACTER_STATUS } from './../constants'
 import { CECIL, KAIN, MIST_DRAGON } from './../constructor-data/characters'
@@ -11,7 +10,8 @@ import { Enemy } from '../elements/enemy'
 import { Item } from '../elements/item'
 import { BattleMenu } from '../elements/battle-menu'
 import { BattleMechanics } from '../elements/battle-mechanics'
-import { SPEAR, IRON_ARMOR, DARK_SWORD } from '../constructor-data/equipments';
+import { SPEAR, IRON_ARMOR, DARK_SWORD, DARK_ARMOR, BLACK_SHIELD, 
+  IRON_SHIELD, BLACK_HELM, IRON_HELM, BLACK_GAUNTLET, IRON_GAUNTLET } from '../constructor-data/equipments';
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')

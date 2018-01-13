@@ -43,3 +43,75 @@ export const IRON_ARMOR = {
     MAGIC_EVASION: 0
   }
 }
+
+export const BLACK_SHIELD = {
+  id: 5,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Black Shield',
+  stats: {
+    DEFENSE: 1,
+    MAGIC_DEFENSE: 0,
+    EVASION: 22,
+    MAGIC_EVASION: 0
+  }
+}
+
+export const IRON_SHIELD = {
+  id: 6,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Iron Shield',
+  stats: {
+    DEFENSE: 1,
+    MAGIC_DEFENSE: 0,
+    EVASION: 20,
+    MAGIC_EVASION: 0
+  }
+}
+
+export const BLACK_HELM = {
+  id: 7,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Black Helm',
+  stats: {
+    DEFENSE: 4,
+    MAGIC_DEFENSE: 0,
+    EVASION: -10,
+    MAGIC_EVASION: 0
+  }
+}
+
+export const IRON_HELM = {
+  id: 8,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Black Helm',
+  stats: {
+    DEFENSE: 3,
+    MAGIC_DEFENSE: 0,
+    EVASION: -10,
+    MAGIC_EVASION: 0
+  }
+}
+
+export const BLACK_GAUNTLET = {
+  id: 9,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Black Gauntlet',
+  stats: {
+    DEFENSE: 2,
+    MAGIC_DEFENSE: 0,
+    EVASION: -10,
+    MAGIC_EVASION: 0
+  }
+}
+
+export const IRON_GAUNTLET = {
+  id: 10,
+  type: ITEM_TYPES.ARMOR,
+  name: 'Iron Gauntlet',
+  stats: {
+    DEFENSE: 2,
+    MAGIC_DEFENSE: 0,
+    EVASION: -10,
+    MAGIC_EVASION: 0
+  }
+}

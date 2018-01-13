@@ -31,14 +31,21 @@ function getWeaponAttackPower(attackerEquipment: Equipment[]) {
   const weapon: any = attackerEquipment.find(equipment => {
     return equipment.type === ITEM_TYPES.WEAPON
   })
-  return weapon.stats.ATTACK ? weapon.stats.ATTACK : 0
+  return weapon.currentStats.ATTACK ? weapon.currentStats.ATTACK : 0
 }
 
 function getWeaponAccuracy(attackerEquipment: Equipment[]) {
   const weapon: any = attackerEquipment.find(equipment => {
     return equipment.type === ITEM_TYPES.WEAPON
   })
-  return weapon.stats.ACCURACY ? weapon.stats.ACCURACY : 0
+  return weapon.currentStats.ACCURACY ? weapon.currentStats.ACCURACY : 0
+}
+
+function getArmorDefense(attackerEquipment: Equipment[]) {
+  const weapon: any = attackerEquipment.find(equipment => {
+    return equipment.type === ITEM_TYPES.ARMOR
+  })
+  return weapon.currentStats.DEFENSE ? weapon.currentStats.DEFENSE : 0
 }
 
 function calculateBaseAttackPower(attacker: Character | Enemy): number {
@@ -47,9 +54,20 @@ function calculateBaseAttackPower(attacker: Character | Enemy): number {
     baseAttackPower = getWeaponAttackPower(attacker.equipment) + attacker.currentStats.STRENGTH / 4 + attacker.level / 4
   } 
   if (attacker instanceof Enemy) {
-    baseAttackPower = attacker.stats.STRENGTH
+    baseAttackPower = attacker.currentStats.STRENGTH
   }
   return baseAttackPower
+}
+
+function calculateBaseDefense(target: Character | Enemy): number {
+  let baseDefense: number = 0
+  if (target instanceof Character) {
+    baseDefense = getArmorDefense(target.equipment) + target.currentStats.STAMINA / 2
+  } 
+  if (target instanceof Enemy) {
+    baseDefense = target.currentStats.DEFENSE
+  }
+  return baseDefense
 }
 
 function calculateRegularDamage(attacker: Character | Enemy, target: Character | Enemy): number {
@@ -57,6 +75,10 @@ function calculateRegularDamage(attacker: Character | Enemy, target: Character |
   const attackPower: number = baseAttackPower + getWeaponAttackPower(attacker.equipment)
   const baseHitRate: number = Math.round(getWeaponAccuracy(attacker.equipment) + attacker.level / 4)
   const baseAttackMultiplier: number = Math.round(attacker.currentStats.STRENGTH / 8 + attacker.currentStats.SPEED / 16 + 1)
+
+  //only for monsters
+  const baseDefense = target.stats.DEFENSE
+  const baseEvade = 0
   console.log(baseAttackMultiplier)
   return 45
 }
