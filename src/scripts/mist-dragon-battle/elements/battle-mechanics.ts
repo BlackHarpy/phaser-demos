@@ -31,21 +31,21 @@ function getWeaponAttackPower(attackerEquipment: Equipment[]) {
   const weapon: any = attackerEquipment.find(equipment => {
     return equipment.type === ITEM_TYPES.WEAPON
   })
-  return weapon.currentStats.ATTACK ? weapon.currentStats.ATTACK : 0
+  return weapon.stats.ATTACK ? weapon.stats.ATTACK : 0
 }
 
 function getWeaponAccuracy(attackerEquipment: Equipment[]) {
   const weapon: any = attackerEquipment.find(equipment => {
     return equipment.type === ITEM_TYPES.WEAPON
   })
-  return weapon.currentStats.ACCURACY ? weapon.currentStats.ACCURACY : 0
+  return weapon.stats.ACCURACY ? weapon.stats.ACCURACY : 0
 }
 
 function getArmorDefense(attackerEquipment: Equipment[]) {
   const weapon: any = attackerEquipment.find(equipment => {
     return equipment.type === ITEM_TYPES.ARMOR
   })
-  return weapon.currentStats.DEFENSE ? weapon.currentStats.DEFENSE : 0
+  return weapon.stats.DEFENSE ? weapon.stats.DEFENSE : 0
 }
 
 function calculateBaseAttackPower(attacker: Character | Enemy): number {
@@ -70,6 +70,18 @@ function calculateBaseDefense(target: Character | Enemy): number {
   return baseDefense
 }
 
+function calculateBaseEvade(target: Character | Enemy): number {
+  if (target instanceof Enemy) {
+    return 0
+  }
+}
+
+function calculateDefenseModifier(target: Character | Enemy): number {
+  if (target instanceof Enemy) {
+    return 0
+  }
+}
+
 function calculateRegularDamage(attacker: Character | Enemy, target: Character | Enemy): number {
   const baseAttackPower: number = Math.round(calculateBaseAttackPower(attacker))
   const attackPower: number = baseAttackPower + getWeaponAttackPower(attacker.equipment)
@@ -78,7 +90,8 @@ function calculateRegularDamage(attacker: Character | Enemy, target: Character |
 
   //only for monsters
   const baseDefense = target.stats.DEFENSE
-  const baseEvade = 0
+  const baseEvade = calculateBaseEvade(target)
+  const defenseModifier = calculateDefenseModifier(target)
   console.log(baseAttackMultiplier)
   return 45
 }
