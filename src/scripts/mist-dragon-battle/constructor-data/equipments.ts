@@ -6,7 +6,7 @@ export const DARK_SWORD = {
   name: 'Dark Sword',
   stats: {
     ATTACK: 10,
-    ACCURACY: 30
+    ACCURACY: 80
   }
 }
 
@@ -16,7 +16,7 @@ export const SPEAR = {
   name: 'Spear',
   stats: {
     ATTACK: 9,
-    ACCURACY: 49
+    ACCURACY: 75
   }
 }
 

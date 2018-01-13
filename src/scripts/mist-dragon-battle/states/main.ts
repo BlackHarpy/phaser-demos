@@ -429,7 +429,7 @@ export class MainState extends State {
       this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
       this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
 
-      this.game.debug.text('Mist Dragon ATB: ' + this.enemies[0].ATB, 250, 400)
+      this.game.debug.text('Mist Dragon HP: ' + this.enemies[0].currentStats.HP, 250, 400)
       this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 250, 420)
       this.game.debug.text('In command: ' + this.receivingCommand, 250, 440)
     }

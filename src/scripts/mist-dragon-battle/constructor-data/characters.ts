@@ -58,15 +58,15 @@ export const MIST_DRAGON = {
   stats: {
     HP: 556,
     MP: 0,
-    STRENGTH: 12,
-    SPEED: 6,
+    STRENGTH: 20,
+    SPEED: 8,
     STAMINA: 12,
     INTELLECT: 6,
     SPIRIT: 6,
     ATTACK: 12,
     ACCURACY: 115,
     EVASION: 15,
-    DEFENSE: 12,
+    DEFENSE: 10,
     MAGIC_DEFENSE: 10,
     MAGIC_EVASION: 15
   },
