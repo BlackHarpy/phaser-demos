@@ -145,9 +145,9 @@ export class MainState extends State {
   setParty(): Character[] {
     const party: Character[] = []
     const kainInventory = this.constructInventory([{id: 1, remaining: 1}])
-    const kainEquipment = this.constructEquipment([SPEAR, IRON_ARMOR])
+    const kainEquipment = this.constructEquipment([SPEAR, IRON_ARMOR, IRON_SHIELD, IRON_HELM, IRON_GAUNTLET])
     const cecilInventory = this.constructInventory([{id: 1, remaining: 2}, {id: 2, remaining: 1}])
-    const cecilEquipment = this.constructEquipment([DARK_SWORD, DARK_ARMOR])
+    const cecilEquipment = this.constructEquipment([DARK_SWORD, DARK_ARMOR, BLACK_SHIELD, BLACK_HELM, BLACK_GAUNTLET])
     party.push(new Character(this.game, KAIN, DRAGOON, kainInventory, kainEquipment))
     party.push(new Character(this.game, CECIL, DARK_KNIGHT, cecilInventory, cecilEquipment))
 
