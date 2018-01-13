@@ -3,6 +3,10 @@ import { Character } from './character'
 import { Enemy } from './enemy'
 import { COMMANDS, CHARACTER_STATUS, ITEM_TYPES } from './../constants'
 
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function numbersBounce (game: Phaser.Game, number: string, sprite: Phaser.Sprite, tint: number): Promise<boolean> {
   return new Promise (resolve => {
     const num: string[] = number.split('')
@@ -41,17 +45,31 @@ function getWeaponAccuracy(attackerEquipment: Equipment[]) {
   return weapon.stats.ACCURACY ? weapon.stats.ACCURACY : 0
 }
 
+//Refactor this
 function getArmorDefense(attackerEquipment: Equipment[]) {
-  const weapon: any = attackerEquipment.find(equipment => {
+  const armorList: any[] = attackerEquipment.filter(equipment => {
     return equipment.type === ITEM_TYPES.ARMOR
   })
-  return weapon.stats.DEFENSE ? weapon.stats.DEFENSE : 0
+  const defenseSum = armorList.reduce((previous, current) => {
+    return previous + current.stats.DEFENSE
+  }, 0)
+  return defenseSum
+}
+
+function getArmorEvade(attackerEquipment: Equipment[]) {
+  const armorList: any[] = attackerEquipment.filter(equipment => {
+    return equipment.type === ITEM_TYPES.ARMOR
+  })
+  const evadeSum = armorList.reduce((previous, current) => {
+    return previous + current.stats.EVASION
+  }, 0)
+  return evadeSum <= 0 ? 0 : evadeSum
 }
 
 function calculateBaseAttackPower(attacker: Character | Enemy): number {
   let baseAttackPower: number = 0
   if (attacker instanceof Character) {
-    baseAttackPower = getWeaponAttackPower(attacker.equipment) + attacker.currentStats.STRENGTH / 4 + attacker.level / 4
+    baseAttackPower = Math.round(getWeaponAttackPower(attacker.equipment) + attacker.currentStats.STRENGTH / 4 + attacker.level / 4)
   } 
   if (attacker instanceof Enemy) {
     baseAttackPower = attacker.currentStats.STRENGTH
@@ -62,7 +80,7 @@ function calculateBaseAttackPower(attacker: Character | Enemy): number {
 function calculateBaseDefense(target: Character | Enemy): number {
   let baseDefense: number = 0
   if (target instanceof Character) {
-    baseDefense = getArmorDefense(target.equipment) + target.currentStats.STAMINA / 2
+    baseDefense = Math.round(getArmorDefense(target.equipment) + target.currentStats.STAMINA / 2)
   } 
   if (target instanceof Enemy) {
     baseDefense = target.currentStats.DEFENSE
@@ -70,30 +88,95 @@ function calculateBaseDefense(target: Character | Enemy): number {
   return baseDefense
 }
 
-function calculateBaseEvade(target: Character | Enemy): number {
-  if (target instanceof Enemy) {
-    return 0
+function calculateEvadeRate(target: Character | Enemy): number {
+  let evadeRate = 0
+  if (target instanceof Character) {
+    evadeRate = getArmorEvade(target.equipment)
   }
+  return evadeRate
 }
 
-function calculateDefenseModifier(target: Character | Enemy): number {
-  if (target instanceof Enemy) {
-    return 0
+function calculateDefenseMultiplier(target: Character | Enemy): number {
+  let defenseMultiplier: number = 0
+  if (target instanceof Character) {
+    defenseMultiplier = Math.round(target.currentStats.SPEED / 8 + target.level / 16)
   }
+  return defenseMultiplier
+}
+
+function evadeHit(evadeRate: number, defenseMultiplier: number): boolean {
+  let evasionSuccess: boolean = false
+  for(let j = 0; j < defenseMultiplier; j++) {
+    if (!evasionSuccess) {
+      if (getRandomInt(0, 99) < evadeRate) {
+        evasionSuccess = true
+      }
+    }
+  }
+  return evasionSuccess
+}
+
+function calculateHitDamage(attackPower: number, targetDefense: number, attackMultiplier: number): number {
+  let hitDamage: number = Math.round((attackPower * getRandomInt(100, 150))/100 - targetDefense)
+  hitDamage = hitDamage < 0 ? 0 : hitDamage
+  return attackMultiplier > 0 && hitDamage === 0 ? 1 : hitDamage
+}
+
+
+function calculateTotalHitsDamage(attackPower: number, hitRate: number, attackMultiplier: number, defense: number, evadeRate: number, defenseMultiplier: number): number {
+  let damage: number = 0
+  let miss: boolean = true
+  if (attackMultiplier >= 1) {
+    for (let i = 0; i < attackMultiplier; i++) {
+      if (getRandomInt(0, 99) <= hitRate) {
+        miss = false
+        if (!evadeHit(evadeRate, defenseMultiplier)) {
+          damage += calculateHitDamage(attackPower, defense, attackMultiplier)
+        }
+      }
+    }
+  }
+  return miss ? -1 : damage
+}
+
+function calculateCriticalHitModifier(attacker: Character | Enemy): number {
+  let modifier: number = 0
+  if (attacker instanceof Character) {
+    //Successful Critical Hit
+    if (getRandomInt(1, 32) === 1) {
+      modifier = Math.round(getWeaponAttackPower(attacker.equipment) / 2)
+    }
+  }
+  return modifier
+}
+
+function calculateHitRate(attacker: Character | Enemy): number {
+  let hitRate: number
+  if (attacker instanceof Character) {
+    hitRate = getWeaponAccuracy(attacker.equipment) + attacker.level / 4
+  } else {
+    //Monstaaaaaa
+    hitRate = 70 + attacker.level / 4
+  }
+  return Math.round(hitRate)
+}
+
+function calculateAttackMultiplier(attacker: Character | Enemy): number {
+  return Math.round(attacker.currentStats.STRENGTH / 8 + attacker.currentStats.SPEED / 16 + 1)
+
 }
 
 function calculateRegularDamage(attacker: Character | Enemy, target: Character | Enemy): number {
-  const baseAttackPower: number = Math.round(calculateBaseAttackPower(attacker))
-  const attackPower: number = baseAttackPower + getWeaponAttackPower(attacker.equipment)
-  const baseHitRate: number = Math.round(getWeaponAccuracy(attacker.equipment) + attacker.level / 4)
-  const baseAttackMultiplier: number = Math.round(attacker.currentStats.STRENGTH / 8 + attacker.currentStats.SPEED / 16 + 1)
+  const baseAttackPower: number = calculateBaseAttackPower(attacker)
+  const attackPower: number = baseAttackPower + calculateCriticalHitModifier(attacker)
+  const hitRate: number = calculateHitRate(attacker)
+  const attackMultiplier: number = calculateAttackMultiplier(attacker)
 
-  //only for monsters
-  const baseDefense = target.currentStats.DEFENSE
-  const baseEvade = calculateBaseEvade(target)
-  const defenseModifier = calculateDefenseModifier(target)
-  console.log(baseAttackMultiplier)
-  return 45
+  const baseDefense = calculateBaseDefense(target)
+  const baseEvade = calculateEvadeRate(target)
+  const defenseModifier = calculateDefenseMultiplier(target)
+  const damage = calculateTotalHitsDamage(attackPower, hitRate, attackMultiplier, baseDefense, baseEvade, defenseModifier)
+  return damage
 }
 
 export class BattleMechanics {
