@@ -63,12 +63,12 @@ export const MIST_DRAGON = {
     STAMINA: 12,
     INTELLECT: 6,
     SPIRIT: 6,
-    ATTACK: 0,
-    ACCURACY: 0,
-    EVASION: 0,
-    DEFENSE: 0,
-    MAGIC_DEFENSE: 0,
-    MAGIC_EVASION: 0
+    ATTACK: 12,
+    ACCURACY: 115,
+    EVASION: 15,
+    DEFENSE: 32,
+    MAGIC_DEFENSE: 10,
+    MAGIC_EVASION: 15
   },
   customFlags: [{ key: 'hitWhileMist', active: false }],
   commands: [{

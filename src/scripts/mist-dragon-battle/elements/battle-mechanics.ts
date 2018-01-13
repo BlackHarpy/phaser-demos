@@ -89,7 +89,7 @@ function calculateRegularDamage(attacker: Character | Enemy, target: Character |
   const baseAttackMultiplier: number = Math.round(attacker.currentStats.STRENGTH / 8 + attacker.currentStats.SPEED / 16 + 1)
 
   //only for monsters
-  const baseDefense = target.stats.DEFENSE
+  const baseDefense = target.currentStats.DEFENSE
   const baseEvade = calculateBaseEvade(target)
   const defenseModifier = calculateDefenseModifier(target)
   console.log(baseAttackMultiplier)
