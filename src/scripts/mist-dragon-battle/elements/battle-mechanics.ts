@@ -205,7 +205,7 @@ export class BattleMechanics {
 
   static setInitialATB(party: Character[]): Character[] {
     return party.map(character => {
-      character.ATB = Math.floor(Math.random() * 101)
+      character.ATB = getRandomInt(0, 100)
       return character
     })
   }
