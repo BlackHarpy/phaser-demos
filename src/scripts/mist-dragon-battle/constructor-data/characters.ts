@@ -61,7 +61,7 @@ export const MIST_DRAGON = {
     STRENGTH: 20,
     SPEED: 8,
     STAMINA: 12,
-    INTELLECT: 6,
+    INTELLECT: 10,
     SPIRIT: 6,
     ATTACK: 12,
     ACCURACY: 115,
@@ -80,7 +80,7 @@ export const MIST_DRAGON = {
   }, {
     id: 2,
     method: () => {
-      //Freezing Mist Special Ability
+      //Cold Mist Special Ability
       this.blink()
     }
   }, {

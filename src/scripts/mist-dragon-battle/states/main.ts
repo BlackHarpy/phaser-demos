@@ -412,8 +412,15 @@ export class MainState extends State {
           actor.currentStats.HP = target.newHP
         }
       }) 
-      this.battleMenu.updateCharactersMenuInfo(this.party)
     }
+    if (newStatus.hasOwnProperty('character')) {
+        const actor: Character = this.getCharacter(newStatus.character.id)
+        if (actor) {
+          actor.currentStats.HP = newStatus.character.newHP
+        }
+    }
+    this.battleMenu.updateCharactersMenuInfo(this.party)
+    
     this.resumeTimer()
   }
 

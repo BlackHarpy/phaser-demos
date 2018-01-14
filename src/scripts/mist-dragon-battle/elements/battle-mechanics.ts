@@ -175,8 +175,30 @@ function calculateRegularDamage(attacker: Character | Enemy, target: Character |
   const baseDefense = calculateBaseDefense(target)
   const baseEvade = calculateEvadeRate(target)
   const defenseModifier = calculateDefenseMultiplier(target)
-  const damage = calculateTotalHitsDamage(attackPower, hitRate, attackMultiplier, baseDefense, baseEvade, defenseModifier)
-  return damage
+  return calculateTotalHitsDamage(attackPower, hitRate, attackMultiplier, baseDefense, baseEvade, defenseModifier)
+}
+
+
+function calculateSpecialAttackDamage(attacker: Character | Enemy, target: Character | Enemy, attackKey: string): number {
+  const baseAttackPower: number = calculateBaseAttackPower(attacker)
+  const attackPower: number = baseAttackPower + calculateCriticalHitModifier(attacker)
+  const attackMultiplier: number = calculateAttackMultiplier(attacker)
+  const specialAttackCalculations = {
+    darkness: () => {
+      const damage = (attackMultiplier * attackPower * 1/2)
+      return damage + ((damage * getRandomInt(100, 150)/100) % 256)
+    },
+    jump: () => {
+      const hitRate: number = calculateHitRate(attacker)
+      const modifiedAttackPower = attackPower * 2
+      const baseDefense = calculateBaseDefense(target)
+      const baseEvade = calculateEvadeRate(target)
+      const defenseModifier = calculateDefenseMultiplier(target)
+      return calculateTotalHitsDamage(modifiedAttackPower, hitRate, attackMultiplier, baseDefense, baseEvade, defenseModifier)
+    }
+  }
+
+  return Math.round(specialAttackCalculations[attackKey]())
 }
 
 export class BattleMechanics {
@@ -197,12 +219,13 @@ export class BattleMechanics {
     }).map(character => { return character.id })
   }
 
-  static calculateDamage(attacker: Character | Enemy, target: Character | Enemy, action: number): number {
+  static calculateDamage(attacker: Character | Enemy, target: Character | Enemy, action: number, specialAttackKey?: string): number {
     const damageCalculationObject = {
-      [COMMANDS.FIGHT.ID]: calculateRegularDamage
+      [COMMANDS.FIGHT.ID]: calculateRegularDamage,
+      [COMMANDS.SPECIAL_ATTACK.ID]: calculateSpecialAttackDamage
     }
    
-    return damageCalculationObject[action](attacker, target)
+    return damageCalculationObject[action](attacker, target, specialAttackKey)
   }
 
   static showDamage(game: Phaser.Game, damage: string, sprite: Phaser.Sprite): Promise<boolean> {

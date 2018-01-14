@@ -23,7 +23,7 @@ export const DRAGOON = {
       return newTargetHP
     },
  
-    startJump(character: Character, target: Character | Enemy): Promise<number> {
+    startJump(character: Character, target: Character | Enemy): Promise<any> {
       character.setStatus(CHARACTER_STATUS.JUMP)      
       return new Promise(resolve => {
         const timer: Phaser.Timer = character.sprite.game.time.create(false)
@@ -33,7 +33,10 @@ export const DRAGOON = {
           const tween = character.sprite.game.add.tween(character.sprite).to({ y: character.sprite.y - 200, x: character.sprite.x - 50 }, 80, "Linear", true)
           timer.stop()
           this.jumpTarget = target
-          resolve(0)
+          resolve({
+            damage: 0,
+            hpLoss: character.currentStats.HP
+          })
           timer.destroy()
         })
         timer.start()
@@ -54,12 +57,15 @@ export const DRAGOON = {
           return Phaser.Math.bezierInterpolation(v, k);
         })
         returnTween.onComplete.add(() => {
-          const damage = 78
+          const damage = BattleMechanics.calculateDamage(character, this.jumpTarget, COMMANDS.SPECIAL_ATTACK.ID, 'jump')          
           BattleMechanics.showDamage(character.game, damage.toString(), this.jumpTarget.sprite)
           character.ATB = 0
           character.status = CHARACTER_STATUS.NORMAL
           character.resetPosition()
-          resolve(damage)
+          resolve({
+            damage: damage,
+            hpLoss: character.currentStats.HP
+          })
         }, this, 1, character)
         hitTween.chain(returnTween)
         hitTween.start()
@@ -105,11 +111,13 @@ export const DARK_KNIGHT = {
           } else {
             timer.stop()            
             this.emitParticles(character).then((value) => {
-              const damage = 64
-              //calculateDamage function
+              const damage = BattleMechanics.calculateDamage(character, target, COMMANDS.SPECIAL_ATTACK.ID, 'darkness')
               BattleMechanics.showDamage(character.game, damage.toString(), target.sprite)
               character.resetPosition()
-              resolve(damage)
+              resolve({
+                damage: damage,
+                hpLoss: Math.round(character.currentStats.HP * 1/8)
+              })
             })
           }
         })
