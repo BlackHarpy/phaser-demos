@@ -85,7 +85,6 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    BattleMechanics.showMessage(this.game, `YOU'RE TEARING ME APART LISA! (o hai doggie)`)
     this.startBattle()
   }
 
