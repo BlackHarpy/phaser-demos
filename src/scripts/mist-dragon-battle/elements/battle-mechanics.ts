@@ -13,7 +13,7 @@ function numbersBounce (game: Phaser.Game, number: string, sprite: Phaser.Sprite
     const damageText: Phaser.BitmapText[] = []
     let x: number = sprite.centerX - (10 * num.length)
     num.forEach((digit, index) => {
-      const digitText = new Phaser.BitmapText(game, x, sprite.centerY, 'ffNumbers', digit, 25)
+      const digitText = new Phaser.BitmapText(game, x, sprite.centerY, 'ffNumbers', digit, 20)
       digitText.tint = tint
       damageText.push(digitText)
       game.add.existing(damageText[index])
@@ -234,6 +234,23 @@ export class BattleMechanics {
 
   static showRecoveredHP(game: Phaser.Game, recovered: string, sprite: Phaser.Sprite): Promise<boolean> {
     return numbersBounce(game, recovered, sprite, 0x50d424)
+  }
+
+  static showMessage(game: Phaser.Game, text: string) {
+    const textStyle: Phaser.PhaserTextStyle = {
+      font: "22px Courier", fill: "#fff", strokeThickness: 4
+    }
+    const background: Phaser.Sprite = game.add.sprite(0, 0, 'rectangle')
+    const message: Phaser.Text = game.add.text(10, 8, text, textStyle)
+    const destroyMessage = () => {
+      background.destroy()
+      message.destroy()
+    }
+    background.position.set(-2, 0)
+    background.height = 40
+    background.width = game.world.width + 4
+
+    game.time.events.add(Phaser.Timer.SECOND * 4, destroyMessage, this)
   }
 
 }

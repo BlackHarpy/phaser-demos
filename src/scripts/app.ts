@@ -1,6 +1,6 @@
 /// <reference path="../../node_modules/phaser-ce/typescript/phaser.d.ts"/>
 /// <reference path="../../node_modules/phaser-ce/typescript/pixi.d.ts"/>
-/// <reference path="./types-definitions/phaser-demos.d.ts"/>
+/// <reference path="./types-definitions/mist-dragon-battle.d.ts"/>
 
 import 'pixi'
 import 'p2'

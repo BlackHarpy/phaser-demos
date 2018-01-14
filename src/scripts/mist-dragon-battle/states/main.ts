@@ -31,8 +31,8 @@ const recoveryItemImage = require('assets/images/mist-dragon-battle/RecoveryItem
 const darknessImage = require('assets/images/mist-dragon-battle/XS1_01_Energy_Burst.png')
 const slashImage = require('assets/images/mist-dragon-battle/XSlash1.png')
 
-const bitmapFontImage = require('assets/fonts/number-font.png')
-const bitmapFontXML = require('assets/fonts/number-font.xml')
+const bitmapFontImage = require('assets/fonts/damage-font.png')
+const bitmapFontXML = require('assets/fonts/damage-font.xml')
 
 export class MainState extends State {
 
@@ -85,6 +85,7 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
+    BattleMechanics.showMessage(this.game, `YOU'RE TEARING ME APART LISA! (o hai doggie)`)
     this.startBattle()
   }
 
