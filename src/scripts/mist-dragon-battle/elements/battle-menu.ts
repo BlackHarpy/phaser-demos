@@ -1,4 +1,4 @@
-import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES, SCALE } from './../constants';
+import { MENU_HEIGHT, MENU_MARGIN, INITIAL_MENU_TEXT_POSITION_Y, COMMANDS, COMMANDS_POSITIONS, ACTOR_TYPES, SCALE, CHARACTER_STATUS } from './../constants';
 import { Character } from './character';
 
 export class BattleMenu {
@@ -109,7 +109,7 @@ export class BattleMenu {
   }
 
   openItemSection(id: number): void {
-    this.cursor.sprite.destroy()    
+    this.cursor.sprite.destroy()
     const backgroundConfig = {
       anchor: { x: 0, y: 1 },
       position: { x: 0, y: this.game.world.height },
@@ -135,7 +135,7 @@ export class BattleMenu {
       y += MENU_MARGIN
     })
     this.itemMenuOpened = true
-    this.setCursor(this.itemSection.itemsList)    
+    this.setCursor(this.itemSection.itemsList)
   }
 
   buildMenuBackground(config: BattleMenu.BackgroundConfig): Phaser.Sprite {
@@ -170,6 +170,7 @@ export class BattleMenu {
     })
     if (characterMenuInfo) {
       characterMenuInfo.healthInfo.text = `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`
+      characterMenuInfo.availableForTargeting = characterInfo.availableForTargeting
     }
   }
 
@@ -177,7 +178,8 @@ export class BattleMenu {
     const characterMenuInfo = {
       id: characterInfo.id,
       name: this.game.add.text(0, 0, characterInfo.name, this.textStyle),
-      healthInfo: this.game.add.text(0, 0, `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`, this.textStyle)
+      healthInfo: this.game.add.text(0, 0, `${characterInfo.remainingHealth} / ${characterInfo.totalHealth}`, this.textStyle),
+      availableForTargeting: characterInfo.availableForTargeting
     }
     return characterMenuInfo
   }
@@ -263,9 +265,17 @@ export class BattleMenu {
   isListeningInput(): boolean {
     return this.commandSectionOpened
   }
-  
+
   isListeningItem(): boolean {
     return this.itemMenuOpened
+  }
+
+  getAvailableFirstOption() {
+    const index = this.activeList.findIndex(element => {
+      return element.availableForTargeting
+    })
+
+    return index !== -1 ? index + 1 : 1
   }
 
   getOption(): number {
@@ -283,19 +293,33 @@ export class BattleMenu {
       this.sounds.cursorMove.play()
     } else if (!this.buttonIsDown && !isUpDown && !isDownDown && isSpaceDown) {
       selected = option
-      this.cursor.currentOption = 1
+      this.cursor.currentOption = this.getAvailableFirstOption()
       this.sounds.cursorSelect.play()
       this.buttonIsDown = true
     }
 
     if (isUpDown || isDownDown) {
-      this.cursor.currentOption = option
-      const cursorPosition = {
-        x: this.activeList[option - 1].cursorPosition.x,
-        y: this.activeList[option - 1].cursorPosition.y
+
+      if (this.activeList[option - 1].hasOwnProperty('availableForTargeting')) {
+        if (this.activeList[option - 1].availableForTargeting) {
+          this.cursor.currentOption = option
+          const cursorPosition = {
+            x: this.activeList[option - 1].cursorPosition.x,
+            y: this.activeList[option - 1].cursorPosition.y
+          }
+          this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+          this.buttonIsDown = true
+        } 
+      } else {
+        this.cursor.currentOption = option
+        const cursorPosition = {
+          x: this.activeList[option - 1].cursorPosition.x,
+          y: this.activeList[option - 1].cursorPosition.y
+        }
+        this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+        this.buttonIsDown = true
+
       }
-      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
-      this.buttonIsDown = true
     }
 
     if (!isUpDown && !isDownDown && !isSpaceDown) {
@@ -305,31 +329,30 @@ export class BattleMenu {
   }
 
   getTarget(targetType: number): number {
-    
-      if (targetType === ACTOR_TYPES.ENEMY) {
-        this.activeList = this.menuData.enemies
-        this.cursor.sprite.scale.x = -1
-        
-      } else {
-        this.activeList = this.menuData.characters
-      }
 
-      const cursorPosition = {
-        x:  this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
-        y:  this.activeList[this.cursor.currentOption - 1].cursorPosition.y
-      }
-      this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
-      return this.getOption()
-      
+    if (targetType === ACTOR_TYPES.ENEMY) {
+      this.activeList = this.menuData.enemies
+      this.cursor.sprite.scale.x = -1
+
+    } else {
+      this.activeList = this.menuData.characters
+    }
+    const cursorPosition = {
+      x: this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
+      y: this.activeList[this.cursor.currentOption - 1].cursorPosition.y
+    }
+    this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
+    return this.getOption()
+
   }
 
   getItem(): number {
-    this.activeList = this.itemSection.itemsList    
+    this.activeList = this.itemSection.itemsList
     const cursorPosition = {
-      x:  this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
-      y:  this.activeList[this.cursor.currentOption - 1].cursorPosition.y
+      x: this.activeList[this.cursor.currentOption - 1].cursorPosition.x,
+      y: this.activeList[this.cursor.currentOption - 1].cursorPosition.y
     }
-    this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)    
+    this.cursor.sprite.position.set(cursorPosition.x, cursorPosition.y)
     const option = this.getOption()
     let idSelected = 0
     if (option !== 0) {
@@ -354,6 +377,7 @@ export class BattleMenu {
       })
       characterMenuData.remainingHealth = character.currentStats.HP
       characterMenuData.items = this.updateItemInfo(character)
+      characterMenuData.availableForTargeting = (character.status === CHARACTER_STATUS.NORMAL || character.status === CHARACTER_STATUS.DEFEND)
       this.updateHealthInfo(characterMenuData)
     })
   }

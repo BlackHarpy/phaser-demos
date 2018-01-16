@@ -111,6 +111,7 @@ function evadeHit(evadeRate: number, defenseMultiplier: number): boolean {
       if (getRandomInt(0, 99) < evadeRate) {
         evasionSuccess = true
       }
+      3.2
     }
   }
   return evasionSuccess

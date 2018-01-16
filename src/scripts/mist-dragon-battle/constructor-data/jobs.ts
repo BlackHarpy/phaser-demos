@@ -35,7 +35,8 @@ export const DRAGOON = {
           this.jumpTarget = target
           resolve({
             damage: 0,
-            hpLoss: character.currentStats.HP
+            hpLoss: character.currentStats.HP,
+            status: CHARACTER_STATUS.JUMP
           })
           timer.destroy()
         })
@@ -64,7 +65,8 @@ export const DRAGOON = {
           character.resetPosition()
           resolve({
             damage: damage,
-            hpLoss: character.currentStats.HP
+            hpLoss: character.currentStats.HP,
+            status: CHARACTER_STATUS.NORMAL       //Thankfully I'm not handling altered states            
           })
         }, this, 1, character)
         hitTween.chain(returnTween)
@@ -116,7 +118,8 @@ export const DARK_KNIGHT = {
               character.resetPosition()
               resolve({
                 damage: damage,
-                hpLoss: Math.round(character.currentStats.HP * 1/8)
+                hpLoss: Math.round(character.currentStats.HP * 1/8),
+                status: CHARACTER_STATUS.NORMAL           
               })
             })
           }

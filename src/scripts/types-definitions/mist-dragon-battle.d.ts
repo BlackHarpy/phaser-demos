@@ -238,6 +238,7 @@ declare namespace BattleMenu {
     id: number
     name: Phaser.Text
     healthInfo: Phaser.Text
+    availableForTargeting: boolean
     initiativeBar?: Phaser.Sprite //no idea yet
   }
 
@@ -286,6 +287,7 @@ declare namespace BattleMenu {
     id: number
     name: string
     specialAttack: string
+    availableForTargeting: boolean
     items?: ItemData[]
     totalHealth?: number
     remainingHealth?: number

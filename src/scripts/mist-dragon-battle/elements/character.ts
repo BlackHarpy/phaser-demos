@@ -196,7 +196,8 @@ export class Character implements Character.Base {
     const newStatus = {
       character: {
         id: this.id,
-        newHP: attackResult.hpLoss
+        newHP: attackResult.hpLoss,
+        currentStatus: attackResult.status
       },
       targets: [{
         type: ACTOR_TYPES.ENEMY,        

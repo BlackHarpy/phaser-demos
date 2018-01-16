@@ -189,6 +189,7 @@ export class MainState extends State {
         specialAttack: character.job.specialAttack.name,
         totalHealth: character.stats.HP,
         remainingHealth: character.currentStats.HP,
+        availableForTargeting: true,
         cursorPosition: {
           x: character.sprite.x - 220,
           y: character.sprite.centerY
@@ -409,18 +410,24 @@ export class MainState extends State {
         const actor: Character | Enemy = target.type === ACTOR_TYPES.CHARACTER ? this.getCharacter(target.id) : this.getEnemy(target.id)
         if (actor) {
           //change to set function
-          actor.currentStats.HP = target.newHP
+          if (target.hasOwnProperty('newHP')) {
+            actor.currentStats.HP = target.newHP
+          }          
         }
       }) 
     }
     if (newStatus.hasOwnProperty('character')) {
         const actor: Character = this.getCharacter(newStatus.character.id)
         if (actor) {
-          actor.currentStats.HP = newStatus.character.newHP
+          if (newStatus.character.hasOwnProperty('newHP')) {
+            actor.currentStats.HP = newStatus.character.newHP
+          }
+          if (newStatus.character.hasOwnProperty('status')) {
+            actor.status = newStatus.character.status
+          }
         }
     }
     this.battleMenu.updateCharactersMenuInfo(this.party)
-    
     this.resumeTimer()
   }
 
