@@ -88,6 +88,7 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
+    BattleMechanics.showMessage(this.game, 'Turned into mist!')
     this.startBattle()
   }
 
@@ -434,6 +435,9 @@ export class MainState extends State {
           }
           if (target.hasOwnProperty('status')) {
             actor.setStatus(target.status)
+          }
+          if (target.hasOwnProperty('counterAttack') && target.counterAttack.idAction !== 0) {
+            this.actionsQueue.unshift(target.counterAttack)
           }
         }
       })

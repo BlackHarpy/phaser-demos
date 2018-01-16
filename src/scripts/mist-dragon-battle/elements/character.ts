@@ -184,7 +184,6 @@ export class Character implements Character.Base {
     await this.goToFront()
     await this.makeAttackAnimation()
     const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
-    await this.goToBack()
     const attackResult = await target.getHit(damage)
     const newStatus = {
       character: {
@@ -199,6 +198,7 @@ export class Character implements Character.Base {
         counterAttack: attackResult.counterAttack
       }]
     }
+    await this.goToBack()
     return {
       response: 'OK',
       newStatus
@@ -218,7 +218,6 @@ export class Character implements Character.Base {
         id: target.id,
         newHP: attackResult.damage === 0 ? target.currentStats.HP : await target.getHit(attackResult.damage),
         status: attackResult.currentHP !== 0 ? target.status : CHARACTER_STATUS.KO,
-        counterAttack: attackResult.counterAttack        
       }]
     }
 

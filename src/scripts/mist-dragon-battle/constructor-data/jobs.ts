@@ -119,7 +119,7 @@ export const DARK_KNIGHT = {
               resolve({
                 damage: damage,
                 hpLoss: Math.round(character.currentStats.HP * 1/8),
-                status: CHARACTER_STATUS.NORMAL           
+                status: CHARACTER_STATUS.NORMAL        
               })
             })
           }

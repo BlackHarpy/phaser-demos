@@ -246,15 +246,16 @@ export class BattleMechanics {
         font: "22px Courier", fill: "#fff", strokeThickness: 4
       }
       const background: Phaser.Sprite = game.add.sprite(0, 0, 'rectangle')
-      const message: Phaser.Text = game.add.text(10, 8, text, textStyle)
+      const message: Phaser.Text = game.add.text(65, 18, text, textStyle)
       const destroyMessage = () => {
         background.destroy()
         message.destroy()
         resolve(true)
       }
-      background.position.set(-2, 0)
+      background.anchor.x = 0.5
+      background.position.set(game.world.centerX, 10)
       background.height = 40
-      background.width = game.world.width + 4
+      background.width = game.world.width - 100
   
       game.time.events.add(Phaser.Timer.SECOND * 4, destroyMessage, this)
     })
