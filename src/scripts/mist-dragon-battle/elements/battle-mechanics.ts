@@ -214,7 +214,7 @@ export class BattleMechanics {
   static getAvailableForTargeting(party: Character[]): number[] {
 
     return party.filter(target => {
-      if (target.status !== CHARACTER_STATUS.JUMP) {
+      if (target.status !== CHARACTER_STATUS.JUMP && target.status !== CHARACTER_STATUS.KO) {
         return target.id
       }
     }).map(character => { return character.id })

@@ -10,8 +10,10 @@ import { Enemy } from '../elements/enemy'
 import { Item } from '../elements/item'
 import { BattleMenu } from '../elements/battle-menu'
 import { BattleMechanics } from '../elements/battle-mechanics'
-import { SPEAR, IRON_ARMOR, DARK_SWORD, DARK_ARMOR, BLACK_SHIELD, 
-  IRON_SHIELD, BLACK_HELM, IRON_HELM, BLACK_GAUNTLET, IRON_GAUNTLET } from '../constructor-data/equipments';
+import {
+  SPEAR, IRON_ARMOR, DARK_SWORD, DARK_ARMOR, BLACK_SHIELD,
+  IRON_SHIELD, BLACK_HELM, IRON_HELM, BLACK_GAUNTLET, IRON_GAUNTLET
+} from '../constructor-data/equipments';
 
 const caveImage = require('assets/images/mist-dragon-battle/Cave.gif')
 const battleMusic = require('assets/sound/mist-dragon-battle/bossfight.mp3')
@@ -144,9 +146,9 @@ export class MainState extends State {
 
   setParty(): Character[] {
     const party: Character[] = []
-    const kainInventory = this.constructInventory([{id: 1, remaining: 1}])
+    const kainInventory = this.constructInventory([{ id: 1, remaining: 1 }])
     const kainEquipment = this.constructEquipment([SPEAR, IRON_ARMOR, IRON_SHIELD, IRON_HELM, IRON_GAUNTLET])
-    const cecilInventory = this.constructInventory([{id: 1, remaining: 2}, {id: 2, remaining: 1}])
+    const cecilInventory = this.constructInventory([{ id: 1, remaining: 2 }, { id: 2, remaining: 1 }])
     const cecilEquipment = this.constructEquipment([DARK_SWORD, DARK_ARMOR, BLACK_SHIELD, BLACK_HELM, BLACK_GAUNTLET])
     party.push(new Character(this.game, KAIN, DRAGOON, kainInventory, kainEquipment))
     party.push(new Character(this.game, CECIL, DARK_KNIGHT, cecilInventory, cecilEquipment))
@@ -165,13 +167,13 @@ export class MainState extends State {
         return item.id === data.id
       })
       const item = new Item(this.game, itemConstructor)
-      inventory.push({item: item, remaining: data.remaining})
+      inventory.push({ item: item, remaining: data.remaining })
     })
     return inventory
   }
 
   //for this neither :(
-  constructEquipment(equipmentToAdd: any []) {
+  constructEquipment(equipmentToAdd: any[]) {
     const equipmentList: Equipment[] = []
     equipmentToAdd.forEach(constructor => {
       const equipment = new Equipment(this.game, constructor)
@@ -270,12 +272,13 @@ export class MainState extends State {
     if (this.commandsQueue.length > 0) {
       const next: number = this.commandsQueue.shift()
       const character = this.getCharacter(next)
-      if (character) {
+      if (character && character.status !== CHARACTER_STATUS.KO) {
         character.focus()
+        this.receivingCommand = next ? next : 0
+        this.battleMenu.openCommandsSection(next)
+        this.battleTimer.pause()
       }
-      this.receivingCommand = next ? next : 0
-      this.battleMenu.openCommandsSection(next)
-      this.battleTimer.pause()
+     
     }
   }
 
@@ -284,51 +287,62 @@ export class MainState extends State {
     return character ? character.inventory.length !== 0 : false
   }
 
+  characterIsAvailable(): boolean {
+    const character = this.getCharacter(this.receivingCommand)
+    return character ? character.status !== CHARACTER_STATUS.KO : false
+  }
+
+
   processCharacterAction(): void {
     this.battleTimer.resume()
-    if (this.commandInConstruction.idAction === 0) {
-      const option: number = this.getMenuOption()
-      this.commandInConstruction.idAction = option
-      this.commandInConstruction.idExec = this.receivingCommand
-    } else {
-      let idAction = this.commandInConstruction.idAction
-      if ((this.commandInConstruction.idAction === COMMANDS.ITEM.ID)) {
-        if (this.characterHasItems()) {
-          if (!this.battleMenu.isListeningItem()) {
-            this.battleMenu.openItemSection(this.receivingCommand)
-          } else {
-            if (this.commandInConstruction.idItemUsed === 0) {
-              const item: number = this.battleMenu.getItem()
-              if (item !== 0) {
-                this.commandInConstruction.idItemUsed = item
+    if (this.characterIsAvailable()) {
+      if (this.commandInConstruction.idAction === 0) {
+        const option: number = this.getMenuOption()
+        this.commandInConstruction.idAction = option
+        this.commandInConstruction.idExec = this.receivingCommand
+      } else {
+        let idAction = this.commandInConstruction.idAction
+        if ((this.commandInConstruction.idAction === COMMANDS.ITEM.ID)) {
+          if (this.characterHasItems()) {
+            if (!this.battleMenu.isListeningItem()) {
+              this.battleMenu.openItemSection(this.receivingCommand)
+            } else {
+              if (this.commandInConstruction.idItemUsed === 0) {
+                const item: number = this.battleMenu.getItem()
+                if (item !== 0) {
+                  this.commandInConstruction.idItemUsed = item
+                }
               }
+  
             }
-           
+          } else {
+            this.commandInConstruction.idAction = 0
+            idAction = this.commandInConstruction.idAction
           }
-        } else {
-          this.commandInConstruction.idAction = 0
-          idAction = this.commandInConstruction.idAction
+  
         }
-        
+        const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
+        const isUsingItem = idAction === COMMANDS.ITEM.ID && this.commandInConstruction.idItemUsed !== 0
+        if (isAttacking || isUsingItem) {
+          const targetType = this.getCharacter(this.receivingCommand).getTargetType(this.commandInConstruction.idAction)
+          const target = this.battleMenu.getTarget(targetType)
+          this.commandInConstruction.idTarget = target
+        }
+        if (this.isCommandComplete()) {
+          const index = this.party.findIndex((value) => {
+            return value.id === this.receivingCommand
+          })
+          this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, this.commandInConstruction.idTarget, this.commandInConstruction.idAction, this.commandInConstruction.idItemUsed)
+          this.receivingCommand = 0
+          this.initializeCommandInConstruction()
+          this.party[index].resetFocus()
+          this.party[index].prepareForAction()
+        }
       }
-      const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
-      const isUsingItem = idAction === COMMANDS.ITEM.ID && this.commandInConstruction.idItemUsed !== 0
-      if (isAttacking || isUsingItem) {
-        const targetType = this.getCharacter(this.receivingCommand).getTargetType(this.commandInConstruction.idAction)
-        const target = this.battleMenu.getTarget(targetType)
-        this.commandInConstruction.idTarget = target
-      }
-      if (this.isCommandComplete()) {
-        const index = this.party.findIndex((value) => {
-          return value.id === this.receivingCommand
-        })
-        this.addActionToQueue(ACTOR_TYPES.CHARACTER, this.receivingCommand, this.commandInConstruction.idTarget, this.commandInConstruction.idAction, this.commandInConstruction.idItemUsed)
-        this.receivingCommand = 0
-        this.initializeCommandInConstruction()
-        this.party[index].resetFocus()
-        this.party[index].prepareForAction()
-      }
+    } else {
+      this.battleMenu.closeCommandsSection()
     }
+    
   }
 
   isCommandComplete(): boolean {
@@ -358,20 +372,20 @@ export class MainState extends State {
     if (this.battleMenu.isListeningItem()) {
       this.battleMenu.closeItemsSection()
     }
-    this.battleMenu.closeCommandsSection()            
+    this.battleMenu.closeCommandsSection()
   }
 
   getReadyForAction(): Battle.ReadyCharacter[] {
     let actions: Battle.ReadyCharacter[] = []
     this.enemies.forEach(enemy => {
       const returnAction: Battle.ReadyCharacter = enemy.fillATB(BattleMechanics.getAvailableForTargeting(this.party))
-      if (returnAction.idReady !== 0) {
+      if (returnAction.hasOwnProperty('idReady') && returnAction.idReady !== 0) {
         actions.push(returnAction)
       }
     })
     this.party.forEach(character => {
       const returnAction: Battle.ReadyCharacter = character.fillATB()
-      if (returnAction.idReady !== 0) {
+      if (returnAction.hasOwnProperty('idReady') && returnAction.idReady !== 0) {      
         actions.push(returnAction)
       }
     })
@@ -381,17 +395,22 @@ export class MainState extends State {
   doNextAction() {
     if (this.actionsQueue.length && !this.actionInProgress) {
       const nextAction: Battle.ActionData = this.actionsQueue.pop()
-      this.battleTimer.pause()
-      let target: Character | Enemy
-      const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)      
-      if (nextAction.idAction === COMMANDS.ITEM.ID) {
-        //Friendly target
-        target = this.party[nextAction.idTarget - 1]
-      } else {
-        target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
+      if (nextAction.idAction !== 0) {
+        const executor = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getCharacter(nextAction.idExec) : this.getEnemy(nextAction.idExec)
+        if (executor.status !== CHARACTER_STATUS.KO) {
+          this.battleTimer.pause()
+          let target: Character | Enemy
+          if (nextAction.idAction === COMMANDS.ITEM.ID) {
+            //Friendly target
+            target = this.party[nextAction.idTarget - 1]
+          } else {
+            target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
+          }
+          const groupTargets = nextAction.idTarget === 100 ? this.party : []
+          this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets, nextAction.idItemUsed)
+        }
+
       }
-      const groupTargets = nextAction.idTarget === 100 ? this.party : []
-      this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets, nextAction.idItemUsed)
     }
   }
 
@@ -412,20 +431,23 @@ export class MainState extends State {
           //change to set function
           if (target.hasOwnProperty('newHP')) {
             actor.currentStats.HP = target.newHP
-          }          
+          }
+          if (target.hasOwnProperty('status')) {
+            actor.setStatus(target.status)
+          }
         }
-      }) 
+      })
     }
     if (newStatus.hasOwnProperty('character')) {
-        const actor: Character = this.getCharacter(newStatus.character.id)
-        if (actor) {
-          if (newStatus.character.hasOwnProperty('newHP')) {
-            actor.currentStats.HP = newStatus.character.newHP
-          }
-          if (newStatus.character.hasOwnProperty('status')) {
-            actor.status = newStatus.character.status
-          }
+      const actor: Character = this.getCharacter(newStatus.character.id)
+      if (actor) {
+        if (newStatus.character.hasOwnProperty('newHP')) {
+          actor.currentStats.HP = newStatus.character.newHP
         }
+        if (newStatus.character.hasOwnProperty('status')) {
+          actor.setStatus(newStatus.character.status)          
+        }
+      }
     }
     this.battleMenu.updateCharactersMenuInfo(this.party)
     this.resumeTimer()

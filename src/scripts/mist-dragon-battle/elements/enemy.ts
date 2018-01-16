@@ -1,4 +1,4 @@
-import { ACTOR_TYPES, MENU_HEIGHT, COMMANDS } from './../constants';
+import { ACTOR_TYPES, MENU_HEIGHT, COMMANDS, CHARACTER_STATUS } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'
 import {SCALE} from '../constants'
@@ -57,8 +57,12 @@ export class Enemy implements Enemy.Base {
     const ATBData = this.getAutomaticAction(availableTargets)
     this.ATB = ATBData.newATB
     actionReady.idReady = this.ATB === 100 ? this.id : 0
-    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    actionReady.automaticAction = ATBData.returnAction && ATBData.returnAction.idAction !== 0 ? ATBData.returnAction : {}
     return actionReady 
+  }
+
+  setStatus(status: number) {
+
   }
 
   getAutomaticAction(availableTargets: number[]) {
@@ -78,7 +82,7 @@ export class Enemy implements Enemy.Base {
   
   getNextCommand(availableTargets: number[]) {
     const nextAction: any = {}
-    if (availableTargets.length) {
+    if (availableTargets.length > 0) {
       // nextAction.idTarget = 100
       // nextAction.idAction = 2
       const targetIndex = Math.floor(Math.random() * availableTargets.length)
@@ -109,11 +113,13 @@ export class Enemy implements Enemy.Base {
     this.ATB = 0    
     await this.blink()
     const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
+    const targetNewHP = await target.getHit(damage)
     const newStatus = {
       targets: [{
         type: ACTOR_TYPES.CHARACTER,
         id: target.id,
-        newHP: await target.getHit(damage)
+        newHP: targetNewHP,
+        status: targetNewHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
       }]
     }
     

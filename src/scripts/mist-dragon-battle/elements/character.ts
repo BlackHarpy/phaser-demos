@@ -147,6 +147,11 @@ export class Character implements Character.Base {
 
   setStatus(status: number) {
     this.status = status
+    if (status === CHARACTER_STATUS.KO) {
+      //change texturo to KO
+      this.sprite.loadTexture(this.sprite.key, 'ko')
+      
+    }
   }
 
   resetATB() {
@@ -155,11 +160,14 @@ export class Character implements Character.Base {
 
   fillATB(): Battle.ReadyCharacter {
     const actionReady = <any>{}
-    const ATBData = this.job.fillATB(this)
-    this.ATB = ATBData.newATB
-    actionReady.idReady = this.ATB === 100 ? this.id : 0
-    actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    if (this.status !== CHARACTER_STATUS.KO) {
+      const ATBData = this.job.fillATB(this)
+      this.ATB = ATBData.newATB
+      actionReady.idReady = this.ATB === 100 ? this.id : 0
+      actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
+    }
     return actionReady
+    
   }
 
   async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
@@ -177,11 +185,13 @@ export class Character implements Character.Base {
     await this.makeAttackAnimation()
     const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
     await this.goToBack()
+    const targetNewHP = await target.getHit(damage)
     const newStatus = {
       targets: [{
         type: ACTOR_TYPES.ENEMY,
         id: target.id,
-        newHP: await target.getHit(damage)
+        newHP: targetNewHP,
+        status: targetNewHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
       }]
     }
     return {
