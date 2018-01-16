@@ -207,6 +207,7 @@ export class Character implements Character.Base {
 
   async specialAttack(target: Character | Enemy): Promise<Battle.ActionStatus> {
     const attackResult = await this.job.performSpecialAttack(this, target)
+    const hitResult = await target.getHit(attackResult.damage)
     const newStatus = {
       character: {
         id: this.id,
@@ -216,8 +217,9 @@ export class Character implements Character.Base {
       targets: [{
         type: ACTOR_TYPES.ENEMY,
         id: target.id,
-        newHP: attackResult.damage === 0 ? target.currentStats.HP : await target.getHit(attackResult.damage),
+        newHP: attackResult.damage === 0 ? target.currentStats.HP : hitResult.currentHP,
         status: attackResult.currentHP !== 0 ? target.status : CHARACTER_STATUS.KO,
+        counterAttack: hitResult.counterAttack
       }]
     }
 
