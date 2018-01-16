@@ -88,7 +88,6 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    BattleMechanics.showMessage(this.game, 'Turned into mist!')
     this.startBattle()
   }
 
@@ -118,6 +117,12 @@ export class MainState extends State {
       idTarget: 0,
       idItemUsed: 0
     }
+  }
+
+  getAvailableCharacters(): Character[] {
+    return this.party.filter(character => {
+      return character.status === CHARACTER_STATUS.NORMAL || character.status === CHARACTER_STATUS.DEFEND
+    })
   }
 
   getCharacter(idCharacter: number) {
@@ -407,7 +412,7 @@ export class MainState extends State {
           } else {
             target = nextAction.executor === ACTOR_TYPES.CHARACTER ? this.getEnemy(nextAction.idTarget) : this.getCharacter(nextAction.idTarget)
           }
-          const groupTargets = nextAction.idTarget === 100 ? this.party : []
+          const groupTargets = nextAction.idTarget === 100 ? this.getAvailableCharacters() : []
           this.makeCharacterAction(nextAction.idAction, executor, target, groupTargets, nextAction.idItemUsed)
         }
 

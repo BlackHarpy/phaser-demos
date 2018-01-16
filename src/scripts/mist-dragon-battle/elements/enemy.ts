@@ -21,7 +21,6 @@ export class Enemy implements Enemy.Base {
   currentStats: IStats
   ATB: number
   customFlags: Enemy.CustomFlag[]
-  commands: ICommand[]
 
   constructor(game: Phaser.Game, enemyConstructor: Enemy.Constructor) {
     this.game = game
@@ -33,7 +32,6 @@ export class Enemy implements Enemy.Base {
     this.stats = enemyConstructor.stats
     this.currentStats = { ...enemyConstructor.stats }
     this.ATB = enemyConstructor.ATB
-    this.commands = enemyConstructor.commands
     this.customFlags = enemyConstructor.customFlags
     this.equipment = []
   }
@@ -66,7 +64,8 @@ export class Enemy implements Enemy.Base {
 
   getAutomaticAction(availableTargets: number[]) {
     const ATBData = <any>{}
-    ATBData.newATB = this.ATB + this.stats.SPEED > 100 ? 100 : this.ATB + this.stats.SPEED
+    const currentSpeed: number = this.status === CHARACTER_STATUS.MIST ? Math.round(this.currentStats.SPEED / 2) : this.currentStats.SPEED
+    ATBData.newATB = this.ATB + currentSpeed > 100 ? 100 : this.ATB + currentSpeed
     if (ATBData.newATB === 100) {
       const nextCommand = this.getNextCommand(availableTargets)
       ATBData.returnAction = {
@@ -188,9 +187,28 @@ export class Enemy implements Enemy.Base {
   async specialAttack(groupTargets: Character[]): Promise<Battle.ActionStatus> {
     this.ATB = 0
     await this.blink()
-    const newStatus = {}
+    await BattleMechanics.showMessage(this.game, 'Freezing Mist', 1)
+    const newStatus = {
+      targets: []
+    }
+    const damagePromises = {
+      idCharacters: [],
+      promises: []
+    }
     groupTargets.forEach(character => {
-      character.getHit(50)
+      const damage = BattleMechanics.calculateDamage(this, character, COMMANDS.SPECIAL_ATTACK.ID, 'freezingMist')
+      damagePromises.idCharacters.push(character.id)
+      damagePromises.promises.push(character.getHit(damage))
+    })
+    await Promise.all(damagePromises.promises).then(result => {
+      result.forEach((value, index) => {
+        newStatus.targets.push({
+          type: ACTOR_TYPES.CHARACTER,
+          id: groupTargets[index].id,
+          newHP: result[index].currentHP,
+          status: result[index].currentHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
+        })
+      })
     })
     return {
       response: 'OK',
@@ -200,6 +218,8 @@ export class Enemy implements Enemy.Base {
 
   async transform(): Promise<Battle.ActionStatus> {
     this.ATB = 0
+    const transformMessage = this.status === CHARACTER_STATUS.NORMAL ? 'Turned into mist!' : 'Now! Get ready to fight!'
+    await BattleMechanics.showMessage(this.game, transformMessage, 2)
     await this.transformAnimation()
     const newStatus = {
       targets: [{

@@ -140,7 +140,6 @@ declare namespace Enemy {
     sprite: Phaser.Sprite
     ATB: number
     stats: IStats
-    commands: ICommand[]
     customFlags?: object    
   }
 
@@ -152,7 +151,6 @@ declare namespace Enemy {
     status: number
     ATB: number
     stats: IStats
-    commands: ICommand[]
     customFlags?: CustomFlag[] 
   }
 
