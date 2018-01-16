@@ -1,1 +1,54 @@
-{"frames":{"stand0":{"frame":{"x":0,"y":111,"w":158,"h":126},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":158,"h":126},"sourceSize":{"w":158,"h":126}},"stand1":{"frame":{"x":0,"y":0,"w":270,"h":110},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":270,"h":110},"sourceSize":{"w":270,"h":110}}},"meta":{"app":"https://www.leshylabs.com/apps/sstool/","version":"Leshy SpriteSheet Tool v0.8.4","image":"mistDragon.png","size":{"w":270,"h":237},"scale":1}}
+{
+  "frames": {
+    "stand0": {
+      "frame": {
+        "x": 0,
+        "y": 111,
+        "w": 158,
+        "h": 126
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 158,
+        "h": 126
+      },
+      "sourceSize": {
+        "w": 158,
+        "h": 126
+      }
+    },
+    "stand1": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 270,
+        "h": 110
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 270,
+        "h": 110
+      },
+      "sourceSize": {
+        "w": 270,
+        "h": 110
+      }
+    }
+  },
+  "meta": {
+    "app": "https://www.leshylabs.com/apps/sstool/",
+    "version": "Leshy SpriteSheet Tool v0.8.4",
+    "image": "mistDragon.png",
+    "size": {
+      "w": 270,
+      "h": 237
+    },
+    "scale": 1
+  }
+}

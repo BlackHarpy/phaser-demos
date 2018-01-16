@@ -52,6 +52,7 @@ export class MainState extends State {
   battleStarted: boolean
   musicCurrentSection: string
   commandInConstruction: Battle.ActionData
+  waitingPromise: boolean
 
   preload(): void {
     this.game.load.image('cave', caveImage)
@@ -87,6 +88,9 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
+    this.enemies[0].transformAnimation().then(response => {
+      this.enemies[0].transformAnimation()
+    })
     this.startBattle()
   }
 
@@ -98,6 +102,7 @@ export class MainState extends State {
       } else {
         this.processCharacterAction()
       }
+      this.checkBattleEnd()
     }
   }
 
@@ -292,7 +297,6 @@ export class MainState extends State {
     return character ? character.status !== CHARACTER_STATUS.KO : false
   }
 
-
   processCharacterAction(): void {
     this.battleTimer.resume()
     if (this.characterIsAvailable()) {
@@ -342,7 +346,6 @@ export class MainState extends State {
     } else {
       this.battleMenu.closeCommandsSection()
     }
-    
   }
 
   isCommandComplete(): boolean {
@@ -456,6 +459,20 @@ export class MainState extends State {
   resumeTimer() {
     this.battleTimer.resume()
     this.actionInProgress = false
+  }
+
+  async checkBattleEnd() {
+    if (!this.waitingPromise) {
+      const partyHasFallen = this.party.every(character => {
+        return character.status === CHARACTER_STATUS.KO
+      })
+      if (partyHasFallen ) {
+        this.waitingPromise = true
+        this.battleStarted = false        
+        await BattleMechanics.showMessage(this.game, 'The party has fallen.')
+        console.log('battle has finished!!!')
+      }
+    }
   }
 
   //For debug purposes

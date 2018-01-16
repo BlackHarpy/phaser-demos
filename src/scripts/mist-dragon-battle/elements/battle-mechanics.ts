@@ -237,21 +237,24 @@ export class BattleMechanics {
     return numbersBounce(game, recovered, sprite, 0x50d424)
   }
 
-  static showMessage(game: Phaser.Game, text: string) {
-    const textStyle: Phaser.PhaserTextStyle = {
-      font: "22px Courier", fill: "#fff", strokeThickness: 4
-    }
-    const background: Phaser.Sprite = game.add.sprite(0, 0, 'rectangle')
-    const message: Phaser.Text = game.add.text(10, 8, text, textStyle)
-    const destroyMessage = () => {
-      background.destroy()
-      message.destroy()
-    }
-    background.position.set(-2, 0)
-    background.height = 40
-    background.width = game.world.width + 4
-
-    game.time.events.add(Phaser.Timer.SECOND * 4, destroyMessage, this)
+  static showMessage(game: Phaser.Game, text: string): Promise<boolean> {
+    return new Promise(resolve => {
+      const textStyle: Phaser.PhaserTextStyle = {
+        font: "22px Courier", fill: "#fff", strokeThickness: 4
+      }
+      const background: Phaser.Sprite = game.add.sprite(0, 0, 'rectangle')
+      const message: Phaser.Text = game.add.text(10, 8, text, textStyle)
+      const destroyMessage = () => {
+        background.destroy()
+        message.destroy()
+        resolve(true)
+      }
+      background.position.set(-2, 0)
+      background.height = 40
+      background.width = game.world.width + 4
+  
+      game.time.events.add(Phaser.Timer.SECOND * 4, destroyMessage, this)
+    })
   }
 
 }

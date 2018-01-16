@@ -1,7 +1,6 @@
-import { ACTOR_TYPES, MENU_HEIGHT, COMMANDS, CHARACTER_STATUS } from './../constants';
+import { ACTOR_TYPES, MENU_HEIGHT, COMMANDS, CHARACTER_STATUS, SCALE } from './../constants';
 import { Character } from './character'
 import{ BattleMechanics } from './battle-mechanics'
-import {SCALE} from '../constants'
 import { networkInterfaces } from 'os';
 
 interface ITransformation {
@@ -96,17 +95,18 @@ export class Enemy implements Enemy.Base {
   }
 
   makeAction(command: number, target?: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
-    let promise: Promise<Battle.ActionStatus>
-    switch (command) {
-      case 1:
-        promise = this.attack(target)
-        break
-      case 2:
-        promise = this.specialAttack(groupTargets)
-        break
-
+    const commandsHandler = {
+      [COMMANDS.FIGHT.ID] : () => {
+        return this.attack(target)
+      },
+      [COMMANDS.SPECIAL_ATTACK.ID] : () => {
+        return this.specialAttack(groupTargets)
+      },
+      [COMMANDS.TRANSFORM.ID] : () => {
+        return this.attack(target)
+      }
     }
-    return promise
+    return commandsHandler[command]()
   }
 
   async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
@@ -122,7 +122,6 @@ export class Enemy implements Enemy.Base {
         status: targetNewHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
       }]
     }
-    
     return {
       response: 'OK',
       newStatus
@@ -131,13 +130,22 @@ export class Enemy implements Enemy.Base {
 
  //TODO Check this next
   async specialAttack(groupTargets: Character[]): Promise<Battle.ActionStatus> {
-    let promise: Promise<Battle.ActionStatus>
     this.ATB = 0        
     await this.blink()
     const newStatus = {}    
     groupTargets.forEach(character => {
       character.getHit(50)
     })
+    return {
+      response: 'OK',
+      newStatus
+    }
+  }
+
+  async transformToMist(): Promise<Battle.ActionStatus> {
+    this.ATB = 0        
+    await this.blink()
+    const newStatus = {}    
     return {
       response: 'OK',
       newStatus
@@ -151,6 +159,31 @@ export class Enemy implements Enemy.Base {
 
   restoreHP(amount: number) {
     BattleMechanics.showDamage(this.game, amount.toString(), this.sprite)
+  }
+
+  transformAnimation(): Promise<boolean> {
+    return new Promise(resolve => {
+      const transformTimer = this.game.time.create(false)
+      enum sprites  {
+        normal = 'stand0',
+        mist = 'stand1'
+      }
+      let key: boolean = this.sprite.frame.toString() === 'stand0'
+      let loop: number = 0
+      transformTimer.loop(Phaser.Timer.QUARTER / 3, () => {
+        key = !key
+        this.sprite.loadTexture(this.sprite.key, key ? sprites.normal : sprites.mist)
+        const scale = key ? SCALE : 1.2
+        this.sprite.scale.set(scale)
+        loop++
+        if (loop === 9) {
+          transformTimer.stop()
+          transformTimer.destroy()
+          resolve (true)
+        }
+      })
+      transformTimer.start()
+    })
   }
 
   blink(): Promise<boolean> {

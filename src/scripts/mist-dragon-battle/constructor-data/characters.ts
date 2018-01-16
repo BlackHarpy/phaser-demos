@@ -8,7 +8,7 @@ export const CECIL = {
   status: CHARACTER_STATUS.NORMAL,
   ATB: 0,    
   stats: {
-    HP: 5,
+    HP: 200,
     MP: 0,
     STRENGTH: 15,
     SPEED: 12,
