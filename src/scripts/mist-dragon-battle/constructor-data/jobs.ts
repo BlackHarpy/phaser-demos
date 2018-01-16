@@ -136,10 +136,10 @@ export const DARK_KNIGHT = {
           singleParticle.animations.add('start', [11, 12, 13, 14, 15, 16, 15, 14, 13, 12, 11])
           singleParticle.animations.play('start', 25, true, true)
         }, this)
-        this.emitter.setRotation(0, 90);
-        this.emitter.setScale(0.5, 1, 0.5, 1, 6000, Phaser.Easing.Linear.None);
+        this.emitter.setRotation(0, 90)
+        this.emitter.setScale(0.5, 1, 0.5, 1, 6000, Phaser.Easing.Linear.None)
         this.emitter.gravity.set(-1000, -200)
-        this.emitter.start(false, 3000, 1);
+        this.emitter.start(false, 3000, 1)
         character.game.time.events.add(2000, () => {
           this.emitter.destroy()
           resolve(true)

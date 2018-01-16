@@ -70,23 +70,5 @@ export const MIST_DRAGON = {
     MAGIC_DEFENSE: 10,
     MAGIC_EVASION: 15
   },
-  customFlags: [{ key: 'hitWhileMist', active: false }],
-  commands: [{
-    id: 1,
-    method: () => {
-      //Normal Attack
-      this.blink()
-    }
-  }, {
-    id: 2,
-    method: () => {
-      //Cold Mist Special Ability
-      this.blink()
-    }
-  }, {
-    id: 3,
-    method: () => {
-      //Transform to Mist
-    }
-  }]
+  customFlags: [{ key: 'hitWhileMist', active: false }]
 }

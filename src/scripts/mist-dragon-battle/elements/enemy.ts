@@ -188,6 +188,7 @@ export class Enemy implements Enemy.Base {
     this.ATB = 0
     await this.blink()
     await BattleMechanics.showMessage(this.game, 'Freezing Mist', 1)
+    await this.frezingMistAnimation()
     const newStatus = {
       targets: []
     }
@@ -210,6 +211,8 @@ export class Enemy implements Enemy.Base {
         })
       })
     })
+    await BattleMechanics.showMessage(this.game, 'Do no fight now!', 2)    
+    await BattleMechanics.showMessage(this.game, 'Fighting when mist will freeze you with Breath!', 2)    
     return {
       response: 'OK',
       newStatus
@@ -233,6 +236,30 @@ export class Enemy implements Enemy.Base {
       response: 'OK',
       newStatus
     }
+  }
+
+  frezingMistAnimation(): Promise<boolean> {
+    return new Promise (resolve => {
+      const emitter = this.game.add.emitter(600, 100, 40)
+      emitter.height = 600
+      emitter.width = 200
+      emitter.makeParticles('freezingMist');
+      emitter.forEach((singleParticle) => {
+        singleParticle.animations.add('start', [2, 3, 4, 5, 6, 5, 4, 3, 2])
+        singleParticle.animations.play('start', 25, true, true)
+      }, this)
+      emitter.setRotation(0, 0)
+      emitter.setXSpeed(0, 0)
+      emitter.setYSpeed(0,0)
+      emitter.gravity.set(0,0)
+      emitter.setAlpha(0.8, 0.8)
+      emitter.start(false, 2000, 20)
+      this.game.time.events.add(2000, () => {
+        emitter.destroy()
+        resolve(true)
+      }, this);
+    })
+    
   }
 
   getHit(damage: number): Promise<Battle.HitResult> {
