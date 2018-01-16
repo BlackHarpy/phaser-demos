@@ -225,12 +225,15 @@ export class BattleMechanics {
       [COMMANDS.FIGHT.ID]: calculateRegularDamage,
       [COMMANDS.SPECIAL_ATTACK.ID]: calculateSpecialAttackDamage
     }
-   
-    return damageCalculationObject[action](attacker, target, specialAttackKey)
+    let damage: number = -1
+    if (target.status !== CHARACTER_STATUS.MIST) {
+      damage = damageCalculationObject[action](attacker, target, specialAttackKey)
+    }
+    return damage
   }
 
   static showDamage(game: Phaser.Game, damage: string, sprite: Phaser.Sprite): Promise<boolean> {
-    return numbersBounce(game, damage, sprite, 0xFFFFFF)
+    return numbersBounce(game, damage !== '-1' ? damage : 'miss!', sprite, 0xFFFFFF)
   }
 
   static showRecoveredHP(game: Phaser.Game, recovered: string, sprite: Phaser.Sprite): Promise<boolean> {
@@ -255,6 +258,10 @@ export class BattleMechanics {
   
       game.time.events.add(Phaser.Timer.SECOND * 4, destroyMessage, this)
     })
+  }
+
+  static getRandomInt(min, max): number {
+    return getRandomInt(min,max)
   }
 
 }

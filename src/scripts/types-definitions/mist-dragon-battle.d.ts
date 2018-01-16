@@ -53,6 +53,11 @@ declare namespace Battle {
     type: string
     object: Enemy.Base | Character.Base
   }
+
+  interface HitResult {
+    currentHP: number 
+    counterAttack?: ActionData
+  }
 }
 
 declare namespace Job {

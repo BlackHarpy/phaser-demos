@@ -88,9 +88,6 @@ export class MainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
-    this.enemies[0].transformAnimation().then(response => {
-      this.enemies[0].transformAnimation()
-    })
     this.startBattle()
   }
 

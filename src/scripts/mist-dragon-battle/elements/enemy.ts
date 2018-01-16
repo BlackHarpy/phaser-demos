@@ -61,7 +61,7 @@ export class Enemy implements Enemy.Base {
   }
 
   setStatus(status: number) {
-
+    this.status = status
   }
 
   getAutomaticAction(availableTargets: number[]) {
@@ -84,14 +84,70 @@ export class Enemy implements Enemy.Base {
     if (availableTargets.length > 0) {
       // nextAction.idTarget = 100
       // nextAction.idAction = 2
-      const targetIndex = Math.floor(Math.random() * availableTargets.length)
-      nextAction.idTarget = availableTargets[targetIndex]
-      nextAction.idAction = 1
+      nextAction.idAction = this.getCommand()
+      nextAction.idTarget = this.getTarget(nextAction.idAction, availableTargets)
     } else {
       nextAction.idAction = 0
       nextAction.idTarget = 0
     }
     return nextAction
+  }
+
+  getTarget(action: number, availableTargets: number[]): number {
+    const targetHandler = {
+      [COMMANDS.FIGHT.ID]: () => {
+        const targetIndex = BattleMechanics.getRandomInt(0, availableTargets.length - 1)
+        return availableTargets[targetIndex]
+      },
+      [COMMANDS.SPECIAL_ATTACK.ID]: () => {
+        //all targets
+        return 100
+      },
+      [COMMANDS.TRANSFORM.ID]: () => {
+        return 0
+      }
+    }
+    return targetHandler[action]()
+  }
+
+  getCustomFlagValue(key: string): boolean {
+    const customFlag = this.customFlags.find(flag => {
+      return flag.key === key
+    })
+    return customFlag ? customFlag.active : false
+  }
+
+  setCustomFlagValue(key: string): void {
+    const index = this.customFlags.findIndex(flag => {
+      return flag.key === key
+    })
+    if (index !== -1) {
+      this.customFlags[index].active = false
+    }
+  }
+
+  getCommand(): number {
+    const commandHandler = {
+      [CHARACTER_STATUS.NORMAL]: () => {
+        //transform if HP is less than half
+        let action: number = COMMANDS.FIGHT.ID
+        if (this.currentStats.HP < (this.stats.HP / 2)) {
+          if (BattleMechanics.getRandomInt(0, 100) < 50) {
+            action = COMMANDS.TRANSFORM.ID
+          }
+        }
+        return action
+      },
+      [CHARACTER_STATUS.MIST]: () => {
+        let action: number = COMMANDS.TRANSFORM.ID
+        //check if has been attacked while Mist Status
+        if (this.getCustomFlagValue('hitWhileMist')) {
+          action = COMMANDS.SPECIAL_ATTACK.ID
+        }
+        return action
+      }
+    }
+    return commandHandler[this.status]()
   }
 
   makeAction(command: number, target?: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
@@ -103,7 +159,7 @@ export class Enemy implements Enemy.Base {
         return this.specialAttack(groupTargets)
       },
       [COMMANDS.TRANSFORM.ID] : () => {
-        return this.attack(target)
+        return this.transform()
       }
     }
     return commandsHandler[command]()
@@ -113,13 +169,13 @@ export class Enemy implements Enemy.Base {
     this.ATB = 0    
     await this.blink()
     const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
-    const targetNewHP = await target.getHit(damage)
+    const attackResult = await target.getHit(damage)
     const newStatus = {
       targets: [{
         type: ACTOR_TYPES.CHARACTER,
         id: target.id,
-        newHP: targetNewHP,
-        status: targetNewHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
+        newHP: attackResult.currentHP,
+        status: attackResult.currentHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
       }]
     }
     return {
@@ -142,19 +198,30 @@ export class Enemy implements Enemy.Base {
     }
   }
 
-  async transformToMist(): Promise<Battle.ActionStatus> {
+  async transform(): Promise<Battle.ActionStatus> {
     this.ATB = 0        
-    await this.blink()
-    const newStatus = {}    
+    await this.transformAnimation()
+    const newStatus = {
+      targets: [{
+        type: ACTOR_TYPES.ENEMY,
+        id: this.id,
+        newHP: this.currentStats.HP,
+        status: this.status === CHARACTER_STATUS.NORMAL ? CHARACTER_STATUS.MIST : CHARACTER_STATUS.NORMAL
+      }]
+    }    
     return {
       response: 'OK',
       newStatus
     }
   }
 
-  async getHit(damage: number): Promise<number> {
-    await BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)      
-    return  this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage  : 0
+  getHit(damage: number): Promise<Battle.HitResult> {
+    return new Promise (resolve => {
+      BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
+      resolve({
+        currentHP: this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage  : 0
+      })
+    })
   }
 
   restoreHP(amount: number) {
@@ -168,15 +235,18 @@ export class Enemy implements Enemy.Base {
         normal = 'stand0',
         mist = 'stand1'
       }
-      let key: boolean = this.sprite.frame.toString() === 'stand0'
+      let key: boolean = this.sprite.frame.toString() !== 'stand0'
       let loop: number = 0
       transformTimer.loop(Phaser.Timer.QUARTER / 3, () => {
         key = !key
         this.sprite.loadTexture(this.sprite.key, key ? sprites.normal : sprites.mist)
-        const scale = key ? SCALE : 1.2
+        let scale = key ? SCALE : 1.2
         this.sprite.scale.set(scale)
         loop++
         if (loop === 9) {
+          this.sprite.loadTexture(this.sprite.key, this.status === CHARACTER_STATUS.MIST ? sprites.normal : sprites.mist)
+          scale = this.status === CHARACTER_STATUS.MIST ? SCALE : 1.2         
+          this.sprite.scale.set(scale)          
           transformTimer.stop()
           transformTimer.destroy()
           resolve (true)

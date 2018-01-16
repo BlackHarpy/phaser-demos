@@ -56,10 +56,10 @@ export const MIST_DRAGON = {
   status: CHARACTER_STATUS.NORMAL,
   ATB: 0,  
   stats: {
-    HP: 556,
+    HP: 100,
     MP: 0,
     STRENGTH: 20,
-    SPEED: 8,
+    SPEED: 15,
     STAMINA: 12,
     INTELLECT: 10,
     SPIRIT: 6,

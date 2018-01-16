@@ -38,7 +38,7 @@ export class Character implements Character.Base {
     this.level = characterConstructor.level
     this.status = characterConstructor.status
     this.stats = characterConstructor.stats
-    this.currentStats = {...characterConstructor.stats}
+    this.currentStats = { ...characterConstructor.stats }
     this.ATB = characterConstructor.ATB
     this.inventory = inventory
     this.equipment = equipment
@@ -150,7 +150,7 @@ export class Character implements Character.Base {
     if (status === CHARACTER_STATUS.KO) {
       //change texturo to KO
       this.sprite.loadTexture(this.sprite.key, 'ko')
-      
+
     }
   }
 
@@ -167,7 +167,7 @@ export class Character implements Character.Base {
       actionReady.automaticAction = ATBData.returnAction ? ATBData.returnAction : {}
     }
     return actionReady
-    
+
   }
 
   async attack(target: Character | Enemy): Promise<Battle.ActionStatus> {
@@ -185,13 +185,18 @@ export class Character implements Character.Base {
     await this.makeAttackAnimation()
     const damage = BattleMechanics.calculateDamage(this, target, COMMANDS.FIGHT.ID)
     await this.goToBack()
-    const targetNewHP = await target.getHit(damage)
+    const attackResult = await target.getHit(damage)
     const newStatus = {
+      character: {
+        id: this.id,
+        status: CHARACTER_STATUS.NORMAL
+      },
       targets: [{
         type: ACTOR_TYPES.ENEMY,
         id: target.id,
-        newHP: targetNewHP,
-        status: targetNewHP !== 0 ? CHARACTER_STATUS.NORMAL : CHARACTER_STATUS.KO
+        newHP: attackResult.currentHP,
+        status: attackResult.currentHP !== 0 ? target.status : CHARACTER_STATUS.KO,
+        counterAttack: attackResult.counterAttack
       }]
     }
     return {
@@ -201,18 +206,19 @@ export class Character implements Character.Base {
   }
 
   async specialAttack(target: Character | Enemy): Promise<Battle.ActionStatus> {
-    
     const attackResult = await this.job.performSpecialAttack(this, target)
     const newStatus = {
       character: {
         id: this.id,
         newHP: attackResult.hpLoss,
-        currentStatus: attackResult.status
+        status: attackResult.status
       },
       targets: [{
-        type: ACTOR_TYPES.ENEMY,        
+        type: ACTOR_TYPES.ENEMY,
         id: target.id,
-        newHP: attackResult.damage === 0 ? target.currentStats.HP : await target.getHit(attackResult.damage)
+        newHP: attackResult.damage === 0 ? target.currentStats.HP : await target.getHit(attackResult.damage),
+        status: attackResult.currentHP !== 0 ? target.status : CHARACTER_STATUS.KO,
+        counterAttack: attackResult.counterAttack        
       }]
     }
 
@@ -240,7 +246,7 @@ export class Character implements Character.Base {
       newStatus: {
         character: {
           id: this.id,
-          newStatus: CHARACTER_STATUS.DEFEND
+          status: CHARACTER_STATUS.DEFEND
         }
       }
     }
@@ -264,7 +270,7 @@ export class Character implements Character.Base {
         newInventory: this.inventory
       },
       targets: [{
-        type: ACTOR_TYPES.CHARACTER,        
+        type: ACTOR_TYPES.CHARACTER,
         id: target.id,
         newHP: target.restoreHP(inventoryRecord.item.modifier)
       }]
@@ -316,10 +322,12 @@ export class Character implements Character.Base {
     return this.animations.attack.play()
   }
 
-  async getHit(damage: number): Promise<number> {
+  async getHit(damage: number): Promise<Battle.HitResult> {
     BattleMechanics.showDamage(this.game, damage.toString(), this.sprite)
     await this.animations.hit.play()
-    return this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage  : 0
+    return {
+      currentHP: this.currentStats.HP - damage >= 0 ? this.currentStats.HP - damage : 0
+    }
   }
 
   restoreHP(amount: number): number {
