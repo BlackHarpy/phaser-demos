@@ -91,7 +91,7 @@ export class Enemy implements Enemy.Base {
     return nextAction
   }
 
-  makeAction(command: number, target: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
+  makeAction(command: number, target?: Character | Enemy, groupTargets?: any[], idItem?: number): Promise<Battle.ActionStatus> {
     let promise: Promise<Battle.ActionStatus>
     switch (command) {
       case 1:

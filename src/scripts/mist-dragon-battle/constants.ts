@@ -32,7 +32,7 @@ export const COMMANDS = {
     LABEL: '-',    
     POSITION: 'SKIP'
   },
-  RUN: {
+  TRANSFORM: {
     ID: 6,
     LABEL: '-',    
     POSITION: 'SPECIAL'
