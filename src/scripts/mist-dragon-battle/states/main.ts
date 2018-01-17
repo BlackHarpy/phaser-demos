@@ -65,7 +65,7 @@ export class MistDragonMainState extends State {
     this.game.load.atlasJSONHash('kain', kainAtlasImage, kainAtlasJSON)
     this.game.load.spritesheet('dark', darknessImage, 192, 192, 35)
     this.game.load.spritesheet('slash', slashImage, 192, 192, 35)
-    this.game.load.spritesheet('freezingMist', freezingMistImage, 192, 192, 35)    
+    this.game.load.spritesheet('freezingMist', freezingMistImage, 192, 192, 35)
     this.game.load.audio('bossBattleTheme', battleMusic)
     this.game.load.audio('cursorMoveSFX', cursorMoveSFX)
     this.game.load.audio('cursorSelectSFX', cursorSelectSFX)
@@ -90,8 +90,11 @@ export class MistDragonMainState extends State {
     this.party = this.setParty()
     this.battleTimer = this.game.time.create(false)
     this.battleMenu = new BattleMenu(this.game, this.buildMenuData())
+    this.startMusic()
     this.startBattle()
   }
+
+
 
   update(): void {
     if (this.battleStarted) {
@@ -103,6 +106,18 @@ export class MistDragonMainState extends State {
       }
       this.checkBattleEnd()
     }
+  }
+
+  startMusic(): void {
+    this.music.addMarker('start', 0, 3.3)
+    this.music.addMarker('loop', 3.3, 61.4)
+    this.musicCurrentSection = 'start'
+    this.music.play(this.musicCurrentSection).onMarkerComplete.add(() => {
+      this.musicCurrentSection = 'loop'
+    }, this)
+    this.music.onStop.add(() => {
+      this.music.play(this.musicCurrentSection)
+    })
   }
 
   startBattle(): void {
@@ -288,7 +303,7 @@ export class MistDragonMainState extends State {
         this.battleMenu.openCommandsSection(next)
         this.battleTimer.pause()
       }
-     
+
     }
   }
 
@@ -322,13 +337,13 @@ export class MistDragonMainState extends State {
                   this.commandInConstruction.idItemUsed = item
                 }
               }
-  
+
             }
           } else {
             this.commandInConstruction.idAction = 0
             idAction = this.commandInConstruction.idAction
           }
-  
+
         }
         const isAttacking = idAction === COMMANDS.FIGHT.ID || idAction === COMMANDS.SPECIAL_ATTACK.ID
         const isUsingItem = idAction === COMMANDS.ITEM.ID && this.commandInConstruction.idItemUsed !== 0
@@ -393,7 +408,7 @@ export class MistDragonMainState extends State {
     })
     this.party.forEach(character => {
       const returnAction: Battle.ReadyCharacter = character.fillATB()
-      if (returnAction.hasOwnProperty('idReady') && returnAction.idReady !== 0) {      
+      if (returnAction.hasOwnProperty('idReady') && returnAction.idReady !== 0) {
         actions.push(returnAction)
       }
     })
@@ -467,7 +482,7 @@ export class MistDragonMainState extends State {
       this.waitingPromise = false
       this.resumeTimer()
     })
-    
+
   }
 
   resumeTimer() {
@@ -477,10 +492,10 @@ export class MistDragonMainState extends State {
 
   async endBattle(finalMessage: string) {
     this.waitingPromise = true
-    this.battleStarted = false 
+    this.battleStarted = false
     this.battleTimer.stop()
-    this.battleMenu.closeCommandsSection()    
-    return await BattleMechanics.showMessage(this.game, finalMessage)    
+    this.battleMenu.closeCommandsSection()
+    return await BattleMechanics.showMessage(this.game, finalMessage)
   }
 
   async checkBattleEnd() {
@@ -491,7 +506,7 @@ export class MistDragonMainState extends State {
       const enemiesHasFallen = this.enemies.every(enemy => {
         return enemy.status === CHARACTER_STATUS.KO
       })
-      if (partyHasFallen ) {
+      if (partyHasFallen) {
         this.endBattle('The party has fallen.')
         this.state.start('main')
       }
@@ -510,15 +525,15 @@ export class MistDragonMainState extends State {
 
   //For debug purposes
   render(): void {
-    if (this.battleStarted) {
-      this.game.debug.text("Seconds passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
-      this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
-      this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
+    // if (this.battleStarted) {
+    //   this.game.debug.text("Seconds passed: " + this.battleTimer.seconds.toFixed(0), 32, 400);
+    //   this.game.debug.text("Cecil ATB: " + this.party[1].ATB, 32, 420);
+    //   this.game.debug.text("Kain ATB: " + this.party[0].ATB, 32, 440);
 
-      this.game.debug.text('Mist Dragon HP: ' + this.enemies[0].currentStats.HP, 250, 400)
-      this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 250, 420)
-      this.game.debug.text('In command: ' + this.receivingCommand, 250, 440)
-    }
+    //   this.game.debug.text('Mist Dragon HP: ' + this.enemies[0].currentStats.HP, 250, 400)
+    //   this.game.debug.text('Waiting Input: ' + this.battleMenu.isListeningInput(), 250, 420)
+    //   this.game.debug.text('In command: ' + this.receivingCommand, 250, 440)
+    // }
 
   }
 
