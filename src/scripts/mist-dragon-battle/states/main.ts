@@ -37,7 +37,7 @@ const freezingMistImage = require('assets/images/mist-dragon-battle/XStarAura.pn
 const bitmapFontImage = require('assets/fonts/damage-font.png')
 const bitmapFontXML = require('assets/fonts/damage-font.xml')
 
-export class MainState extends State {
+export class MistDragonMainState extends State {
 
   caveBackground: Phaser.Sprite
   mistDragon: Enemy
@@ -469,16 +469,28 @@ export class MainState extends State {
     this.actionInProgress = false
   }
 
+  async endBattle(finalMessage: string) {
+    this.waitingPromise = true
+    this.battleStarted = false 
+    this.battleTimer.stop()
+    return await BattleMechanics.showMessage(this.game, finalMessage)    
+  }
+
   async checkBattleEnd() {
     if (!this.waitingPromise) {
       const partyHasFallen = this.party.every(character => {
         return character.status === CHARACTER_STATUS.KO
       })
+      const enemiesHasFallen = this.enemies.every(enemy => {
+        return enemy.status === CHARACTER_STATUS.KO
+      })
       if (partyHasFallen ) {
-        this.waitingPromise = true
-        this.battleStarted = false        
-        await BattleMechanics.showMessage(this.game, 'The party has fallen.')
-        console.log('battle has finished!!!')
+        this.endBattle('The party has fallen.')
+        this.state.start('main')
+      }
+      if (enemiesHasFallen) {
+        await this.endBattle('The Mist Dragon has been defeated!')
+        this.state.start('main')        
       }
     }
   }

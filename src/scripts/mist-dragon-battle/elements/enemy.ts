@@ -58,7 +58,7 @@ export class Enemy implements Enemy.Base {
     return actionReady
   }
 
-  setStatus(status: number) {
+  async setStatus(status: number) {
     this.status = status
   }
 
@@ -144,6 +144,9 @@ export class Enemy implements Enemy.Base {
           action = COMMANDS.SPECIAL_ATTACK.ID
         }
         return action
+      },
+      [CHARACTER_STATUS.KO]: () => {
+        return 0
       }
     }
     return commandHandler[this.status]()

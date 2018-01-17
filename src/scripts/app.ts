@@ -7,14 +7,17 @@ import 'p2'
 import 'phaser'
 
 import { IntroState } from './intro'
-import { MainState as MistDragonBattleState } from './mist-dragon-battle/states/main'
+import { MistDragonMainState } from './mist-dragon-battle/states/main'
+import { MainState } from './select-demo/states/main'
 
 export default class App extends Phaser.Game {
     constructor(config: Phaser.IGameConfig) {
       super(config)
       //this.state.add('intro', IntroState)      
-      this.state.add('mist-dragon-battle', MistDragonBattleState)      
-      this.state.start('mist-dragon-battle')
+      this.state.add('main', MainState)
+      this.state.add('mist-dragon-battle', MistDragonMainState)      
+      this.state.start('main')
+      // this.state.start('mist-dragon-battle')
     }
   }
 

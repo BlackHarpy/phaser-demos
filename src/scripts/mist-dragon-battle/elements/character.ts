@@ -145,7 +145,7 @@ export class Character implements Character.Base {
     })
   }
 
-  setStatus(status: number) {
+  async setStatus(status: number) {
     this.status = status
     if (status === CHARACTER_STATUS.KO) {
       //change texturo to KO
