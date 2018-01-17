@@ -16,8 +16,7 @@ export default class App extends Phaser.Game {
       //this.state.add('intro', IntroState)      
       this.state.add('main', MainState)
       this.state.add('mist-dragon-battle', MistDragonMainState)      
-      this.state.start('main')
-      // this.state.start('mist-dragon-battle')
+      this.state.start('mist-dragon-battle')
     }
   }
 

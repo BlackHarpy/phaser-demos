@@ -67,6 +67,9 @@ function calculateBaseDefense(target: Character | Enemy): number {
   if (target instanceof Enemy) {
     baseDefense = target.currentStats.DEFENSE
   }
+  if (target.status === CHARACTER_STATUS.DEFEND) {
+    baseDefense = baseDefense * 2
+  }
   return baseDefense
 }
 
