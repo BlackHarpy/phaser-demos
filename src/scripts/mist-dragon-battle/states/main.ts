@@ -432,6 +432,8 @@ export class MistDragonMainState extends State {
 
   updateStatus(actionResult: Battle.ActionStatus) {
     const newStatus = actionResult.newStatus
+    const statusPromises = []
+    this.waitingPromise = true
     if (newStatus.hasOwnProperty('targets')) {
       newStatus.targets.forEach(target => {
         const actor: Character | Enemy = target.type === ACTOR_TYPES.CHARACTER ? this.getCharacter(target.id) : this.getEnemy(target.id)
@@ -441,7 +443,7 @@ export class MistDragonMainState extends State {
             actor.currentStats.HP = target.newHP
           }
           if (target.hasOwnProperty('status')) {
-            actor.setStatus(target.status)
+            statusPromises.push(actor.setStatus(target.status))
           }
           if (target.hasOwnProperty('counterAttack') && target.counterAttack.idAction !== 0) {
             this.actionsQueue.unshift(target.counterAttack)
@@ -456,12 +458,16 @@ export class MistDragonMainState extends State {
           actor.currentStats.HP = newStatus.character.newHP
         }
         if (newStatus.character.hasOwnProperty('status')) {
-          actor.setStatus(newStatus.character.status)          
+          statusPromises.push(actor.setStatus(newStatus.character.status))
         }
       }
     }
-    this.battleMenu.updateCharactersMenuInfo(this.party)
-    this.resumeTimer()
+    Promise.all(statusPromises).then(result => {
+      this.battleMenu.updateCharactersMenuInfo(this.party)
+      this.waitingPromise = false
+      this.resumeTimer()
+    })
+    
   }
 
   resumeTimer() {
@@ -473,6 +479,7 @@ export class MistDragonMainState extends State {
     this.waitingPromise = true
     this.battleStarted = false 
     this.battleTimer.stop()
+    this.battleMenu.closeCommandsSection()    
     return await BattleMechanics.showMessage(this.game, finalMessage)    
   }
 
@@ -489,8 +496,14 @@ export class MistDragonMainState extends State {
         this.state.start('main')
       }
       if (enemiesHasFallen) {
+        this.party.forEach(character => {
+          if (character.status !== CHARACTER_STATUS.KO) {
+            character.victory()
+          }
+        })
         await this.endBattle('The Mist Dragon has been defeated!')
-        this.state.start('main')        
+
+        // this.state.start('main')        
       }
     }
   }

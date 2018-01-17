@@ -152,6 +152,7 @@ export class Character implements Character.Base {
       this.sprite.loadTexture(this.sprite.key, 'ko')
 
     }
+    return true
   }
 
   resetATB() {

@@ -58,8 +58,13 @@ export class Enemy implements Enemy.Base {
     return actionReady
   }
 
-  async setStatus(status: number) {
+  async setStatus(status: number): Promise<boolean> {
     this.status = status
+    let finished: boolean = true
+    if (status === CHARACTER_STATUS.KO) {
+      finished = await this.destroyAnimation()
+    }
+    return finished
   }
 
   getAutomaticAction(availableTargets: number[]) {
@@ -337,6 +342,34 @@ export class Enemy implements Enemy.Base {
         }
       })
       tintTimer.start()
+    })
+  }
+
+  destroyAnimation(): Promise<boolean> {
+    return new Promise(resolve => {
+      this.sprite.x = 200
+      const shake = this.game.add.tween(this.sprite)
+      .to({x: this.sprite.x - 15}, 100, Phaser.Easing.Bounce.InOut, false, 1000, 20, true)
+      const fade = this.game.add.tween(this.sprite)
+      .to({alpha: 0, tint: 0xff0000}, 3000, Phaser.Easing.Linear.None, false, 1000)
+      let loop: number = 0
+      const destroyTimer = this.game.time.create(false)
+      destroyTimer.loop(Phaser.Timer.SECOND, () => {
+        if (loop < 2) {
+          this.game.camera.flash(0xFFFFFF, 300)
+        }
+        loop++
+        if (loop === 2) {
+          this.game.camera.flash(0xFFFFFF, 300)          
+          shake.start()
+          fade.onComplete.add(() => {
+            destroyTimer.destroy()
+            resolve(true)
+          })
+          fade.start()
+        }
+      })
+      destroyTimer.start()
     })
   }
 
